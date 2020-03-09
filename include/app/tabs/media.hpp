@@ -1,6 +1,7 @@
 #ifndef MEDIA_HPP_
 #define MEDIA_HPP_
 
+#include <QMediaPlayer>
 #include <QtWidgets>
 
 #include <app/bluetooth.hpp>
@@ -26,7 +27,6 @@ class BluetoothPlayerSubTab : public QWidget {
     QWidget *controls_widget();
 
     Bluetooth *bluetooth;
-    Theme *theme;
 };
 
 class RadioPlayerSubTab : public QWidget {
@@ -42,6 +42,24 @@ class RadioPlayerSubTab : public QWidget {
     Config *config;
     Theme *theme;
     Tuner *tuner;
+};
+
+class LocalPlayerSubTab : public QWidget {
+    Q_OBJECT
+
+   public:
+    LocalPlayerSubTab(QWidget *parent = nullptr);
+
+    static QString durationFmt(int total_ms);
+
+   private:
+    QWidget *tracks_widget();
+    QWidget *seek_widget();
+    QWidget *controls_widget();
+
+    Theme *theme;
+    QMediaPlayer *player;
+    QLabel *path_label;
 };
 
 #endif
