@@ -53,9 +53,11 @@ class LocalPlayerSubTab : public QWidget {
     static QString durationFmt(int total_ms);
 
    private:
-    QWidget *tracks_widget();
+    QWidget *playlist_widget();
     QWidget *seek_widget();
     QWidget *controls_widget();
+    void populate_dirs(QString path, QListWidget *dirs_widget);
+    void populate_tracks(QString path, QListWidget *tracks_widget);
 
     Theme *theme;
     QMediaPlayer *player;

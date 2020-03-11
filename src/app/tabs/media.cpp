@@ -249,50 +249,26 @@ LocalPlayerSubTab::LocalPlayerSubTab(QWidget *parent) : QWidget(parent)
     this->path_label->setFont(Theme::font_14);
     layout->addWidget(this->path_label);
 
-    layout->addWidget(this->tracks_widget());
+    layout->addWidget(this->playlist_widget());
     layout->addWidget(this->seek_widget());
     layout->addWidget(this->controls_widget());
 }
 
 // this needs a whole lot of cleanup
-QWidget *LocalPlayerSubTab::tracks_widget()
+QWidget *LocalPlayerSubTab::playlist_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     // define what this should really be
-    QDir directory("/home/robert/ia_music");
+    QString root_path("/home/robert/ia_music");
 
     QListWidget *folders = new QListWidget(widget);
-    QFileInfoList music_dirs = directory.entryInfoList(QDir::AllDirs | QDir::Readable);
-    for (QFileInfo music_dir : music_dirs) {
-        if (music_dir.fileName() == ".") continue;
-
-        QListWidgetItem *folder = new QListWidgetItem(music_dir.fileName(), folders);
-        if (music_dir.fileName() == "..") {
-            folder->setText("↲");
-
-            if (music_dir.dir().absolutePath() == "/home/robert/ia_music") folder->setFlags(Qt::NoItemFlags);
-        }
-        else {
-            folder->setText(music_dir.fileName());
-        }
-        folder->setFont(Theme::font_16);
-        folder->setData(Qt::UserRole, QVariant(music_dir.absoluteFilePath()));
-    }
+    this->populate_dirs(root_path, folders);
     layout->addWidget(folders, 1);
 
     QListWidget *tracks = new QListWidget(widget);
-    QStringList music_files = directory.entryList(QStringList() << "*.mp3", QDir::Files | QDir::Readable);
-    for (QString music_file : music_files) {
-        if (this->player->playlist()->addMedia(
-                QMediaContent(QUrl::fromLocalFile("/home/robert/ia_music/" + music_file)))) {
-            int lastPoint = music_file.lastIndexOf(".");
-            QString fileNameNoExt = music_file.left(lastPoint);
-            QListWidgetItem *track = new QListWidgetItem(fileNameNoExt, tracks);
-            track->setFont(Theme::font_16);
-        }
-    }
+    this->populate_tracks(root_path, tracks);
     connect(tracks, &QListWidget::itemClicked, [tracks, player = this->player](QListWidgetItem *item) {
         player->playlist()->setCurrentIndex(tracks->row(item));
         player->play();
@@ -308,40 +284,8 @@ QWidget *LocalPlayerSubTab::tracks_widget()
         this->player->playlist()->clear();
         QString current_path(item->data(Qt::UserRole).toString());
         this->path_label->setText(current_path);
-        QDir directory(current_path);
-        QStringList music_files = directory.entryList(QStringList() << "*.mp3", QDir::Files | QDir::Readable);
-        for (QString music_file : music_files) {
-            if (this->player->playlist()->addMedia(
-                    QMediaContent(QUrl::fromLocalFile(current_path + '/' + music_file)))) {
-                TagLib::FileRef f(std::string(current_path.toStdString() + "/" + music_file.toStdString()).c_str());
-                if (!f.isNull() && f.tag()) {
-                    TagLib::Tag *tag = f.tag();
-                    tag->title();
-                }
-                int lastPoint = music_file.lastIndexOf(".");
-                QString fileNameNoExt = music_file.left(lastPoint);
-                QListWidgetItem *track = new QListWidgetItem(fileNameNoExt, tracks);
-                track->setFont(Theme::font_16);
-            }
-        }
-
-        folders->clear();
-        QFileInfoList music_dirs = directory.entryInfoList(QDir::AllDirs | QDir::Readable);
-        for (QFileInfo music_dir : music_dirs) {
-            if (music_dir.fileName() == ".") continue;
-
-            QListWidgetItem *folder = new QListWidgetItem(music_dir.fileName(), folders);
-            if (music_dir.fileName() == "..") {
-                folder->setText("↲");
-
-                if (music_dir.dir().absolutePath() == "/home/robert/ia_music") folder->setFlags(Qt::NoItemFlags);
-            }
-            else {
-                folder->setText(music_dir.fileName());
-            }
-            folder->setFont(Theme::font_16);
-            folder->setData(Qt::UserRole, QVariant(music_dir.absoluteFilePath()));
-        }
+        this->populate_tracks(current_path, tracks);
+        this->populate_dirs(current_path, folders);
     });
     layout->addWidget(tracks, 3);
 
@@ -359,10 +303,10 @@ QWidget *LocalPlayerSubTab::seek_widget()
     QLabel *value = new QLabel(LocalPlayerSubTab::durationFmt(slider->sliderPosition()), widget);
     value->setFixedHeight(value->height());
     value->setFont(Theme::font_14);
-    connect(slider, &QSlider::valueChanged, [player = this->player, value](int position) {
-        player->setPosition(position);
-        value->setText(LocalPlayerSubTab::durationFmt(position));
-    });
+    connect(slider, &QSlider::valueChanged,
+            [value](int position) { value->setText(LocalPlayerSubTab::durationFmt(position)); });
+    connect(slider, &QSlider::sliderReleased,
+            [player = this->player, slider]() { player->setPosition(slider->value()); });
     connect(this->player, &QMediaPlayer::durationChanged, [slider](qint64 duration) {
         slider->setSliderPosition(0);
         slider->setRange(0, duration);
@@ -439,4 +383,43 @@ QString LocalPlayerSubTab::durationFmt(int total_ms)
     int secs = total_ms / 1000;
 
     return QString("%1:%2:%3").arg(hrs, 2, 10, QChar('0')).arg(mins, 2, 10, QChar('0')).arg(secs, 2, 10, QChar('0'));
+}
+
+void LocalPlayerSubTab::populate_dirs(QString path, QListWidget *dirs_widget)
+{
+    dirs_widget->clear();
+    QFileInfoList dirs = QDir(path).entryInfoList(QDir::AllDirs | QDir::Readable);
+    for (QFileInfo dir : dirs) {
+        if (dir.fileName() == ".") continue;
+
+        QListWidgetItem *item = new QListWidgetItem(dir.fileName(), dirs_widget);
+        if (dir.fileName() == "..") {
+            item->setText("↲");
+
+            if (dir.dir().absolutePath() == "/home/robert/ia_music") item->setFlags(Qt::NoItemFlags);
+        }
+        else {
+            item->setText(dir.fileName());
+        }
+        item->setFont(Theme::font_16);
+        item->setData(Qt::UserRole, QVariant(dir.absoluteFilePath()));
+    }
+}
+
+void LocalPlayerSubTab::populate_tracks(QString path, QListWidget *tracks_widget)
+{
+    QStringList tracks = QDir(path).entryList(QStringList() << "*.mp3", QDir::Files | QDir::Readable);
+    for (QString track : tracks) {
+        if (this->player->playlist()->addMedia(QMediaContent(QUrl::fromLocalFile(path + '/' + track)))) {
+            TagLib::FileRef f(std::string(path.toStdString() + "/" + track.toStdString()).c_str());
+            if (!f.isNull() && f.tag()) {
+                TagLib::Tag *tag = f.tag();
+                tag->title();
+            }
+            int lastPoint = track.lastIndexOf(".");
+            QString fileNameNoExt = track.left(lastPoint);
+            QListWidgetItem *item = new QListWidgetItem(fileNameNoExt, tracks_widget);
+            item->setFont(Theme::font_16);
+        }
+    }
 }
