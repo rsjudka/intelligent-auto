@@ -388,7 +388,8 @@ QString LocalPlayerSubTab::durationFmt(int total_ms)
 void LocalPlayerSubTab::populate_dirs(QString path, QListWidget *dirs_widget)
 {
     dirs_widget->clear();
-    QFileInfoList dirs = QDir(path).entryInfoList(QDir::AllDirs | QDir::Readable);
+    QDir current_dir(path);
+    QFileInfoList dirs = current_dir.entryInfoList(QDir::AllDirs | QDir::Readable);
     for (QFileInfo dir : dirs) {
         if (dir.fileName() == ".") continue;
 
@@ -396,7 +397,7 @@ void LocalPlayerSubTab::populate_dirs(QString path, QListWidget *dirs_widget)
         if (dir.fileName() == "..") {
             item->setText("↲");
 
-            if (dir.dir().absolutePath() == "/home/robert/ia_music") item->setFlags(Qt::NoItemFlags);
+            if (current_dir.isRoot()) item->setFlags(Qt::NoItemFlags);
         }
         else {
             item->setText(dir.fileName());
