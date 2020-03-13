@@ -59,7 +59,7 @@ class LocalPlayerSubTab : public QWidget {
     void populate_dirs(QString path, QListWidget *dirs_widget);
     void populate_tracks(QString path, QListWidget *tracks_widget);
 
-    Theme *theme;
+    Config *config;
     QMediaPlayer *player;
     QLabel *path_label;
 };

@@ -235,33 +235,45 @@ QWidget *RadioPlayerSubTab::controls_widget()
 
 LocalPlayerSubTab::LocalPlayerSubTab(QWidget *parent) : QWidget(parent)
 {
+    this->config = Config::get_instance();
+
     QMediaPlaylist *playlist = new QMediaPlaylist(this);
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
 
     this->player = new QMediaPlayer(this);
     this->player->setPlaylist(playlist);
 
+    this->path_label = new QLabel(this->config->get_media_home(), this);
+    this->path_label->setFont(Theme::font_14);
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(24, 24, 24, 24);
 
-    // put this in the same widget as the folders/tracks
-    this->path_label = new QLabel("/home/robert/ia_music/", this);
-    this->path_label->setFont(Theme::font_14);
     layout->addWidget(this->path_label);
-
     layout->addWidget(this->playlist_widget());
     layout->addWidget(this->seek_widget());
     layout->addWidget(this->controls_widget());
 }
 
-// this needs a whole lot of cleanup
 QWidget *LocalPlayerSubTab::playlist_widget()
 {
+    Theme *theme = Theme::get_instance();
+
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    // define what this should really be
-    QString root_path("/home/robert/ia_music");
+    QString root_path(config->get_media_home());
+
+    QPushButton *home_button = new QPushButton(widget);
+    home_button->setFlat(true);
+    home_button->setCheckable(true);
+    home_button->setChecked(this->config->get_media_home() == root_path);
+    home_button->setIconSize(Theme::icon_32);
+    connect(home_button, &QPushButton::clicked, [this](bool checked = false) {
+        this->config->set_media_home(checked ? this->path_label->text() : QDir().absolutePath());
+    });
+    theme->add_button_icon("playlist_add_check", home_button, "playlist_add");
+    layout->addWidget(home_button, 0, Qt::AlignTop);
 
     QListWidget *folders = new QListWidget(widget);
     this->populate_dirs(root_path, folders);
@@ -277,7 +289,7 @@ QWidget *LocalPlayerSubTab::playlist_widget()
         if (idx < 0) return;
         tracks->setCurrentRow(idx);
     });
-    connect(folders, &QListWidget::itemClicked, [this, folders, tracks](QListWidgetItem *item) {
+    connect(folders, &QListWidget::itemClicked, [this, folders, tracks, home_button](QListWidgetItem *item) {
         if (!item->isSelected()) return;
 
         tracks->clear();
@@ -286,8 +298,10 @@ QWidget *LocalPlayerSubTab::playlist_widget()
         this->path_label->setText(current_path);
         this->populate_tracks(current_path, tracks);
         this->populate_dirs(current_path, folders);
+
+        home_button->setChecked(this->config->get_media_home() == current_path);
     });
-    layout->addWidget(tracks, 3);
+    layout->addWidget(tracks, 2);
 
     return widget;
 }
@@ -314,9 +328,9 @@ QWidget *LocalPlayerSubTab::seek_widget()
     connect(this->player, &QMediaPlayer::positionChanged,
             [slider](qint64 position) { slider->setSliderPosition(position); });
 
-    layout->addStretch(5);
-    layout->addWidget(slider, 25);
-    layout->addWidget(value, 4);
+    layout->addStretch(4);
+    layout->addWidget(slider, 28);
+    layout->addWidget(value, 3);
     layout->addStretch(1);
 
     return widget;
@@ -376,13 +390,10 @@ QWidget *LocalPlayerSubTab::controls_widget()
 
 QString LocalPlayerSubTab::durationFmt(int total_ms)
 {
-    int hrs = total_ms / 3600000;
-    total_ms -= 3600000 * hrs;
-    int mins = total_ms / 60000;
-    total_ms -= 60000 * mins;
-    int secs = total_ms / 1000;
+    int mins = (total_ms / (1000 * 60)) % 60;
+    int secs = (total_ms / 1000) % 60;
 
-    return QString("%1:%2:%3").arg(hrs, 2, 10, QChar('0')).arg(mins, 2, 10, QChar('0')).arg(secs, 2, 10, QChar('0'));
+    return QString("%1:%2").arg(mins, 2, 10, QChar('0')).arg(secs, 2, 10, QChar('0'));
 }
 
 void LocalPlayerSubTab::populate_dirs(QString path, QListWidget *dirs_widget)
