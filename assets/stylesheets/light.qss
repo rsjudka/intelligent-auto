@@ -161,6 +161,22 @@ QListView::item:disabled {
     color: rgba(0, 0, 0, 97);
 }
 
+QScrollBar {
+    background-color: transparent;
+}
+
+QScrollBar::handle {
+    background-color: palette(base);
+}
+
+QScrollBar::add-line {
+    border: none;
+}
+
+QScrollBar::sub-line {
+    border: none;
+}
+
 Switch {
     qproperty-track_color: rgba(0, 0, 0, 64);
     qproperty-thumb_color: rgb(224, 224, 224);
