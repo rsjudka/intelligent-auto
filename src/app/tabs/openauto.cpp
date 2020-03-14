@@ -1,12 +1,12 @@
 #include <app/config.hpp>
-#include <app/tabs/open_auto.hpp>
+#include <app/tabs/openauto.hpp>
 #include <app/theme.hpp>
 #include <app/window.hpp>
 
 OpenAutoWorker::OpenAutoWorker(std::function<void(bool)> callback, QWidget *parent)
     : io_service(),
       work(io_service),
-      configuration(Config::get_instance()->open_auto_config),
+      configuration(Config::get_instance()->openauto_config),
       tcp_wrapper(),
       usb_wrapper((libusb_init(&this->usb_context), usb_context)),
       query_factory(usb_wrapper, io_service),
@@ -54,33 +54,62 @@ void OpenAutoWorker::create_io_service_workers()
     this->thread_pool.emplace_back(worker);
 }
 
+OpenAutoFrame::OpenAutoFrame(QWidget *parent) : QWidget(parent)
+{
+    this->resize(parent->size());
+    this->setStyleSheet("background-color: rgb(0, 0, 0);");
+}
+
+void OpenAutoFrame::mouseDoubleClickEvent(QMouseEvent *)
+{
+    this->fullscreen = !this->fullscreen;
+
+    emit toggle_fullscreen(this->fullscreen);
+}
+
 OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
 {
     MainWindow *window = qobject_cast<MainWindow *>(parent);
 
-    connect(window, &MainWindow::set_open_auto_state, [this](unsigned int alpha) {
+    connect(window, &MainWindow::set_openauto_state, [this](unsigned int alpha) {
         if (this->worker != nullptr) this->worker->set_opacity(alpha);
         if (alpha > 0) this->setFocus();
     });
 
     QStackedLayout *layout = new QStackedLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
+    connect(window, &MainWindow::is_ready, [this, window, layout]() {
+        OpenAutoFrame *frame = new OpenAutoFrame(this);
+        layout->addWidget(frame);
 
+        auto callback = [this, layout, window, frame](bool is_active) {
+            if (!is_active && frame->is_fullscreen()) {
+                window->remove_widget(frame);
+                layout->addWidget(frame);
+            }
+            layout->setCurrentIndex(is_active ? 1 : 0);
+            if (this->worker != nullptr) this->worker->resize();
+        };
+        if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, frame);
+
+        connect(frame, &OpenAutoFrame::toggle_fullscreen, [layout, frame, window, worker = this->worker](bool enable) {
+            qDebug() << frame->geometry();
+            if (enable) {
+                layout->removeWidget(frame);
+                window->add_widget(frame);
+            }
+            else {
+                window->remove_widget(frame);
+                layout->addWidget(frame);
+                layout->setCurrentIndex(1);
+            }
+            if (worker != nullptr) worker->resize();
+        });
+
+        this->worker->start();
+        this->setFocus();
+    });
     layout->addWidget(this->msg_widget());
-#ifdef USE_OMX
-    QWidget *omx_backdrop = new QWidget(this);
-    omx_backdrop->setStyleSheet("background-color: black;");
-    layout->addWidget(omx_backdrop);
-#endif
-}
-
-void OpenAutoTab::start_worker()
-{
-    QStackedLayout *layout = qobject_cast<QStackedLayout *>(this->layout());
-    auto callback = [layout](bool is_active) { layout->setCurrentIndex(is_active ? 1 : 0); };
-    if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, this);
-
-    this->worker->start();
 }
 
 QWidget *OpenAutoTab::msg_widget()

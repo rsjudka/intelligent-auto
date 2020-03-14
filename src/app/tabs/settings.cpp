@@ -350,10 +350,10 @@ QWidget *OpenAutoSettingsSubTab::rhd_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
-    toggle->setChecked(this->config->open_auto_config->getHandednessOfTrafficType() ==
+    toggle->setChecked(this->config->openauto_config->getHandednessOfTrafficType() ==
                        autoapp::configuration::HandednessOfTrafficType::RIGHT_HAND_DRIVE);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
-        config->open_auto_config->setHandednessOfTrafficType(
+        config->openauto_config->setHandednessOfTrafficType(
             state ? autoapp::configuration::HandednessOfTrafficType::RIGHT_HAND_DRIVE
                   : autoapp::configuration::HandednessOfTrafficType::LEFT_HAND_DRIVE);
     });
@@ -377,17 +377,17 @@ QWidget *OpenAutoSettingsSubTab::frame_rate_row_widget()
     QRadioButton *fps_30_button = new QRadioButton("30fps", group);
     fps_30_button->setFixedHeight(fps_30_button->height());
     fps_30_button->setFont(Theme::font_14);
-    fps_30_button->setChecked(this->config->open_auto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_30);
+    fps_30_button->setChecked(this->config->openauto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_30);
     connect(fps_30_button, &QRadioButton::clicked,
-            [config = this->config]() { config->open_auto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_30); });
+            [config = this->config]() { config->openauto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_30); });
     group_layout->addWidget(fps_30_button);
 
     QRadioButton *fps_60_button = new QRadioButton("60fps", group);
     fps_60_button->setFixedHeight(fps_60_button->height());
     fps_60_button->setFont(Theme::font_14);
-    fps_60_button->setChecked(this->config->open_auto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_60);
+    fps_60_button->setChecked(this->config->openauto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_60);
     connect(fps_60_button, &QRadioButton::clicked,
-            [config = this->config]() { config->open_auto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_60); });
+            [config = this->config]() { config->openauto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_60); });
     group_layout->addWidget(fps_60_button);
 
     layout->addWidget(group, 1, Qt::AlignHCenter);
@@ -410,30 +410,30 @@ QWidget *OpenAutoSettingsSubTab::resolution_row_widget()
     QRadioButton *res_480_button = new QRadioButton("480p", group);
     res_480_button->setFixedHeight(res_480_button->height());
     res_480_button->setFont(Theme::font_14);
-    res_480_button->setChecked(this->config->open_auto_config->getVideoResolution() ==
+    res_480_button->setChecked(this->config->openauto_config->getVideoResolution() ==
                                aasdk::proto::enums::VideoResolution::_480p);
     connect(res_480_button, &QRadioButton::clicked, [config = this->config]() {
-        config->open_auto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_480p);
+        config->openauto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_480p);
     });
     group_layout->addWidget(res_480_button);
 
     QRadioButton *res_720_button = new QRadioButton("720p", group);
     res_720_button->setFixedHeight(res_720_button->height());
     res_720_button->setFont(Theme::font_14);
-    res_720_button->setChecked(this->config->open_auto_config->getVideoResolution() ==
+    res_720_button->setChecked(this->config->openauto_config->getVideoResolution() ==
                                aasdk::proto::enums::VideoResolution::_720p);
     connect(res_720_button, &QRadioButton::clicked, [config = this->config]() {
-        config->open_auto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_720p);
+        config->openauto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_720p);
     });
     group_layout->addWidget(res_720_button);
 
     QRadioButton *res_1080_button = new QRadioButton("1080p", group);
     res_1080_button->setFixedHeight(res_1080_button->height());
     res_1080_button->setFont(Theme::font_14);
-    res_1080_button->setChecked(this->config->open_auto_config->getVideoResolution() ==
+    res_1080_button->setChecked(this->config->openauto_config->getVideoResolution() ==
                                 aasdk::proto::enums::VideoResolution::_1080p);
     connect(res_1080_button, &QRadioButton::clicked, [config = this->config]() {
-        config->open_auto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_1080p);
+        config->openauto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_1080p);
     });
     group_layout->addWidget(res_1080_button);
 
@@ -464,13 +464,13 @@ QWidget *OpenAutoSettingsSubTab::dpi_widget()
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
     slider->setFixedHeight(slider->height());
     slider->setRange(0, 512);
-    slider->setSliderPosition(this->config->open_auto_config->getScreenDPI());
+    slider->setSliderPosition(this->config->openauto_config->getScreenDPI());
     QLabel *value = new QLabel(QString::number(slider->sliderPosition()), widget);
     value->setFixedHeight(value->height());
     value->setFont(Theme::font_14);
     connect(slider, &QSlider::valueChanged, [config = this->config, value](int position) {
         value->setText(QString::number(position));
-        config->open_auto_config->setScreenDPI(position);
+        config->openauto_config->setScreenDPI(position);
     });
 
     layout->addStretch(2);
@@ -491,10 +491,10 @@ QWidget *OpenAutoSettingsSubTab::rt_audio_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
-    toggle->setChecked(this->config->open_auto_config->getAudioOutputBackendType() ==
+    toggle->setChecked(this->config->openauto_config->getAudioOutputBackendType() ==
                        autoapp::configuration::AudioOutputBackendType::RTAUDIO);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
-        config->open_auto_config->setAudioOutputBackendType(
+        config->openauto_config->setAudioOutputBackendType(
             state ? autoapp::configuration::AudioOutputBackendType::RTAUDIO
                   : autoapp::configuration::AudioOutputBackendType::QT);
     });
@@ -518,18 +518,18 @@ QWidget *OpenAutoSettingsSubTab::audio_channels_row_widget()
     QCheckBox *music_button = new QCheckBox("Music", group);
     music_button->setFixedHeight(music_button->height());
     music_button->setFont(Theme::font_14);
-    music_button->setChecked(this->config->open_auto_config->musicAudioChannelEnabled());
+    music_button->setChecked(this->config->openauto_config->musicAudioChannelEnabled());
     connect(music_button, &QCheckBox::toggled,
-            [config = this->config](bool checked) { config->open_auto_config->setMusicAudioChannelEnabled(checked); });
+            [config = this->config](bool checked) { config->openauto_config->setMusicAudioChannelEnabled(checked); });
     group_layout->addWidget(music_button);
     group_layout->addStretch(2);
 
     QCheckBox *speech_button = new QCheckBox("Speech", group);
     speech_button->setFixedHeight(speech_button->height());
     speech_button->setFont(Theme::font_14);
-    speech_button->setChecked(this->config->open_auto_config->speechAudioChannelEnabled());
+    speech_button->setChecked(this->config->openauto_config->speechAudioChannelEnabled());
     connect(speech_button, &QCheckBox::toggled,
-            [config = this->config](bool checked) { config->open_auto_config->setSpeechAudioChannelEnabled(checked); });
+            [config = this->config](bool checked) { config->openauto_config->setSpeechAudioChannelEnabled(checked); });
     group_layout->addWidget(speech_button);
 
     layout->addWidget(group, 1, Qt::AlignHCenter);
@@ -547,10 +547,10 @@ QWidget *OpenAutoSettingsSubTab::bluetooth_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
-    toggle->setChecked(this->config->open_auto_config->getBluetoothAdapterType() ==
+    toggle->setChecked(this->config->openauto_config->getBluetoothAdapterType() ==
                        autoapp::configuration::BluetoothAdapterType::LOCAL);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
-        config->open_auto_config->setBluetoothAdapterType(state ? autoapp::configuration::BluetoothAdapterType::LOCAL
+        config->openauto_config->setBluetoothAdapterType(state ? autoapp::configuration::BluetoothAdapterType::LOCAL
                                                                 : autoapp::configuration::BluetoothAdapterType::NONE);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
