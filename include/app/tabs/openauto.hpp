@@ -25,7 +25,7 @@ class OpenAutoWorker {
 
     inline void start() { this->app->waitForUSBDevice(); }
     inline void set_opacity(unsigned int alpha) { this->service_factory.setOpacity(alpha); }
-    inline void resize() { this->service_factory.resize(); }
+    inline void resize(bool skipUpdate = false) { this->service_factory.resize(skipUpdate); }
 
    private:
     void create_usb_workers();

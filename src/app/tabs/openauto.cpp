@@ -57,24 +57,24 @@ void OpenAutoWorker::create_io_service_workers()
 OpenAutoFrame::OpenAutoFrame(QWidget *parent) : QWidget(parent)
 {
     this->resize(parent->size());
-    this->setStyleSheet("background-color: rgb(0, 0, 0);");
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QWidget *frame = new QWidget(this);
+    frame->setStyleSheet("background-color: rgb(0, 0, 0);");
+    layout->addWidget(frame);
 }
 
 void OpenAutoFrame::mouseDoubleClickEvent(QMouseEvent *)
 {
     this->fullscreen = !this->fullscreen;
-
     emit toggle_fullscreen(this->fullscreen);
 }
 
 OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
 {
     MainWindow *window = qobject_cast<MainWindow *>(parent);
-
-    connect(window, &MainWindow::set_openauto_state, [this](unsigned int alpha) {
-        if (this->worker != nullptr) this->worker->set_opacity(alpha);
-        if (alpha > 0) this->setFocus();
-    });
 
     QStackedLayout *layout = new QStackedLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -86,11 +86,17 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
             if (!is_active && frame->is_fullscreen()) {
                 window->remove_widget(frame);
                 layout->addWidget(frame);
+                if (this->worker != nullptr) this->worker->resize(true);
             }
             layout->setCurrentIndex(is_active ? 1 : 0);
-            if (this->worker != nullptr) this->worker->resize();
+            frame->setFocus();
         };
         if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, frame);
+
+        connect(window, &MainWindow::set_openauto_state, [this, frame](unsigned int alpha) {
+            if (this->worker != nullptr) this->worker->set_opacity(alpha);
+            if (alpha > 0) frame->setFocus();
+        });
 
         connect(frame, &OpenAutoFrame::toggle_fullscreen, [layout, frame, window, worker = this->worker](bool enable) {
             if (enable) {
@@ -103,10 +109,10 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
                 layout->setCurrentIndex(1);
             }
             if (worker != nullptr) worker->resize();
+            frame->setFocus();
         });
 
         this->worker->start();
-        this->setFocus();
     });
     layout->addWidget(this->msg_widget());
 }
