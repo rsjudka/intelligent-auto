@@ -93,7 +93,6 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
         if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, frame);
 
         connect(frame, &OpenAutoFrame::toggle_fullscreen, [layout, frame, window, worker = this->worker](bool enable) {
-            qDebug() << frame->geometry();
             if (enable) {
                 layout->removeWidget(frame);
                 window->add_widget(frame);
