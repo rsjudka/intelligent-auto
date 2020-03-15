@@ -20,7 +20,6 @@ MainWindow::MainWindow()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     layout->addWidget(this->tabs_widget());
-    layout->addWidget(this->controls_widget());
 
     setCentralWidget(widget);
 }
@@ -28,20 +27,20 @@ MainWindow::MainWindow()
 QTabWidget *MainWindow::tabs_widget()
 {
     QTabWidget *widget = new QTabWidget(this);
-    widget->setTabPosition(QTabWidget::TabPosition::West);
+    widget->setTabPosition(QTabWidget::TabPosition::South);
     widget->tabBar()->setIconSize(Theme::icon_48);
 
     widget->addTab(this->open_auto_tab, QString());
-    this->theme->add_tab_icon("directions_car", 0, Qt::Orientation::Vertical);
+    this->theme->add_tab_icon("directions_car", 0, Qt::Orientation::Horizontal);
 
     widget->addTab(new MediaTab(this), QString());
-    this->theme->add_tab_icon("play_circle_outline", 1, Qt::Orientation::Vertical);
+    this->theme->add_tab_icon("play_circle_outline", 1, Qt::Orientation::Horizontal);
 
     widget->addTab(new DataTab(this), QString());
-    this->theme->add_tab_icon("speed", 2, Qt::Orientation::Vertical);
+    this->theme->add_tab_icon("speed", 2, Qt::Orientation::Horizontal);
 
     widget->addTab(new SettingsTab(this), "");
-    this->theme->add_tab_icon("tune", 3, Qt::Orientation::Vertical);
+    this->theme->add_tab_icon("tune", 3, Qt::Orientation::Horizontal);
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         this->setWindowOpacity(position / 255.0);
@@ -56,6 +55,8 @@ QTabWidget *MainWindow::tabs_widget()
         emit set_open_auto_state((index == 0) ? (windowOpacity() * 255) : 0);
         emit set_data_state(index == 2);
     });
+
+    widget->setCornerWidget(this->volume_widget(), Qt::BottomRightCorner);
 
     return widget;
 }
@@ -79,6 +80,7 @@ QWidget *MainWindow::volume_widget()
     layout->setContentsMargins(0, 0, 0, 0);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setFixedWidth(this->width() * .4);
     slider->setRange(0, 100);
     slider->setSliderPosition(this->config->get_volume());
     update_system_volume(slider->sliderPosition());
@@ -106,7 +108,7 @@ QWidget *MainWindow::volume_widget()
     });
 
     layout->addWidget(lower_button);
-    layout->addWidget(slider, 4);
+    layout->addWidget(slider);
     layout->addWidget(raise_button);
 
     return widget;
