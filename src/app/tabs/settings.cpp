@@ -3,6 +3,7 @@
 #include <aasdk_proto/VideoResolutionEnum.pb.h>
 #include <BluezQt/Device>
 #include <BluezQt/PendingCall>
+#include <QScrollArea>
 #include <f1x/openauto/autoapp/Configuration/AudioOutputBackendType.hpp>
 #include <f1x/openauto/autoapp/Configuration/BluetootAdapterType.hpp>
 #include <f1x/openauto/autoapp/Configuration/HandednessOfTrafficType.hpp>
@@ -31,7 +32,7 @@ GeneralSettingsSubTab::GeneralSettingsSubTab(QWidget *parent) : QWidget(parent)
     this->config = Config::get_instance();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(this->settings_widget());
     layout->addWidget(this->controls_widget());
@@ -49,7 +50,11 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
 
-    return widget;
+    QScrollArea *scroll_area = new QScrollArea(this);
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setWidget(widget);
+
+    return scroll_area;
 }
 
 QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
@@ -199,7 +204,6 @@ BluetoothSettingsSubTab::BluetoothSettingsSubTab(QWidget *parent) : QWidget(pare
     this->config = Config::get_instance();
 
     QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
 
     layout->addWidget(this->controls_widget());
     layout->addWidget(this->devices_widget());
@@ -316,7 +320,7 @@ OpenAutoSettingsSubTab::OpenAutoSettingsSubTab(QWidget *parent) : QWidget(parent
     this->config = Config::get_instance();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(this->settings_widget());
 }
@@ -337,7 +341,11 @@ QWidget *OpenAutoSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->bluetooth_row_widget(), 1);
 
-    return widget;
+    QScrollArea *scroll_area = new QScrollArea(this);
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setWidget(widget);
+
+    return scroll_area;
 }
 
 QWidget *OpenAutoSettingsSubTab::rhd_row_widget()
