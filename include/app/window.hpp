@@ -20,8 +20,10 @@ class MainWindow : public QMainWindow {
    public:
     MainWindow();
 
-    void add_widget(QWidget *widget);
-    void remove_widget(QWidget *widget);
+    inline void add_widget(QWidget *widget) { this->layout->addWidget(widget); }
+    inline void remove_widget(QWidget *widget) { this->layout->removeWidget(widget); }
+    inline void set_widget() { layout->setCurrentIndex(1); }
+    inline void unset_widget() { layout->setCurrentIndex(0); }
 
    protected:
     void showEvent(QShowEvent *event);

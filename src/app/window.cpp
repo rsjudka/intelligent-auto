@@ -134,15 +134,3 @@ void MainWindow::showEvent(QShowEvent *event)
     QWidget::showEvent(event);
     emit is_ready();
 }
-
-void MainWindow::add_widget(QWidget *widget)
-{
-    this->layout->addWidget(widget);
-    this->layout->setCurrentIndex(1);
-}
-
-void MainWindow::remove_widget(QWidget *widget)
-{
-    this->layout->removeWidget(widget);
-    this->layout->setCurrentIndex(0);
-}

@@ -69,7 +69,7 @@ OpenAutoFrame::OpenAutoFrame(QWidget *parent) : QWidget(parent)
 void OpenAutoFrame::mouseDoubleClickEvent(QMouseEvent *)
 {
     this->fullscreen = !this->fullscreen;
-    emit toggle_fullscreen(this->fullscreen);
+    emit double_clicked(this->fullscreen);
 }
 
 OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
@@ -83,12 +83,10 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
         layout->addWidget(frame);
 
         auto callback = [this, layout, window, frame](bool is_active) {
-            if (!is_active && frame->is_fullscreen()) {
-                window->remove_widget(frame);
-                layout->addWidget(frame);
-                if (this->worker != nullptr) this->worker->resize(true);
-            }
-            layout->setCurrentIndex(is_active ? 1 : 0);
+            if (frame->is_fullscreen())
+                is_active ? window->set_widget() : window->unset_widget();
+            else
+                layout->setCurrentIndex(is_active ? 1 : 0);
             frame->setFocus();
         };
         if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, frame);
@@ -98,12 +96,15 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
             if (alpha > 0) frame->setFocus();
         });
 
-        connect(frame, &OpenAutoFrame::toggle_fullscreen, [layout, frame, window, worker = this->worker](bool enable) {
+        connect(frame, &OpenAutoFrame::double_clicked, [layout, frame, window, worker = this->worker](bool enable) {
             if (enable) {
+                layout->setCurrentIndex(0);
                 layout->removeWidget(frame);
                 window->add_widget(frame);
+                window->set_widget();
             }
             else {
+                window->unset_widget();
                 window->remove_widget(frame);
                 layout->addWidget(frame);
                 layout->setCurrentIndex(1);

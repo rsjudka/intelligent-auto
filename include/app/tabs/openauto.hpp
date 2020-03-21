@@ -25,7 +25,7 @@ class OpenAutoWorker {
 
     inline void start() { this->app->waitForUSBDevice(); }
     inline void set_opacity(unsigned int alpha) { this->service_factory.setOpacity(alpha); }
-    inline void resize(bool skipUpdate = false) { this->service_factory.resize(skipUpdate); }
+    inline void resize() { this->service_factory.resize(); }
 
    private:
     void create_usb_workers();
@@ -62,7 +62,7 @@ class OpenAutoFrame : public QWidget {
     bool fullscreen = false;
 
    signals:
-    void toggle_fullscreen(bool enable);
+    void double_clicked(bool enable);
 };
 
 class OpenAutoTab : public QWidget {
