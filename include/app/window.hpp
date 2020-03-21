@@ -13,6 +13,7 @@
 #include <app/config.hpp>
 #include <app/tabs/open_auto.hpp>
 #include <app/theme.hpp>
+#include <QBluetoothSocket>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -35,7 +36,12 @@ class MainWindow : public QMainWindow {
 
    signals:
     void set_data_state(bool enabled);
+<<<<<<< HEAD
     void set_open_auto_state(unsigned int alpha);
+=======
+    void set_openauto_state(unsigned int alpha);
+
+>>>>>>> 6004010... Implemented bluetooth OBDII
 };
 
 #endif

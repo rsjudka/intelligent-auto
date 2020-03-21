@@ -7,8 +7,12 @@
 #include <string>
 
 #include <obd/command.hpp>
-
-class OBD {
+#include <QBluetoothAddress>
+#include <iostream>
+#include <QBluetoothSocket>
+#include <sys/socket.h>
+class OBD : public QObject{
+   Q_OBJECT
    public:
     OBD();
     ~OBD();
@@ -18,7 +22,8 @@ class OBD {
     inline bool is_connected() { return this->connected; }
 
     static OBD *get_instance();
-
+    enum OBDType {USB, BT};
+    inline OBDType get_adapter_type(){return this->adapterType;}
    private:
     void connect(std::string dev_path, speed_t baudrate);
     void initialize();
@@ -32,8 +37,14 @@ class OBD {
 
     int fd;
     std::mutex obd_mutex;
+    OBDType adapterType;
+    QBluetoothSocket* btSocket;
+
 
     bool connected = false;
+    public slots:
+        void btConnected();
+        void socketChanged(QBluetoothSocket::SocketState state);
 };
 
 #endif
