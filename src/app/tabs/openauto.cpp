@@ -56,8 +56,6 @@ void OpenAutoWorker::create_io_service_workers()
 
 OpenAutoFrame::OpenAutoFrame(QWidget *parent) : QWidget(parent)
 {
-    this->resize(parent->size());
-
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
@@ -68,54 +66,62 @@ OpenAutoFrame::OpenAutoFrame(QWidget *parent) : QWidget(parent)
 
 void OpenAutoFrame::mouseDoubleClickEvent(QMouseEvent *)
 {
-    this->fullscreen = !this->fullscreen;
+    this->toggle_fullscreen();
     emit double_clicked(this->fullscreen);
 }
 
 OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
 {
     MainWindow *window = qobject_cast<MainWindow *>(parent);
+    connect(window, &MainWindow::set_openauto_state, [this](unsigned int alpha) {
+        if (this->worker != nullptr) this->worker->set_opacity(alpha);
+        if (alpha > 0) this->setFocus();
+    });
 
     QStackedLayout *layout = new QStackedLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    connect(window, &MainWindow::is_ready, [this, window, layout]() {
-        OpenAutoFrame *frame = new OpenAutoFrame(this);
-        layout->addWidget(frame);
 
-        auto callback = [this, layout, window, frame](bool is_active) {
-            if (frame->is_fullscreen())
-                is_active ? window->set_widget() : window->unset_widget();
-            else
-                layout->setCurrentIndex(is_active ? 1 : 0);
+    OpenAutoFrame *frame = new OpenAutoFrame(this);
+    connect(frame, &OpenAutoFrame::toggle, [window, layout, frame](bool enable) {
+        if (!enable && frame->is_fullscreen()) {
+            window->unset_widget();
+            window->remove_widget(frame);
+            layout->addWidget(frame);
+            layout->setCurrentIndex(1);
+            frame->toggle_fullscreen();
+        }
+        layout->setCurrentIndex(enable ? 1 : 0);
+    });
+    connect(frame, &OpenAutoFrame::double_clicked, [=](bool fullscreen) {
+        if (fullscreen) {
+            layout->setCurrentIndex(0);
+            layout->removeWidget(frame);
+            window->add_widget(frame);
+            window->set_widget();
+        }
+        else {
+            window->unset_widget();
+            window->remove_widget(frame);
+            layout->addWidget(frame);
+            layout->setCurrentIndex(1);
+        }
+        if (this->worker != nullptr) this->worker->resize();
+        frame->setFocus();
+    });
+
+    layout->addWidget(this->msg_widget());
+    layout->addWidget(frame);
+
+    connect(window, &MainWindow::is_ready, [this, frame]() {
+        frame->resize(this->size());
+        auto callback = [frame](bool is_active) {
+            frame->toggle(is_active);
             frame->setFocus();
         };
         if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, frame);
 
-        connect(window, &MainWindow::set_openauto_state, [this, frame](unsigned int alpha) {
-            if (this->worker != nullptr) this->worker->set_opacity(alpha);
-            if (alpha > 0) frame->setFocus();
-        });
-
-        connect(frame, &OpenAutoFrame::double_clicked, [layout, frame, window, worker = this->worker](bool enable) {
-            if (enable) {
-                layout->setCurrentIndex(0);
-                layout->removeWidget(frame);
-                window->add_widget(frame);
-                window->set_widget();
-            }
-            else {
-                window->unset_widget();
-                window->remove_widget(frame);
-                layout->addWidget(frame);
-                layout->setCurrentIndex(1);
-            }
-            if (worker != nullptr) worker->resize();
-            frame->setFocus();
-        });
-
         this->worker->start();
     });
-    layout->addWidget(this->msg_widget());
 }
 
 QWidget *OpenAutoTab::msg_widget()

@@ -54,6 +54,7 @@ class OpenAutoFrame : public QWidget {
     OpenAutoFrame(QWidget *parent);
 
     inline bool is_fullscreen() { return this->fullscreen; }
+    inline void toggle_fullscreen() { this->fullscreen = !this->fullscreen; }
 
    protected:
     void mouseDoubleClickEvent(QMouseEvent *);
@@ -62,7 +63,8 @@ class OpenAutoFrame : public QWidget {
     bool fullscreen = false;
 
    signals:
-    void double_clicked(bool enable);
+    void double_clicked(bool fullscreen);
+    void toggle(bool enable);
 };
 
 class OpenAutoTab : public QWidget {

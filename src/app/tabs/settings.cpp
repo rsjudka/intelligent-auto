@@ -4,6 +4,7 @@
 #include <BluezQt/Device>
 #include <BluezQt/PendingCall>
 #include <QScrollArea>
+#include <QScroller>
 #include <f1x/openauto/autoapp/Configuration/AudioOutputBackendType.hpp>
 #include <f1x/openauto/autoapp/Configuration/BluetootAdapterType.hpp>
 #include <f1x/openauto/autoapp/Configuration/HandednessOfTrafficType.hpp>
@@ -50,6 +51,9 @@ QWidget *GeneralSettingsSubTab::settings_widget()
 
     QScrollArea *scroll_area = new QScrollArea(this);
     scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QScroller::grabGesture(scroll_area->viewport(), QScroller::LeftMouseButtonGesture);
+    QScroller::scroller(scroll_area->viewport())->setScrollerProperties(Theme::scroller_property());
     scroll_area->setWidgetResizable(true);
     scroll_area->setWidget(widget);
 
@@ -151,16 +155,18 @@ QWidget *GeneralSettingsSubTab::color_row_widget()
     layout->addWidget(label, 1);
 
     QComboBox *box = new QComboBox(widget);
-    box->setMinimumContentsLength(16);
     box->setItemDelegate(new QStyledItemDelegate());
     box->setFont(Theme::font_14);
     QMap<QString, QColor> colors = this->theme->get_colors();
     QMap<QString, QColor>::iterator it;
     QPixmap pixmap(Theme::icon_16);
+    int min_length = 0;
     for (it = colors.begin(); it != colors.end(); it++) {
         pixmap.fill(it.value());
         box->addItem(QIcon(pixmap), it.key());
+        min_length = std::max(min_length, it.key().length());
     }
+    box->setMinimumContentsLength(min_length + 2);
     box->setCurrentText(this->config->get_color());
     connect(box, QOverload<const QString &>::of(&QComboBox::activated),
             [theme = this->theme, config = this->config](const QString &color) {
@@ -294,6 +300,9 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
     });
 
     QScrollArea *scroll_area = new QScrollArea(this);
+    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QScroller::grabGesture(scroll_area->viewport(), QScroller::LeftMouseButtonGesture);
+    QScroller::scroller(scroll_area->viewport())->setScrollerProperties(Theme::scroller_property());
     scroll_area->setWidgetResizable(true);
     scroll_area->setWidget(widget);
 
@@ -329,6 +338,9 @@ QWidget *OpenAutoSettingsSubTab::settings_widget()
 
     QScrollArea *scroll_area = new QScrollArea(this);
     scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QScroller::grabGesture(scroll_area->viewport(), QScroller::LeftMouseButtonGesture);
+    QScroller::scroller(scroll_area->viewport())->setScrollerProperties(Theme::scroller_property());
     scroll_area->setWidgetResizable(true);
     scroll_area->setWidget(widget);
 
@@ -489,9 +501,9 @@ QWidget *OpenAutoSettingsSubTab::rt_audio_row_widget()
     toggle->setChecked(this->config->openauto_config->getAudioOutputBackendType() ==
                        autoapp::configuration::AudioOutputBackendType::RTAUDIO);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
-        config->openauto_config->setAudioOutputBackendType(
-            state ? autoapp::configuration::AudioOutputBackendType::RTAUDIO
-                  : autoapp::configuration::AudioOutputBackendType::QT);
+        config->openauto_config->setAudioOutputBackendType(state
+                                                               ? autoapp::configuration::AudioOutputBackendType::RTAUDIO
+                                                               : autoapp::configuration::AudioOutputBackendType::QT);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
@@ -546,7 +558,7 @@ QWidget *OpenAutoSettingsSubTab::bluetooth_row_widget()
                        autoapp::configuration::BluetoothAdapterType::LOCAL);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
         config->openauto_config->setBluetoothAdapterType(state ? autoapp::configuration::BluetoothAdapterType::LOCAL
-                                                                : autoapp::configuration::BluetoothAdapterType::NONE);
+                                                               : autoapp::configuration::BluetoothAdapterType::NONE);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 

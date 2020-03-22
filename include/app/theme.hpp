@@ -6,7 +6,9 @@
 #include <QObject>
 #include <QPair>
 #include <QPushButton>
+#include <QScrollerProperties>
 #include <QString>
+#include <QVariant>
 
 typedef QPair<int, QIcon> tab_icon_t;
 typedef QPair<QPushButton *, QIcon> button_icon_t;
@@ -61,6 +63,16 @@ class Theme : public QObject {
         br->setFrameShadow(QFrame::Plain);
 
         return br;
+    }
+    inline static QScrollerProperties scroller_property()
+    {
+        QVariant policy =
+            QVariant::fromValue<QScrollerProperties::OvershootPolicy>(QScrollerProperties::OvershootAlwaysOff);
+        QScrollerProperties properties;
+        properties.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, policy);
+        properties.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, policy);
+
+        return properties;
     }
     static Theme *get_instance();
 
