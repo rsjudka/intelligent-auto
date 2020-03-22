@@ -1,11 +1,13 @@
 #ifndef THEME_HPP_
 #define THEME_HPP_
 
+#include <QAbstractScrollArea>
 #include <QFrame>
 #include <QMap>
 #include <QObject>
 #include <QPair>
 #include <QPushButton>
+#include <QScroller>
 #include <QScrollerProperties>
 #include <QString>
 #include <QVariant>
@@ -64,15 +66,18 @@ class Theme : public QObject {
 
         return br;
     }
-    inline static QScrollerProperties scroller_property()
+    inline static void to_touch_scroller(QAbstractScrollArea *area)
     {
         QVariant policy =
             QVariant::fromValue<QScrollerProperties::OvershootPolicy>(QScrollerProperties::OvershootAlwaysOff);
-        QScrollerProperties properties;
+        QScrollerProperties properties = QScroller::scroller(area->viewport())->scrollerProperties();
         properties.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, policy);
         properties.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, policy);
 
-        return properties;
+        area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+        area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        QScroller::grabGesture(area->viewport(), QScroller::LeftMouseButtonGesture);
+        QScroller::scroller(area->viewport())->setScrollerProperties(properties);
     }
     static Theme *get_instance();
 

@@ -4,7 +4,6 @@
 #include <BluezQt/Device>
 #include <BluezQt/PendingCall>
 #include <QScrollArea>
-#include <QScroller>
 #include <f1x/openauto/autoapp/Configuration/AudioOutputBackendType.hpp>
 #include <f1x/openauto/autoapp/Configuration/BluetootAdapterType.hpp>
 #include <f1x/openauto/autoapp/Configuration/HandednessOfTrafficType.hpp>
@@ -50,10 +49,7 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(this->brightness_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
-    scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QScroller::grabGesture(scroll_area->viewport(), QScroller::LeftMouseButtonGesture);
-    QScroller::scroller(scroll_area->viewport())->setScrollerProperties(Theme::scroller_property());
+    Theme::to_touch_scroller(scroll_area);
     scroll_area->setWidgetResizable(true);
     scroll_area->setWidget(widget);
 
@@ -300,9 +296,7 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
     });
 
     QScrollArea *scroll_area = new QScrollArea(this);
-    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QScroller::grabGesture(scroll_area->viewport(), QScroller::LeftMouseButtonGesture);
-    QScroller::scroller(scroll_area->viewport())->setScrollerProperties(Theme::scroller_property());
+    Theme::to_touch_scroller(scroll_area);
     scroll_area->setWidgetResizable(true);
     scroll_area->setWidget(widget);
 
@@ -337,10 +331,7 @@ QWidget *OpenAutoSettingsSubTab::settings_widget()
     layout->addWidget(this->bluetooth_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
-    scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QScroller::grabGesture(scroll_area->viewport(), QScroller::LeftMouseButtonGesture);
-    QScroller::scroller(scroll_area->viewport())->setScrollerProperties(Theme::scroller_property());
+    Theme::to_touch_scroller(scroll_area);
     scroll_area->setWidgetResizable(true);
     scroll_area->setWidget(widget);
 
