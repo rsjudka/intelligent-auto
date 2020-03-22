@@ -82,13 +82,14 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
     layout->setContentsMargins(0, 0, 0, 0);
 
     OpenAutoFrame *frame = new OpenAutoFrame(this);
-    connect(frame, &OpenAutoFrame::toggle, [window, layout, frame](bool enable) {
+    connect(frame, &OpenAutoFrame::toggle, [=](bool enable) {
         if (!enable && frame->is_fullscreen()) {
             window->unset_widget();
             window->remove_widget(frame);
             layout->addWidget(frame);
             layout->setCurrentIndex(1);
             frame->toggle_fullscreen();
+            if (this->worker != nullptr) this->worker->resize();
         }
         layout->setCurrentIndex(enable ? 1 : 0);
     });
