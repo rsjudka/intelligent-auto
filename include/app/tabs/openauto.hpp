@@ -1,5 +1,5 @@
-#ifndef openauto_HPP_
-#define openauto_HPP_
+#ifndef OPENAUTO_HPP_
+#define OPENAUTO_HPP_
 
 #include <QtWidgets>
 #include <f1x/aasdk/TCP/TCPWrapper.hpp>
