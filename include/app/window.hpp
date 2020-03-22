@@ -39,6 +39,8 @@ class MainWindow : public QMainWindow {
     Theme *theme;
     QStackedLayout *layout;
 
+    const QSize TAB_SIZE = Theme::icon_48;
+
    signals:
     void is_ready();
     void set_data_state(bool enabled);
