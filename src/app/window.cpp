@@ -65,7 +65,7 @@ QTabWidget *MainWindow::tabs_widget()
                 for (auto &icon : button_icons) icon.first->setIcon(icon.second);
             });
     connect(widget, &QTabWidget::currentChanged, [this](int index) {
-        emit set_openauto_state((index == 0) ? (windowOpacity() * 255) : 0);
+        emit set_openauto_state((index == 0) ? (this->windowOpacity() * 255) : 0);
         emit set_data_state(index == 2);
     });
 

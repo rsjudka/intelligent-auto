@@ -113,13 +113,14 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
     layout->addWidget(this->msg_widget());
     layout->addWidget(frame);
 
-    connect(window, &MainWindow::is_ready, [this, frame]() {
+    connect(window, &MainWindow::is_ready, [this, frame, opacity = window->windowOpacity()]() {
         frame->resize(this->size());
         auto callback = [frame](bool is_active) {
             frame->toggle(is_active);
             frame->setFocus();
         };
         if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, frame);
+        this->worker->set_opacity(opacity * 255);
 
         this->worker->start();
     });
