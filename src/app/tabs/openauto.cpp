@@ -8,16 +8,16 @@ OpenAutoWorker::OpenAutoWorker(std::function<void(bool)> callback, QWidget *pare
       work(io_service),
       configuration(Config::get_instance()->openauto_config),
       tcp_wrapper(),
-      usb_wrapper((libusb_init(&this->usb_context), usb_context)),
+      usb_wrapper((libusb_init(&usb_context), usb_context)),
       query_factory(usb_wrapper, io_service),
       query_chain_factory(usb_wrapper, io_service, query_factory),
       service_factory(io_service, configuration, parent, callback),
       android_auto_entity_factory(io_service, configuration, service_factory),
-      usb_hub(std::make_shared<aasdk::usb::USBHub>(this->usb_wrapper, this->io_service, this->query_chain_factory)),
-      connected_accessories_enumerator(std::make_shared<aasdk::usb::ConnectedAccessoriesEnumerator>(
-          this->usb_wrapper, this->io_service, this->query_chain_factory)),
-      app(std::make_shared<autoapp::App>(this->io_service, this->usb_wrapper, this->tcp_wrapper,
-                                         this->android_auto_entity_factory, usb_hub, connected_accessories_enumerator))
+      usb_hub(std::make_shared<aasdk::usb::USBHub>(usb_wrapper, io_service, query_chain_factory)),
+      connected_accessories_enumerator(
+          std::make_shared<aasdk::usb::ConnectedAccessoriesEnumerator>(usb_wrapper, io_service, query_chain_factory)),
+      app(std::make_shared<autoapp::App>(io_service, usb_wrapper, tcp_wrapper, android_auto_entity_factory, usb_hub,
+                                         connected_accessories_enumerator))
 {
     this->create_usb_workers();
     this->create_io_service_workers();
