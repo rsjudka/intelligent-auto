@@ -36,12 +36,7 @@ class MainWindow : public QMainWindow {
 
    signals:
     void set_data_state(bool enabled);
-<<<<<<< HEAD
     void set_open_auto_state(unsigned int alpha);
-=======
-    void set_openauto_state(unsigned int alpha);
-
->>>>>>> 6004010... Implemented bluetooth OBDII
 };
 
 #endif
