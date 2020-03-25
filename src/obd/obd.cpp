@@ -55,7 +55,7 @@ void OBD::socketChanged(QBluetoothSocket::SocketState state){
 
 bool OBD::query(Command &cmd, double &val)
 {
-    std::cout<<"[IntelligentAuto][OBD BT] QUERY"<<std::endl;
+    // std::cout<<"[IntelligentAuto][OBD BT] QUERY"<<std::endl;
     if (!this->connected) return false;
 
     std::lock_guard<std::mutex> guard(this->obd_mutex);
@@ -134,7 +134,7 @@ int OBD::_write(std::string str)
         this->connected = false;
         return 0;
     }
-    std::cout<<"[IntelligentAuto][OBD BT] Wrote "<<str.c_str()<<" with "<<size<<" bytes"<<std::endl;
+    // std::cout<<"[IntelligentAuto][OBD BT] Wrote "<<str.c_str()<<" with "<<size<<" bytes"<<std::endl;
 
     return size;
 }
@@ -173,7 +173,7 @@ std::string OBD::_read()
   
     while (true) {
         if (((adapterType==BT)?(::recv(btSocket->socketDescriptor(), (void *) buf, 1, 0)):(read(this->fd, (void *)buf, 1))) == -1) {
-            std::cout << "failed read" << std::endl;
+            // std::cout << "failed read" << std::endl;
             if(adapterType != BT){
                 this->connected = false;
                 return "";
@@ -189,6 +189,6 @@ std::string OBD::_read()
         else
             str += buf[0];
     }
-    std::cout<<"[IntelligentAuto][OBD BT] Read "<<str<< " from "<<((adapterType==BT)?("bluetooth"):("usb"))<<std::endl;
+    // std::cout<<"[IntelligentAuto][OBD BT] Read "<<str<< " from "<<((adapterType==BT)?("bluetooth"):("usb"))<<std::endl;
     return str;
 }
