@@ -18,6 +18,7 @@ Config::Config()
     this->radio_station = this->ia_config.value("Radio/station", 98.0).toDouble();
     this->radio_muted = this->ia_config.value("Radio/muted", true).toBool();
     this->media_home = this->ia_config.value("media_home", QDir().absolutePath()).toString();
+    this->wireless_active = this->ia_config.value("Wireless/active", false).toBool();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
@@ -44,6 +45,8 @@ void Config::save()
         this->ia_config.setValue("Radio/muted", this->radio_muted);
     if (this->media_home != this->ia_config.value("media_home", QDir().absolutePath()).toString())
         this->ia_config.setValue("media_home", this->media_home);
+    if (this->wireless_active != this->ia_config.value("Wireless/active", false).toBool())
+        this->ia_config.setValue("Wireless/active", this->wireless_active);
 
     this->openauto_config->save();
 }
