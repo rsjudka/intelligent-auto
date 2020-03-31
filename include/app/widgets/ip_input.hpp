@@ -5,6 +5,7 @@
 #include <QList>
 #include <QPushButton>
 #include <QWidget>
+#include <QElapsedTimer>
 #include <array>
 
 #include <app/theme.hpp>
@@ -42,6 +43,7 @@ class IpInput : public QWidget {
     QList<IpAddress> addresses;
     IpAddress last_saved_address;
     QFont font;
+    QElapsedTimer *reset_timer;
     Theme *theme;
 };
 

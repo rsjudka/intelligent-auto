@@ -31,6 +31,7 @@ QStringList IpInput::IpAddress::to_str_list(bool pad)
 IpInput::IpInput(QStringList addresses, QFont font, QWidget *parent) : QWidget(parent), last_saved_address(DEFAULT_IP)
 {
     this->theme = Theme::get_instance();
+    this->reset_timer = new QElapsedTimer();
     this->font = font;
     this->update_addresses(addresses);
 
@@ -77,8 +78,11 @@ QWidget *IpInput::input_widget()
             button->setFont(this->font);
             button->setFlat(true);
             this->inputs.append(button);
-            connect(button, &QPushButton::clicked,
-                    [button]() { button->setText(QString::number((button->text().toInt() + 1) % 10)); });
+            connect(button, &QPushButton::pressed, [this]() { this->reset_timer->start(); });
+            connect(button, &QPushButton::released, [this, button]() {
+                button->setText(
+                    this->reset_timer->hasExpired(500) ? "0" : QString::number((button->text().toInt() + 1) % 10));
+            });
             layout->addWidget(button);
         }
     }
