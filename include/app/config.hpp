@@ -53,6 +53,9 @@ class Config : public QObject {
     inline bool get_wireless_active() { return this->wireless_active; }
     inline void set_wireless_active(bool wireless_active) { this->wireless_active = wireless_active; }
 
+    inline QString get_wireless_address() { return this->wireless_address; }
+    inline void set_wireless_address(QString wireless_address) { this->wireless_address = wireless_address; }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
@@ -69,6 +72,7 @@ class Config : public QObject {
     bool radio_muted;
     QString media_home;
     bool wireless_active;
+    QString wireless_address;
 
    signals:
     void brightness_changed(unsigned int brightness);

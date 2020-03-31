@@ -15,6 +15,12 @@ class IpInput : public QWidget {
    public:
     IpInput(QStringList addresses, QFont font, QWidget *parent = nullptr);
     QString active_address();
+    inline void set_last_saved_address(QString address) { this->update(IpAddress(address)); }
+    inline void update_addresses(QStringList addresses)
+    {
+        this->addresses.clear();
+        for (auto address : addresses) this->addresses.append(IpAddress(address));
+    }
 
    private:
     struct IpAddress {
@@ -24,10 +30,7 @@ class IpInput : public QWidget {
 
         uint32_t address;
 
-        bool operator==(const IpAddress &rhs) const
-        {
-            return this->address == rhs.address;
-        }
+        bool operator==(const IpAddress &rhs) const { return this->address == rhs.address; }
     };
 
     QWidget *input_widget();

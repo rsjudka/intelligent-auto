@@ -31,11 +31,8 @@ QStringList IpInput::IpAddress::to_str_list(bool pad)
 IpInput::IpInput(QStringList addresses, QFont font, QWidget *parent) : QWidget(parent), last_saved_address(DEFAULT_IP)
 {
     this->theme = Theme::get_instance();
-
     this->font = font;
-
-    for (auto address : addresses) this->addresses.append(IpAddress(address));
-    if (this->addresses.size() > 0) this->last_saved_address = this->addresses[0];
+    this->update_addresses(addresses);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
 
