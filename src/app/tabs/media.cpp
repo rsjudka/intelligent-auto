@@ -307,10 +307,8 @@ QWidget *LocalPlayerSubTab::seek_widget()
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
-    // slider->setFixedHeight(slider->height());
     slider->setRange(0, 0);
     QLabel *value = new QLabel(LocalPlayerSubTab::durationFmt(slider->sliderPosition()), widget);
-    // value->setFixedHeight(value->height());
     value->setFont(Theme::font_14);
     connect(slider, &QSlider::valueChanged,
             [value](int position) { value->setText(LocalPlayerSubTab::durationFmt(position)); });
