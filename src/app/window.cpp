@@ -5,6 +5,7 @@
 
 #include <app/tabs/data.hpp>
 #include <app/tabs/media.hpp>
+#include <app/tabs/launcher.hpp>
 #include <app/tabs/settings.hpp>
 #include <app/window.hpp>
 
@@ -55,8 +56,11 @@ QTabWidget *MainWindow::tabs_widget()
     widget->addTab(new DataTab(this), QString());
     this->theme->add_tab_icon("speed", 2, Qt::Orientation::Vertical);
 
+    widget->addTab(new LauncherTab(this), "");
+    this->theme->add_tab_icon("widgets", 3, Qt::Orientation::Vertical);
+
     widget->addTab(new SettingsTab(this), "");
-    this->theme->add_tab_icon("tune", 3, Qt::Orientation::Vertical);
+    this->theme->add_tab_icon("tune", 4, Qt::Orientation::Vertical);
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         this->setWindowOpacity(position / 255.0);
