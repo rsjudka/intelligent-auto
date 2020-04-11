@@ -48,6 +48,7 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->si_units_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->brightness_module_row_widget(), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->quick_control_row_widget(), 1);
@@ -76,6 +77,28 @@ QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
         config->set_dark_mode(state);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::brightness_module_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Brightness Module", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    layout->addWidget(this->brightness_module_select_widget(), 1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::brightness_module_select_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
 
     return widget;
 }
