@@ -33,11 +33,11 @@ class EmbeddedApp : public QWidget {
 
    private:
     struct WindowProp {
-        WindowProp(char *prop, uint64_t size);
+        WindowProp(char *prop, unsigned long size);
         ~WindowProp();
 
         void *prop;
-        uint64_t size;
+        unsigned long size;
     };
 
     WindowProp get_window_prop(Window window, Atom type, const char *name);

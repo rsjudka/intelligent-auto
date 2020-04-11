@@ -1,6 +1,6 @@
 #include <app/tabs/launcher.hpp>
 
-EmbeddedApp::WindowProp::WindowProp(char *prop, uint64_t size)
+EmbeddedApp::WindowProp::WindowProp(char *prop, unsigned long size)
 {
     this->size = size;
     this->prop = new char[this->size + 1];
@@ -85,19 +85,19 @@ EmbeddedApp::WindowProp EmbeddedApp::get_window_prop(Window window, Atom type, c
     Atom prop = XInternAtom(this->display, name, false);
 
     Atom actual_type_return;
-    int32_t actual_format_return;
-    uint64_t nitems_return, bytes_after_return;
-    uint8_t *prop_return;
+    int actual_format_return;
+    unsigned long nitems_return, bytes_after_return;
+    unsigned char *prop_return;
     XGetWindowProperty(this->display, window, prop, 0, 1024, false, type, &actual_type_return, &actual_format_return,
                        &nitems_return, &bytes_after_return, &prop_return);
 
-    uint64_t size = (actual_format_return / 8) * nitems_return;
+    unsigned long size = (actual_format_return / 8) * nitems_return;
     if (actual_format_return == 32) size *= sizeof(long) / 4;
 
-    WindowProp winProp((char *)prop_return, size);
+    WindowProp window_prop((char *)prop_return, size);
     XFree(prop_return);
 
-    return winProp;
+    return window_prop;
 }
 
 std::list<Window> EmbeddedApp::get_clients()
@@ -106,7 +106,7 @@ std::list<Window> EmbeddedApp::get_clients()
 
     WindowProp prop = this->get_window_prop(this->root_window, XA_WINDOW, "_NET_CLIENT_LIST");
     Window *window_list = (Window *)prop.prop;
-    for (uint64_t i = 0; i < prop.size / sizeof(Window); i++) windows.push_back(window_list[i]);
+    for (unsigned long i = 0; i < prop.size / sizeof(Window); i++) windows.push_back(window_list[i]);
 
     return windows;
 }
