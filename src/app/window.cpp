@@ -19,6 +19,8 @@ MainWindow::MainWindow()
     this->theme->set_mode(this->config->get_dark_mode());
     this->theme->set_color(this->config->get_color());
 
+    this->config->add_quick_control("volume", this->volume_widget());
+
     QFrame *widget = new QFrame(this);
     this->layout = new QStackedLayout(widget);
 
@@ -109,12 +111,31 @@ QWidget *MainWindow::controls_widget()
         if (system(cmd.str().c_str()) < 0) qApp->exit();
     });
 
+    QWidget *quick_control = this->quick_control_widget();
+    quick_control->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
     layout->addWidget(tab_spacer);
-    layout->addWidget(this->volume_widget());
+    layout->addWidget(quick_control);
     layout->addStretch();
     layout->addWidget(save_button);
     layout->addWidget(shutdown_button);
     layout->addWidget(exit_button);
+
+    return widget;
+}
+
+QWidget *MainWindow::quick_control_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QStackedLayout *layout = new QStackedLayout(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QMap<QString, QWidget *> quick_controls = this->config->get_quick_controls();
+    for (auto quick_control : quick_controls.values()) layout->addWidget(quick_control);
+    layout->setCurrentWidget(quick_controls[this->config->get_quick_control()]);
+    connect(this->config, &Config::quick_control_changed, [layout, quick_controls](QString quick_control) {
+        layout->setCurrentWidget(quick_controls[quick_control]);
+    });
 
     return widget;
 }

@@ -20,6 +20,7 @@ Config::Config()
     this->media_home = this->ia_config.value("media_home", QDir().absolutePath()).toString();
     this->wireless_active = this->ia_config.value("Wireless/active", false).toBool();
     this->wireless_address = this->ia_config.value("Wireless/address", "0.0.0.0").toString();
+    this->quick_control = this->ia_config.value("quick_control", "none").toString();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
@@ -48,8 +49,10 @@ void Config::save()
         this->ia_config.setValue("media_home", this->media_home);
     if (this->wireless_active != this->ia_config.value("Wireless/active", false).toBool())
         this->ia_config.setValue("Wireless/active", this->wireless_active);
-    if (this->wireless_address != this->ia_config.value("Wireless/address", "0.0.0.0").toBool())
+    if (this->wireless_address != this->ia_config.value("Wireless/address", "0.0.0.0").toString())
         this->ia_config.setValue("Wireless/address", this->wireless_address);
+    if (this->quick_control != this->ia_config.value("quick_control", "none").toString())
+        this->ia_config.setValue("quick_control", this->quick_control);
 
     this->openauto_config->save();
 }

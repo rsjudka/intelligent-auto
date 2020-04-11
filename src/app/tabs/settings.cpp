@@ -49,6 +49,8 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(this->si_units_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
+    layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->quick_control_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
     Theme::to_touch_scroller(scroll_area);
@@ -188,6 +190,62 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
         label->update(color);
         this->theme->set_color(color);
         this->config->set_color(color);
+    });
+
+    layout->addStretch(1);
+    layout->addWidget(left_button);
+    layout->addWidget(label, 2);
+    layout->addWidget(right_button);
+    layout->addStretch(1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::quick_control_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Quick Control", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    layout->addWidget(this->quick_control_select_widget(), 1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::quick_control_select_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    const QStringList controls = this->config->get_quick_controls().keys();
+
+    QLabel *label = new QLabel(this->config->get_quick_control(), widget);
+    label->setAlignment(Qt::AlignCenter);
+    label->setFont(Theme::font_16);
+
+    QPushButton *left_button = new QPushButton(widget);
+    left_button->setFlat(true);
+    left_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_left", left_button);
+    connect(left_button, &QPushButton::clicked, [this, label, controls]() {
+        int total_controls = controls.size();
+        QString control =
+            controls[((controls.indexOf(label->text()) - 1) % total_controls + total_controls) % total_controls];
+        label->setText(control);
+        this->config->set_quick_control(control);
+    });
+
+    QPushButton *right_button = new QPushButton(widget);
+    right_button->setFlat(true);
+    right_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_right", right_button);
+    connect(right_button, &QPushButton::clicked, [this, label, controls]() {
+        QString control = controls[(controls.indexOf(label->text()) + 1) % controls.size()];
+        label->setText(control);
+        this->config->set_quick_control(control);
     });
 
     layout->addStretch(1);

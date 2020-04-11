@@ -4,6 +4,8 @@
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 
 #include <QObject>
+#include <QWidget>
+#include <QFrame>
 #include <QSettings>
 #include <QString>
 
@@ -56,11 +58,23 @@ class Config : public QObject {
     inline QString get_wireless_address() { return this->wireless_address; }
     inline void set_wireless_address(QString wireless_address) { this->wireless_address = wireless_address; }
 
+    inline QString get_quick_control() { return this->quick_control; }
+    inline void set_quick_control(QString quick_control)
+    {
+        this->quick_control = quick_control;
+        emit quick_control_changed(this->quick_control);
+    }
+
+    inline QMap<QString, QWidget *> get_quick_controls() { return this->quick_controls; }
+    inline void add_quick_control(QString name, QWidget *widget) { this->quick_controls[name] = widget; }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
 
    private:
+    QMap<QString, QWidget *> quick_controls = {{"none", new QFrame()}};
+
     QSettings ia_config;
     int volume;
     bool dark_mode;
@@ -73,10 +87,12 @@ class Config : public QObject {
     QString media_home;
     bool wireless_active;
     QString wireless_address;
+    QString quick_control;
 
    signals:
     void brightness_changed(unsigned int brightness);
     void si_units_changed(bool si_units);
+    void quick_control_changed(QString quick_control);
 };
 
 #endif
