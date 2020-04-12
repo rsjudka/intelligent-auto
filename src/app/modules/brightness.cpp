@@ -5,7 +5,11 @@
 
 #include <app/modules/brightness.hpp>
 
-BrightnessModule::BrightnessModule(QMainWindow *window) : QObject(qApp) { this->window = window; }
+BrightnessModule::BrightnessModule(QMainWindow *window, bool enable_androidauto_update) : QObject(qApp)
+{
+	this->window = window;
+	this->enable_androidauto_update = enable_androidauto_update;
+}
 
 void MockedBrightnessModule::set_brightness(int brightness) { this->window->setWindowOpacity(brightness / 255.0); }
 

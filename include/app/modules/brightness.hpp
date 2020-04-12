@@ -9,22 +9,24 @@ class BrightnessModule : public QObject {
     Q_OBJECT
 
    public:
-    BrightnessModule(QMainWindow *window);
+    BrightnessModule(QMainWindow *window, bool enable_androidauto_update = false);
 
     virtual void set_brightness(int brightness) = 0;
-    bool update_androidauto() { return false; }
+    bool update_androidauto() { return this->enable_androidauto_update; }
 
    protected:
     QMainWindow *window;
+
+   private:
+    bool enable_androidauto_update;
 };
 
 class MockedBrightnessModule : public BrightnessModule {
     Q_OBJECT
 
    public:
-    MockedBrightnessModule(QMainWindow *window) : BrightnessModule(window) {}
+    MockedBrightnessModule(QMainWindow *window) : BrightnessModule(window, true) {}
     void set_brightness(int brightness);
-    bool update_androidauto() { return true; }
 };
 
 // class RpiOfficialBrightnessModule : public BrightnessModule {
