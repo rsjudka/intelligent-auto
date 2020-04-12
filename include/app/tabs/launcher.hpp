@@ -26,10 +26,13 @@ class EmbeddedApp : public QWidget {
     Q_OBJECT
 
    public:
-    EmbeddedApp(QWidget *parent = nullptr);
+    EmbeddedApp(int delay, QWidget *parent = nullptr);
 
     void start(QString app);
     void end();
+
+    inline int get_delay() { return this->delay; }
+    inline void set_delay(int delay) { this->delay = delay; }
 
    private:
     struct WindowProp {
@@ -49,6 +52,7 @@ class EmbeddedApp : public QWidget {
     Window root_window;
     QProcess *process;
     QVBoxLayout *container;
+    int delay;
 
    signals:
     void closed();
@@ -64,6 +68,8 @@ class LauncherTab : public QWidget {
    private:
     QWidget *launcher_widget();
     QWidget *app_select_widget();
+    QWidget *config_widget();
+    QWidget *delay_widget();
     void populate_dirs(QString path);
     void populate_apps(QString path);
 

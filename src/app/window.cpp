@@ -103,13 +103,13 @@ QWidget *MainWindow::controls_widget()
     this->theme->add_button_icon("close", exit_button);
     connect(exit_button, &QPushButton::clicked, []() { qApp->exit(); });
 
-    QElapsedTimer timer;
-    connect(shutdown_button, &QPushButton::pressed, [&timer]() { timer.start(); });
-    connect(shutdown_button, &QPushButton::released, [&timer]() {
+    QElapsedTimer *timer = new QElapsedTimer();
+    connect(shutdown_button, &QPushButton::pressed, [timer]() { timer->start(); });
+    connect(shutdown_button, &QPushButton::released, [timer]() {
         sync();
 
         std::stringstream cmd;
-        cmd << "shutdown -" << (timer.hasExpired(2000) ? 'r' : 'h') << " now";
+        cmd << "shutdown -" << (timer->hasExpired(2000) ? 'r' : 'h') << " now";
         if (system(cmd.str().c_str()) < 0) qApp->exit();
     });
 
