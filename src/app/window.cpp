@@ -70,7 +70,7 @@ QTabWidget *MainWindow::tabs_widget()
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
         module->set_brightness(position);
-        if (widget->currentIndex() == 0 && module->do_update_androidauto()) emit set_openauto_state(position);
+        if (widget->currentIndex() == 0 && module->update_androidauto()) emit set_openauto_state(position);
     });
     connect(this->theme, &Theme::icons_updated,
             [widget](QList<tab_icon_t> &tab_icons, QList<button_icon_t> &button_icons) {
@@ -79,7 +79,7 @@ QTabWidget *MainWindow::tabs_widget()
             });
     connect(widget, &QTabWidget::currentChanged, [this](int index) {
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
-        int alpha = module->do_update_androidauto() ? this->config->get_brightness() : 255;
+        int alpha = module->update_androidauto() ? this->config->get_brightness() : 255;
         emit set_openauto_state((index == 0) ? alpha : 0);
     });
 

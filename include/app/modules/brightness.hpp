@@ -1,8 +1,8 @@
 #ifndef BRIGHTNESS_HPP_
 #define BRIGHTNESS_HPP_
 
-#include <QObject>
 #include <QMainWindow>
+#include <QObject>
 #include <QScreen>
 
 class BrightnessModule : public QObject {
@@ -12,24 +12,19 @@ class BrightnessModule : public QObject {
     BrightnessModule(QMainWindow *window);
 
     virtual void set_brightness(int brightness) = 0;
-    bool do_update_androidauto() { return this->update_androidauto; }
+    bool update_androidauto() { return false; }
 
    protected:
     QMainWindow *window;
-
-   private:
-    bool update_androidauto = false;
 };
 
 class MockedBrightnessModule : public BrightnessModule {
     Q_OBJECT
 
-    public:
+   public:
     MockedBrightnessModule(QMainWindow *window) : BrightnessModule(window) {}
     void set_brightness(int brightness);
-
-   private:
-    bool update_androidauto = true;
+    bool update_androidauto() { return true; }
 };
 
 // class RpiOfficialBrightnessModule : public BrightnessModule {
