@@ -7,6 +7,7 @@
 #include <app/tabs/media.hpp>
 #include <app/tabs/settings.hpp>
 #include <app/window.hpp>
+#include <app/modules/brightness.hpp>
 
 MainWindow::MainWindow()
 {
@@ -19,7 +20,11 @@ MainWindow::MainWindow()
     this->theme->set_mode(this->config->get_dark_mode());
     this->theme->set_color(this->config->get_color());
 
-    this->config->add_quick_control("volume", this->volume_widget());
+    this->config->add_quick_view("none", new QFrame(this));
+    this->config->add_quick_view("volume", this->volume_widget());
+
+    this->config->add_brightness_module("mocked", new MockedBrightnessModule(this));
+    this->config->add_brightness_module("x", new XBrightnessModule(this));
 
     QFrame *widget = new QFrame(this);
     this->layout = new QStackedLayout(widget);
@@ -61,7 +66,10 @@ QTabWidget *MainWindow::tabs_widget()
     this->theme->add_tab_icon("tune", 3, Qt::Orientation::Vertical);
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
-        this->setWindowOpacity(position / 255.0);
+        BrightnessModule *module = this->config->get_brightness_modules()[this->config->get_brightness_module()];
+        module->get_brightness();
+        module->set_brightness(position);
+        // this->setWindowOpacity(position / 255.0);
         if (widget->currentIndex() == 0) emit set_openauto_state(position);
     });
     connect(this->theme, &Theme::icons_updated,
@@ -111,11 +119,11 @@ QWidget *MainWindow::controls_widget()
         if (system(cmd.str().c_str()) < 0) qApp->exit();
     });
 
-    QWidget *quick_control = this->quick_control_widget();
-    quick_control->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    QWidget *quick_view = this->quick_view_widget();
+    quick_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
     layout->addWidget(tab_spacer);
-    layout->addWidget(quick_control);
+    layout->addWidget(quick_view);
     layout->addStretch();
     layout->addWidget(save_button);
     layout->addWidget(shutdown_button);
@@ -124,17 +132,17 @@ QWidget *MainWindow::controls_widget()
     return widget;
 }
 
-QWidget *MainWindow::quick_control_widget()
+QWidget *MainWindow::quick_view_widget()
 {
     QWidget *widget = new QWidget(this);
     QStackedLayout *layout = new QStackedLayout(widget);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    QMap<QString, QWidget *> quick_controls = this->config->get_quick_controls();
-    for (auto quick_control : quick_controls.values()) layout->addWidget(quick_control);
-    layout->setCurrentWidget(quick_controls[this->config->get_quick_control()]);
-    connect(this->config, &Config::quick_control_changed, [layout, quick_controls](QString quick_control) {
-        layout->setCurrentWidget(quick_controls[quick_control]);
+    QMap<QString, QWidget *> quick_views = this->config->get_quick_views();
+    for (auto quick_view : quick_views.values()) layout->addWidget(quick_view);
+    layout->setCurrentWidget(quick_views[this->config->get_quick_view()]);
+    connect(this->config, &Config::quick_view_changed, [layout, quick_views](QString quick_view) {
+        layout->setCurrentWidget(quick_views[quick_view]);
     });
 
     return widget;

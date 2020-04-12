@@ -51,7 +51,7 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(this->brightness_module_row_widget(), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
-    layout->addWidget(this->quick_control_row_widget(), 1);
+    layout->addWidget(this->quick_view_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
     Theme::to_touch_scroller(scroll_area);
@@ -99,6 +99,40 @@ QWidget *GeneralSettingsSubTab::brightness_module_select_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    const QStringList modules = this->config->get_brightness_modules().keys();
+
+    QLabel *label = new QLabel(this->config->get_brightness_module(), widget);
+    label->setAlignment(Qt::AlignCenter);
+    label->setFont(Theme::font_16);
+
+    QPushButton *left_button = new QPushButton(widget);
+    left_button->setFlat(true);
+    left_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_left", left_button);
+    connect(left_button, &QPushButton::clicked, [this, label, modules]() {
+        int total_modules = modules.size();
+        QString module =
+            modules[((modules.indexOf(label->text()) - 1) % total_modules + total_modules) % total_modules];
+        label->setText(module);
+        this->config->set_brightness_module(module);
+    });
+
+    QPushButton *right_button = new QPushButton(widget);
+    right_button->setFlat(true);
+    right_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_right", right_button);
+    connect(right_button, &QPushButton::clicked, [this, label, modules]() {
+        QString module = modules[(modules.indexOf(label->text()) + 1) % modules.size()];
+        label->setText(module);
+        this->config->set_brightness_module(module);
+    });
+
+    layout->addStretch(1);
+    layout->addWidget(left_button);
+    layout->addWidget(label, 2);
+    layout->addWidget(right_button);
+    layout->addStretch(1);
 
     return widget;
 }
@@ -224,28 +258,28 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::quick_control_row_widget()
+QWidget *GeneralSettingsSubTab::quick_view_row_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    QLabel *label = new QLabel("Quick Control", widget);
+    QLabel *label = new QLabel("Quick View", widget);
     label->setFont(Theme::font_16);
     layout->addWidget(label, 1);
 
-    layout->addWidget(this->quick_control_select_widget(), 1);
+    layout->addWidget(this->quick_view_select_widget(), 1);
 
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::quick_control_select_widget()
+QWidget *GeneralSettingsSubTab::quick_view_select_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    const QStringList controls = this->config->get_quick_controls().keys();
+    const QStringList views = this->config->get_quick_views().keys();
 
-    QLabel *label = new QLabel(this->config->get_quick_control(), widget);
+    QLabel *label = new QLabel(this->config->get_quick_view(), widget);
     label->setAlignment(Qt::AlignCenter);
     label->setFont(Theme::font_16);
 
@@ -253,22 +287,21 @@ QWidget *GeneralSettingsSubTab::quick_control_select_widget()
     left_button->setFlat(true);
     left_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("arrow_left", left_button);
-    connect(left_button, &QPushButton::clicked, [this, label, controls]() {
-        int total_controls = controls.size();
-        QString control =
-            controls[((controls.indexOf(label->text()) - 1) % total_controls + total_controls) % total_controls];
-        label->setText(control);
-        this->config->set_quick_control(control);
+    connect(left_button, &QPushButton::clicked, [this, label, views]() {
+        int total_views = views.size();
+        QString view = views[((views.indexOf(label->text()) - 1) % total_views + total_views) % total_views];
+        label->setText(view);
+        this->config->set_quick_view(view);
     });
 
     QPushButton *right_button = new QPushButton(widget);
     right_button->setFlat(true);
     right_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("arrow_right", right_button);
-    connect(right_button, &QPushButton::clicked, [this, label, controls]() {
-        QString control = controls[(controls.indexOf(label->text()) + 1) % controls.size()];
-        label->setText(control);
-        this->config->set_quick_control(control);
+    connect(right_button, &QPushButton::clicked, [this, label, views]() {
+        QString view = views[(views.indexOf(label->text()) + 1) % views.size()];
+        label->setText(view);
+        this->config->set_quick_view(view);
     });
 
     layout->addStretch(1);

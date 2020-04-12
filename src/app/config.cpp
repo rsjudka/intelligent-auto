@@ -20,7 +20,8 @@ Config::Config()
     this->media_home = this->ia_config.value("media_home", QDir().absolutePath()).toString();
     this->wireless_active = this->ia_config.value("Wireless/active", false).toBool();
     this->wireless_address = this->ia_config.value("Wireless/address", "0.0.0.0").toString();
-    this->quick_control = this->ia_config.value("quick_control", "none").toString();
+    this->quick_view = this->ia_config.value("quick_view", "none").toString();
+    this->brightness_module = this->ia_config.value("brightness_module", "mocked").toString();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
@@ -51,8 +52,10 @@ void Config::save()
         this->ia_config.setValue("Wireless/active", this->wireless_active);
     if (this->wireless_address != this->ia_config.value("Wireless/address", "0.0.0.0").toString())
         this->ia_config.setValue("Wireless/address", this->wireless_address);
-    if (this->quick_control != this->ia_config.value("quick_control", "none").toString())
-        this->ia_config.setValue("quick_control", this->quick_control);
+    if (this->quick_view != this->ia_config.value("quick_view", "none").toString())
+        this->ia_config.setValue("quick_view", this->quick_view);
+    if (this->brightness_module != this->ia_config.value("brightness_module", "mocked").toString())
+        this->ia_config.setValue("brightness_module", this->brightness_module);
 
     this->openauto_config->save();
 }

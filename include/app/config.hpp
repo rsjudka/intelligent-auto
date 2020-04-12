@@ -9,6 +9,8 @@
 #include <QSettings>
 #include <QString>
 
+#include <app/modules/brightness.hpp>
+
 class Config : public QObject {
     Q_OBJECT
 
@@ -58,22 +60,30 @@ class Config : public QObject {
     inline QString get_wireless_address() { return this->wireless_address; }
     inline void set_wireless_address(QString wireless_address) { this->wireless_address = wireless_address; }
 
-    inline QString get_quick_control() { return this->quick_control; }
-    inline void set_quick_control(QString quick_control)
+    inline QString get_quick_view() { return this->quick_view; }
+    inline void set_quick_view(QString quick_view)
     {
-        this->quick_control = quick_control;
-        emit quick_control_changed(this->quick_control);
+        this->quick_view = quick_view;
+        emit quick_view_changed(this->quick_view);
     }
+    inline QMap<QString, QWidget *> get_quick_views() { return this->quick_views; }
+    inline void add_quick_view(QString name, QWidget *view) { this->quick_views[name] = view; }
 
-    inline QMap<QString, QWidget *> get_quick_controls() { return this->quick_controls; }
-    inline void add_quick_control(QString name, QWidget *widget) { this->quick_controls[name] = widget; }
+    inline QString get_brightness_module() { return this->brightness_module; }
+    inline void set_brightness_module(QString brightness_module) { this->brightness_module = brightness_module; }
+    inline QMap<QString, BrightnessModule *> get_brightness_modules() { return this->brightness_modules; }
+    inline void add_brightness_module(QString name, BrightnessModule *module)
+    {
+        this->brightness_modules[name] = module;
+    }
 
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
 
    private:
-    QMap<QString, QWidget *> quick_controls = {{"none", new QFrame()}};
+    QMap<QString, QWidget *> quick_views;
+    QMap<QString, BrightnessModule *> brightness_modules;
 
     QSettings ia_config;
     int volume;
@@ -87,12 +97,13 @@ class Config : public QObject {
     QString media_home;
     bool wireless_active;
     QString wireless_address;
-    QString quick_control;
+    QString quick_view;
+    QString brightness_module;
 
    signals:
     void brightness_changed(unsigned int brightness);
     void si_units_changed(bool si_units);
-    void quick_control_changed(QString quick_control);
+    void quick_view_changed(QString quick_view);
 };
 
 #endif
