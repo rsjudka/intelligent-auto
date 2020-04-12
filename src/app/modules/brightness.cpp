@@ -7,24 +7,11 @@
 
 BrightnessModule::BrightnessModule(QMainWindow *window) : QObject(qApp) { this->window = window; }
 
-int MockedBrightnessModule::get_brightness() { return this->window->windowOpacity() * 255; }
-
 void MockedBrightnessModule::set_brightness(int brightness) { this->window->setWindowOpacity(brightness / 255.0); }
 
 XBrightnessModule::XBrightnessModule(QMainWindow *window) : BrightnessModule(window)
 {
     this->screen = qApp->screens()[0];
-}
-
-int XBrightnessModule::get_brightness()
-{
-    QProcess process(this);
-    process.start("xrandr --current --verbose");
-    process.waitForFinished();
-    qDebug() << process.readAllStandardOutput();
-
-    return 255;
-
 }
 
 void XBrightnessModule::set_brightness(int brightness)

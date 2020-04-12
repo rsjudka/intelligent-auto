@@ -67,11 +67,13 @@ class Config : public QObject {
         emit quick_view_changed(this->quick_view);
     }
     inline QMap<QString, QWidget *> get_quick_views() { return this->quick_views; }
+    inline QWidget *get_quick_view(QString name) { return this->quick_views[name]; }
     inline void add_quick_view(QString name, QWidget *view) { this->quick_views[name] = view; }
 
     inline QString get_brightness_module() { return this->brightness_module; }
     inline void set_brightness_module(QString brightness_module) { this->brightness_module = brightness_module; }
     inline QMap<QString, BrightnessModule *> get_brightness_modules() { return this->brightness_modules; }
+    inline BrightnessModule *get_brightness_module(QString name) { return this->brightness_modules[name]; }
     inline void add_brightness_module(QString name, BrightnessModule *module)
     {
         this->brightness_modules[name] = module;

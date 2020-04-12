@@ -147,14 +147,16 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
         frame->setFocus();
     });
 
-    connect(window, &MainWindow::is_ready, [this, layout, frame, opacity = window->windowOpacity()]() {
+    connect(window, &MainWindow::is_ready, [this, layout, frame]() {
         frame->resize(this->size());
         auto callback = [frame](bool is_active) {
             frame->toggle(is_active);
             frame->setFocus();
         };
         if (this->worker == nullptr) this->worker = new OpenAutoWorker(callback, frame);
-        this->worker->set_opacity(opacity * 255);
+        BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
+        if (module->do_update_androidauto())
+            this->worker->set_opacity(this->config->get_brightness());
 
         layout->addWidget(this->msg_widget());
         layout->addWidget(frame);

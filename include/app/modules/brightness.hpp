@@ -11,7 +11,6 @@ class BrightnessModule : public QObject {
    public:
     BrightnessModule(QMainWindow *window);
 
-    virtual int get_brightness() = 0;
     virtual void set_brightness(int brightness) = 0;
     bool do_update_androidauto() { return this->update_androidauto; }
 
@@ -27,7 +26,6 @@ class MockedBrightnessModule : public BrightnessModule {
 
     public:
     MockedBrightnessModule(QMainWindow *window) : BrightnessModule(window) {}
-    int get_brightness();
     void set_brightness(int brightness);
 
    private:
@@ -43,7 +41,6 @@ class XBrightnessModule : public BrightnessModule {
 
    public:
     XBrightnessModule(QMainWindow *window);
-    int get_brightness();
     void set_brightness(int brightness);
 
    private:
