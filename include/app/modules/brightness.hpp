@@ -9,13 +9,10 @@ class BrightnessModule : public QObject {
     Q_OBJECT
 
    public:
-    BrightnessModule(QMainWindow *window, bool enable_androidauto_update = false);
+    BrightnessModule(bool enable_androidauto_update);
 
     virtual void set_brightness(int brightness) = 0;
-    bool update_androidauto() { return this->enable_androidauto_update; }
-
-   protected:
-    QMainWindow *window;
+    inline bool update_androidauto() { return this->enable_androidauto_update; }
 
    private:
     bool enable_androidauto_update;
@@ -25,19 +22,26 @@ class MockedBrightnessModule : public BrightnessModule {
     Q_OBJECT
 
    public:
-    MockedBrightnessModule(QMainWindow *window) : BrightnessModule(window, true) {}
+    MockedBrightnessModule(QMainWindow *window);
     void set_brightness(int brightness);
+
+   private:
+    QMainWindow *window;
 };
 
-// class RpiOfficialBrightnessModule : public BrightnessModule {
-//     Q_OBJECT
-// };
+class RpiBrightnessModule : public BrightnessModule {
+    Q_OBJECT
+
+   public:
+    RpiBrightnessModule() : BrightnessModule(false) {}
+    void set_brightness(int brightness);
+};
 
 class XBrightnessModule : public BrightnessModule {
     Q_OBJECT
 
    public:
-    XBrightnessModule(QMainWindow *window);
+    XBrightnessModule();
     void set_brightness(int brightness);
 
    private:

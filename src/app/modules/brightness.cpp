@@ -1,21 +1,28 @@
-#include <QApplication>
+#include <QGuiApplication>
 #include <QProcess>
 #include <QWindow>
-#include <QDebug>
 
 #include <app/modules/brightness.hpp>
 
-BrightnessModule::BrightnessModule(QMainWindow *window, bool enable_androidauto_update) : QObject(qApp)
+BrightnessModule::BrightnessModule(bool enable_androidauto_update) : QObject(qApp)
 {
-	this->window = window;
-	this->enable_androidauto_update = enable_androidauto_update;
+    this->enable_androidauto_update = enable_androidauto_update;
 }
+
+MockedBrightnessModule::MockedBrightnessModule(QMainWindow *window) : BrightnessModule(true) { this->window = window; }
 
 void MockedBrightnessModule::set_brightness(int brightness) { this->window->setWindowOpacity(brightness / 255.0); }
 
-XBrightnessModule::XBrightnessModule(QMainWindow *window) : BrightnessModule(window)
+void RpiBrightnessModule::set_brightness(int brightness)
 {
-    this->screen = qApp->screens()[0];
+    QProcess process(this);
+    process.start(QString("echo %1 > /sys/class/backlight/rpi_backlight/brightness").arg(brightness));
+    process.waitForFinished();
+}
+
+XBrightnessModule::XBrightnessModule() : BrightnessModule(false)
+{
+    this->screen = QGuiApplication::primaryScreen();
 }
 
 void XBrightnessModule::set_brightness(int brightness)

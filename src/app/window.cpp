@@ -19,11 +19,12 @@ MainWindow::MainWindow()
     this->theme->set_mode(this->config->get_dark_mode());
     this->theme->set_color(this->config->get_color());
 
-    this->config->add_quick_view("none", new QFrame(this));
     this->config->add_quick_view("volume", this->volume_widget());
+    this->config->add_quick_view("none", new QFrame(this));
 
     this->config->add_brightness_module("mocked", new MockedBrightnessModule(this));
-    this->config->add_brightness_module("x", new XBrightnessModule(this));
+    this->config->add_brightness_module("x", new XBrightnessModule());
+    this->config->add_brightness_module("rpi 7\"", new RpiBrightnessModule());
 
     BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
     module->set_brightness(this->config->get_brightness());
