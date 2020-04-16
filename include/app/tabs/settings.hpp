@@ -3,10 +3,13 @@
 
 #include <QMap>
 #include <QtWidgets>
+#include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 
 #include <app/bluetooth.hpp>
 #include <app/config.hpp>
 #include <app/theme.hpp>
+
+namespace aasdk = f1x::aasdk;
 
 class SettingsTab : public QTabWidget {
     Q_OBJECT
@@ -58,6 +61,12 @@ class OpenAutoSettingsSubTab : public QWidget {
     OpenAutoSettingsSubTab(QWidget *parent = nullptr);
 
    private:
+    struct Button {
+        QString name;
+        QString key;
+        aasdk::proto::enums::ButtonCode::Enum code;
+    };
+
     QWidget *settings_widget();
     QWidget *rhd_row_widget();
     QWidget *frame_rate_row_widget();
@@ -67,6 +76,9 @@ class OpenAutoSettingsSubTab : public QWidget {
     QWidget *rt_audio_row_widget();
     QWidget *audio_channels_row_widget();
     QWidget *bluetooth_row_widget();
+    QWidget *touchscreen_row_widget();
+    QCheckBox *button_checkbox(Button &button, QWidget *parent);
+    QWidget *buttons_row_widget();
 
     Bluetooth *bluetooth;
     Config *config;

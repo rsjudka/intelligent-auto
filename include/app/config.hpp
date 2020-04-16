@@ -57,6 +57,7 @@ class Config : public QObject {
     inline void set_wireless_address(QString wireless_address) { this->wireless_address = wireless_address; }
 
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
+    f1x::openauto::autoapp::configuration::Configuration::ButtonCodes openauto_button_codes;
 
     static Config *get_instance();
 

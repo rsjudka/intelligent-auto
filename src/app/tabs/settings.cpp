@@ -1,6 +1,7 @@
 #include <aasdk_proto/ButtonCodeEnum.pb.h>
 #include <aasdk_proto/VideoFPSEnum.pb.h>
 #include <aasdk_proto/VideoResolutionEnum.pb.h>
+#include <algorithm>
 #include <BluezQt/Device>
 #include <BluezQt/PendingCall>
 #include <QLabel>
@@ -15,9 +16,6 @@
 #include <app/widgets/color_label.hpp>
 #include <app/widgets/switch.hpp>
 #include <app/window.hpp>
-
-namespace aasdk = f1x::aasdk;
-namespace autoapp = f1x::openauto::autoapp;
 
 SettingsTab::SettingsTab(QWidget *parent) : QTabWidget(parent)
 {
@@ -352,6 +350,9 @@ QWidget *OpenAutoSettingsSubTab::settings_widget()
     layout->addWidget(this->audio_channels_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->bluetooth_row_widget(), 1);
+    layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->touchscreen_row_widget(), 1);
+    layout->addWidget(this->buttons_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
     Theme::to_touch_scroller(scroll_area);
@@ -393,7 +394,7 @@ QWidget *OpenAutoSettingsSubTab::frame_rate_row_widget()
     layout->addWidget(label, 1);
 
     QGroupBox *group = new QGroupBox(widget);
-    QHBoxLayout *group_layout = new QHBoxLayout(group);
+    QVBoxLayout *group_layout = new QVBoxLayout(group);
 
     QRadioButton *fps_30_button = new QRadioButton("30fps", group);
     fps_30_button->setFont(Theme::font_14);
@@ -424,7 +425,7 @@ QWidget *OpenAutoSettingsSubTab::resolution_row_widget()
     layout->addWidget(label, 1);
 
     QGroupBox *group = new QGroupBox(widget);
-    QHBoxLayout *group_layout = new QHBoxLayout(group);
+    QVBoxLayout *group_layout = new QVBoxLayout(group);
 
     QRadioButton *res_480_button = new QRadioButton("480p", group);
     res_480_button->setFont(Theme::font_14);
@@ -527,7 +528,7 @@ QWidget *OpenAutoSettingsSubTab::audio_channels_row_widget()
     layout->addWidget(label, 1);
 
     QGroupBox *group = new QGroupBox(widget);
-    QHBoxLayout *group_layout = new QHBoxLayout(group);
+    QVBoxLayout *group_layout = new QVBoxLayout(group);
 
     QCheckBox *music_button = new QCheckBox("Music", group);
     music_button->setFont(Theme::font_14);
@@ -566,6 +567,81 @@ QWidget *OpenAutoSettingsSubTab::bluetooth_row_widget()
                                                                : autoapp::configuration::BluetoothAdapterType::NONE);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
+
+    return widget;
+}
+
+QWidget *OpenAutoSettingsSubTab::touchscreen_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Touchscreen", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    Switch *toggle = new Switch(widget);
+    toggle->setChecked(this->config->openauto_config->getTouchscreenEnabled());
+    connect(toggle, &Switch::stateChanged,
+            [config = this->config](bool state) { config->openauto_config->setTouchscreenEnabled(state); });
+    layout->addWidget(toggle, 1, Qt::AlignHCenter);
+
+    return widget;
+}
+
+QCheckBox *OpenAutoSettingsSubTab::button_checkbox(Button &button, QWidget *parent)
+{
+    QCheckBox *checkbox = new QCheckBox(QString("%1 [%2]").arg(button.name).arg(button.key), parent);
+    checkbox->setFont(Theme::font_14);
+    checkbox->setChecked(std::find(this->config->openauto_button_codes.begin(),
+                                   this->config->openauto_button_codes.end(),
+                                   button.code) != this->config->openauto_button_codes.end());
+    connect(checkbox, &QCheckBox::toggled, [config = this->config, button](bool checked) {
+        if (checked) {
+            config->openauto_button_codes.push_back(button.code);
+        }
+        else {
+            config->openauto_button_codes.erase(
+                std::remove(config->openauto_button_codes.begin(), config->openauto_button_codes.end(), button.code),
+                config->openauto_button_codes.end());
+        }
+    });
+
+    return checkbox;
+}
+
+QWidget *OpenAutoSettingsSubTab::buttons_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Buttons", widget);
+    label->setFont(Theme::font_16);
+
+    QGroupBox *group = new QGroupBox(widget);
+    QVBoxLayout *group_layout = new QVBoxLayout(group);
+
+    QList<Button> buttons({{"Enter", "Enter", aasdk::proto::enums::ButtonCode::ENTER},
+                           {"Left", "Left", aasdk::proto::enums::ButtonCode::LEFT},
+                           {"Right", "Right", aasdk::proto::enums::ButtonCode::RIGHT},
+                           {"Up", "Up", aasdk::proto::enums::ButtonCode::UP},
+                           {"Down", "Down", aasdk::proto::enums::ButtonCode::DOWN},
+                           {"Back", "Esc", aasdk::proto::enums::ButtonCode::BACK},
+                           {"Home", "H", aasdk::proto::enums::ButtonCode::HOME},
+                           {"Phone", "P", aasdk::proto::enums::ButtonCode::PHONE},
+                           {"Call End", "O", aasdk::proto::enums::ButtonCode::CALL_END},
+                           {"Play", "X", aasdk::proto::enums::ButtonCode::PLAY},
+                           {"Pause", "C", aasdk::proto::enums::ButtonCode::PAUSE},
+                           {"Prev Track", "V", aasdk::proto::enums::ButtonCode::PREV},
+                           {"Next Track", "N", aasdk::proto::enums::ButtonCode::NEXT},
+                           {"Toggle Play", "B", aasdk::proto::enums::ButtonCode::TOGGLE_PLAY},
+                           {"Voice", "M", aasdk::proto::enums::ButtonCode::MICROPHONE_1},
+                           {"Scroll", "1/2", aasdk::proto::enums::ButtonCode::SCROLL_WHEEL}});
+
+    for (auto button : buttons) group_layout->addWidget(this->button_checkbox(button, widget));
+
+    layout->addWidget(label, 1);
+    layout->addWidget(group, 1, Qt::AlignHCenter);
 
     return widget;
 }

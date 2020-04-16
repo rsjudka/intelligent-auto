@@ -7,6 +7,7 @@
 Config::Config()
     : QObject(qApp),
       openauto_config(std::make_shared<f1x::openauto::autoapp::configuration::Configuration>()),
+      openauto_button_codes(openauto_config->getButtonCodes()),
       ia_config(QSettings::IniFormat, QSettings::UserScope, "ia")
 {
     this->volume = this->ia_config.value("volume", 50).toInt();
@@ -51,6 +52,7 @@ void Config::save()
     if (this->wireless_address != this->ia_config.value("Wireless/address", "0.0.0.0").toBool())
         this->ia_config.setValue("Wireless/address", this->wireless_address);
 
+    this->openauto_config->setButtonCodes(this->openauto_button_codes);
     this->openauto_config->save();
 }
 

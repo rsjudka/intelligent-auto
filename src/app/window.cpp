@@ -2,6 +2,7 @@
 #include <QtWidgets>
 #include <cstdlib>
 #include <sstream>
+#include <QShortcut>
 
 #include <app/tabs/data.hpp>
 #include <app/tabs/media.hpp>
@@ -48,15 +49,23 @@ QTabWidget *MainWindow::tabs_widget()
 
     widget->addTab(new OpenAutoTab(this), QString());
     this->theme->add_tab_icon("directions_car", 0, Qt::Orientation::Vertical);
+    QShortcut *openauto_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this);
+    QObject::connect(openauto_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(0); });
 
     widget->addTab(new MediaTab(this), QString());
     this->theme->add_tab_icon("play_circle_outline", 1, Qt::Orientation::Vertical);
+    QShortcut *media_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this);
+    QObject::connect(media_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(1); });
 
     widget->addTab(new DataTab(this), QString());
     this->theme->add_tab_icon("speed", 2, Qt::Orientation::Vertical);
+    QShortcut *data_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this);
+    QObject::connect(data_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(2); });
 
     widget->addTab(new SettingsTab(this), "");
     this->theme->add_tab_icon("tune", 3, Qt::Orientation::Vertical);
+    QShortcut *settings_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_4), this);
+    QObject::connect(settings_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(3); });
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         this->setWindowOpacity(position / 255.0);
@@ -142,6 +151,11 @@ QWidget *MainWindow::volume_widget()
         int position = slider->sliderPosition() - 10;
         slider->setSliderPosition(position);
     });
+    QShortcut *lower_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
+    QObject::connect(lower_key, &QShortcut::activated, [slider]() {
+        int position = slider->sliderPosition() - 1;
+        slider->setSliderPosition(position);
+    });
 
     QPushButton *raise_button = new QPushButton(widget);
     raise_button->setFlat(true);
@@ -149,6 +163,11 @@ QWidget *MainWindow::volume_widget()
     this->theme->add_button_icon("volume_up", raise_button);
     connect(raise_button, &QPushButton::clicked, [slider]() {
         int position = slider->sliderPosition() + 10;
+        slider->setSliderPosition(position);
+    });
+    QShortcut *upper_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), this);
+    QObject::connect(upper_key, &QShortcut::activated, [slider]() {
+        int position = slider->sliderPosition() + 1;
         slider->setSliderPosition(position);
     });
 
