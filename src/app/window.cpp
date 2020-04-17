@@ -153,7 +153,7 @@ QWidget *MainWindow::volume_widget()
     });
     QShortcut *lower_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
     QObject::connect(lower_key, &QShortcut::activated, [slider]() {
-        int position = slider->sliderPosition() - 1;
+        int position = slider->sliderPosition() - 2;
         slider->setSliderPosition(position);
     });
 
@@ -167,7 +167,7 @@ QWidget *MainWindow::volume_widget()
     });
     QShortcut *upper_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), this);
     QObject::connect(upper_key, &QShortcut::activated, [slider]() {
-        int position = slider->sliderPosition() + 1;
+        int position = slider->sliderPosition() + 2;
         slider->setSliderPosition(position);
     });
 
