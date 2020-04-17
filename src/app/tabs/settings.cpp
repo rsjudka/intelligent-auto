@@ -44,6 +44,8 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(this->dark_mode_row_widget(), 1);
     layout->addWidget(this->color_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->mouse_row_widget(), 1);
+    layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->si_units_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
@@ -193,6 +195,26 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
     layout->addWidget(label, 2);
     layout->addWidget(right_button);
     layout->addStretch(1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::mouse_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Mouse", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    Switch *toggle = new Switch(widget);
+    toggle->setChecked(this->config->get_mouse_active());
+    connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
+        qApp->setOverrideCursor(state ? Qt::ArrowCursor : Qt::BlankCursor);
+        config->set_mouse_active(state);
+    });
+    layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
     return widget;
 }

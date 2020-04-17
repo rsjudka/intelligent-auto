@@ -15,6 +15,7 @@ MainWindow::MainWindow()
 
     this->config = Config::get_instance();
     this->setWindowOpacity(this->config->get_brightness() / 255.0);
+    qApp->setOverrideCursor(this->config->get_mouse_active() ? Qt::ArrowCursor : Qt::BlankCursor);
 
     this->theme = Theme::get_instance();
     this->theme->set_mode(this->config->get_dark_mode());

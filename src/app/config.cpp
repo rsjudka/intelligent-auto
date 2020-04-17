@@ -21,6 +21,7 @@ Config::Config()
     this->media_home = this->ia_config.value("media_home", QDir().absolutePath()).toString();
     this->wireless_active = this->ia_config.value("Wireless/active", false).toBool();
     this->wireless_address = this->ia_config.value("Wireless/address", "0.0.0.0").toString();
+    this->mouse_active = this->ia_config.value("mouse_active", true).toBool();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
@@ -51,6 +52,8 @@ void Config::save()
         this->ia_config.setValue("Wireless/active", this->wireless_active);
     if (this->wireless_address != this->ia_config.value("Wireless/address", "0.0.0.0").toBool())
         this->ia_config.setValue("Wireless/address", this->wireless_address);
+    if (this->mouse_active != this->ia_config.value("mouse_active", true).toBool())
+        this->ia_config.setValue("mouse_active", this->mouse_active);
 
     this->openauto_config->setButtonCodes(this->openauto_button_codes);
     this->openauto_config->save();

@@ -32,6 +32,7 @@ class GeneralSettingsSubTab : public QWidget {
     QWidget *si_units_row_widget();
     QWidget *color_row_widget();
     QWidget *color_select_widget();
+    QWidget *mouse_row_widget();
 
     Config *config;
     Theme *theme;

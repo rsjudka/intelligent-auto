@@ -56,6 +56,9 @@ class Config : public QObject {
     inline QString get_wireless_address() { return this->wireless_address; }
     inline void set_wireless_address(QString wireless_address) { this->wireless_address = wireless_address; }
 
+    inline bool get_mouse_active() { return this->mouse_active; }
+    inline void set_mouse_active(bool mouse_active) { this->mouse_active = mouse_active; }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
     f1x::openauto::autoapp::configuration::Configuration::ButtonCodes openauto_button_codes;
 
@@ -74,6 +77,7 @@ class Config : public QObject {
     QString media_home;
     bool wireless_active;
     QString wireless_address;
+    bool mouse_active;
 
    signals:
     void brightness_changed(unsigned int brightness);
