@@ -11,7 +11,7 @@
 #include <QtWidgets>
 
 #include <app/config.hpp>
-#include <app/tabs/openauto.hpp>
+#include <app/shortcuts.hpp>
 #include <app/theme.hpp>
 
 class MainWindow : public QMainWindow {
@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow {
 
     Config *config;
     Theme *theme;
+    Shortcuts *shortcuts;
     QStackedLayout *layout;
 
     const QSize TAB_SIZE = Theme::icon_48;

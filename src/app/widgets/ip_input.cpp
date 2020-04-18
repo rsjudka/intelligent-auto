@@ -75,6 +75,7 @@ QWidget *IpInput::input_widget()
     for (auto numbers : this->last_saved_address.to_str_list(true)) {
         for (auto number : numbers) {
             QPushButton *button = new QPushButton(QString(number), widget);
+            button->setProperty("add_hint", true);
             button->setFont(this->font);
             button->setFlat(true);
             this->inputs.append(button);

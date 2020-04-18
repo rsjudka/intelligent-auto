@@ -60,8 +60,8 @@ class Config : public QObject {
     inline bool get_mouse_active() { return this->mouse_active; }
     inline void set_mouse_active(bool mouse_active) { this->mouse_active = mouse_active; }
 
-    inline void set_shortcut(QString key, QKeySequence shortcut) { this->shortcuts[key] = {this->shortcuts[key].first, shortcut}; }
-    inline QMap<QString, QPair<QString, QKeySequence>> get_shortcuts() { return this->shortcuts; }
+    inline void set_shortcut(QString id, QString shortcut) { this->shortcuts[id] = shortcut; }
+    inline QString get_shortcut(QString id) { return this->shortcuts[id]; }
 
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
     f1x::openauto::autoapp::configuration::Configuration::ButtonCodes openauto_button_codes;
@@ -70,7 +70,6 @@ class Config : public QObject {
 
    private:
     QSettings ia_config;
-    QMap<QString, QPair<QString, QKeySequence>> shortcuts;
     int volume;
     bool dark_mode;
     int brightness;
@@ -83,6 +82,7 @@ class Config : public QObject {
     bool wireless_active;
     QString wireless_address;
     bool mouse_active;
+    QMap<QString, QString> shortcuts;
 
    signals:
     void brightness_changed(unsigned int brightness);

@@ -23,16 +23,10 @@ Config::Config()
     this->wireless_address = this->ia_config.value("Wireless/address", "0.0.0.0").toString();
     this->mouse_active = this->ia_config.value("mouse_active", true).toBool();
 
-    const QMap<QString, QString> shortcut_names = {
-        {"openauto_tab", "Open OpenAuto Tab"}, {"media_tab", "Open Media Tab"},  {"data_tab", "Open Data Tab"},
-        {"settings_tab", "Open Settings Tab"}, {"volume_up", "Increase Volume"}, {"volume_down", "Decrease Volume"}};
-
-    for (auto key : shortcut_names.keys()) {
-        QString value = shortcut_names[key];
-        this->shortcuts[key] = {
-            value,
-            QKeySequence::fromString(this->ia_config.value(QString("Shortcuts/%1").arg(key), QString()).toString())};
-    }
+    this->ia_config.beginGroup("Shortcuts");
+    for (auto key : this->ia_config.childKeys())
+        this->shortcuts[key] = this->ia_config.value(key, QString()).toString();
+    this->ia_config.endGroup();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
@@ -65,10 +59,11 @@ void Config::save()
         this->ia_config.setValue("Wireless/address", this->wireless_address);
     if (this->mouse_active != this->ia_config.value("mouse_active", true).toBool())
         this->ia_config.setValue("mouse_active", this->mouse_active);
-    for (auto key : this->shortcuts.keys()) {
-        QString config_key = QString("Shortcuts/%1").arg(key);
-        QString value = this->shortcuts[key].second.toString();
-        if (value != this->ia_config.value(config_key, QString()).toString()) this->ia_config.setValue(config_key, value);
+    for (auto id : this->shortcuts.keys()) {
+        QString config_key = QString("Shortcuts/%1").arg(id);
+        QString shortcut = this->shortcuts[id];
+        if (shortcut != this->ia_config.value(config_key, QString()).toString())
+            this->ia_config.setValue(config_key, shortcut);
     }
 
     this->openauto_config->setButtonCodes(this->openauto_button_codes);

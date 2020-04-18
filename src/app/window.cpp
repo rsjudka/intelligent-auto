@@ -1,11 +1,12 @@
 #include <QElapsedTimer>
+#include <QShortcut>
 #include <QtWidgets>
 #include <cstdlib>
 #include <sstream>
-#include <QShortcut>
 
 #include <app/tabs/data.hpp>
 #include <app/tabs/media.hpp>
+#include <app/tabs/openauto.hpp>
 #include <app/tabs/settings.hpp>
 #include <app/window.hpp>
 
@@ -20,6 +21,8 @@ MainWindow::MainWindow()
     this->theme = Theme::get_instance();
     this->theme->set_mode(this->config->get_dark_mode());
     this->theme->set_color(this->config->get_color());
+
+    this->shortcuts = Shortcuts::get_instance();
 
     QFrame *widget = new QFrame(this);
     this->layout = new QStackedLayout(widget);
@@ -50,23 +53,27 @@ QTabWidget *MainWindow::tabs_widget()
 
     widget->addTab(new OpenAutoTab(this), QString());
     this->theme->add_tab_icon("directions_car", 0, Qt::Orientation::Vertical);
-    QShortcut *openauto_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this);
-    QObject::connect(openauto_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(0); });
+    QShortcut *openauto_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("openauto_tab")), this);
+    this->shortcuts->add_shortcut("openauto_tab", "Open OpenAuto Tab", openauto_key);
+    QObject::connect(openauto_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(0); });
 
     widget->addTab(new MediaTab(this), QString());
     this->theme->add_tab_icon("play_circle_outline", 1, Qt::Orientation::Vertical);
-    QShortcut *media_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this);
-    QObject::connect(media_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(1); });
+    QShortcut *media_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("media_tab")), this);
+    this->shortcuts->add_shortcut("media_tab", "Open Media Tab", media_key);
+    QObject::connect(media_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(1); });
 
     widget->addTab(new DataTab(this), QString());
     this->theme->add_tab_icon("speed", 2, Qt::Orientation::Vertical);
-    QShortcut *data_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this);
-    QObject::connect(data_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(2); });
+    QShortcut *data_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("data_tab")), this);
+    this->shortcuts->add_shortcut("data_tab", "Open Data Tab", data_key);
+    QObject::connect(data_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(2); });
 
     widget->addTab(new SettingsTab(this), "");
     this->theme->add_tab_icon("tune", 3, Qt::Orientation::Vertical);
-    QShortcut *settings_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_4), this);
-    QObject::connect(settings_key, &QShortcut::activated, [widget](){ widget->setCurrentIndex(3); });
+    QShortcut *settings_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("settings_tab")), this);
+    this->shortcuts->add_shortcut("settings_tab", "Open Settings Tab", settings_key);
+    QObject::connect(settings_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(3); });
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         this->setWindowOpacity(position / 255.0);
@@ -152,7 +159,8 @@ QWidget *MainWindow::volume_widget()
         int position = slider->sliderPosition() - 10;
         slider->setSliderPosition(position);
     });
-    QShortcut *lower_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
+    QShortcut *lower_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("volume_down")), this);
+    this->shortcuts->add_shortcut("volume_down", "Decrease Volume", lower_key);
     QObject::connect(lower_key, &QShortcut::activated, [slider]() {
         int position = slider->sliderPosition() - 2;
         slider->setSliderPosition(position);
@@ -166,7 +174,8 @@ QWidget *MainWindow::volume_widget()
         int position = slider->sliderPosition() + 10;
         slider->setSliderPosition(position);
     });
-    QShortcut *upper_key = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), this);
+    QShortcut *upper_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("volume_up")), this);
+    this->shortcuts->add_shortcut("volume_up", "Increase Volume", upper_key);
     QObject::connect(upper_key, &QShortcut::activated, [slider]() {
         int position = slider->sliderPosition() + 2;
         slider->setSliderPosition(position);

@@ -14,9 +14,10 @@
 #include <app/tabs/settings.hpp>
 #include <app/theme.hpp>
 #include <app/widgets/color_label.hpp>
-#include <app/widgets/shortcut_input.hpp>
 #include <app/widgets/switch.hpp>
 #include <app/window.hpp>
+
+namespace autoapp = f1x::openauto::autoapp;
 
 SettingsTab::SettingsTab(QWidget *parent) : QTabWidget(parent)
 {
@@ -351,6 +352,7 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
 ShortcutsSettingsSubTab::ShortcutsSettingsSubTab(QWidget *parent) : QWidget(parent)
 {
     this->config = Config::get_instance();
+    this->shortcuts = Shortcuts::get_instance();
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(this->settings_widget());
 }
@@ -360,11 +362,15 @@ QWidget *ShortcutsSettingsSubTab::settings_widget()
     QWidget *widget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
-    QMap<QString, QPair<QString, QKeySequence>> shortcuts = this->config->get_shortcuts();
-    for (auto key : shortcuts.keys()) {
-        QPair<QString, QKeySequence> shortcut = shortcuts[key];
-        layout->addWidget(this->shortcut_row_widget(key, shortcut.first, shortcut.second), 1);
+    QMap<QString, QPair<QString, QShortcut *>> shortcuts = this->shortcuts->get_shortcuts();
+    for (auto id : shortcuts.keys()) {
+        QPair<QString, QShortcut *> shortcut = shortcuts[id];
+        layout->addWidget(this->shortcut_row_widget(id, shortcut.first, shortcut.second));
     }
+    connect(this->shortcuts, &Shortcuts::shortcut_added,
+            [this, layout](QString id, QString description, QShortcut *shortcut) {
+                layout->addWidget(this->shortcut_row_widget(id, description, shortcut));
+            });
 
     QScrollArea *scroll_area = new QScrollArea(this);
     Theme::to_touch_scroller(scroll_area);
@@ -374,20 +380,23 @@ QWidget *ShortcutsSettingsSubTab::settings_widget()
     return scroll_area;
 }
 
-QWidget *ShortcutsSettingsSubTab::shortcut_row_widget(QString key, QString name, QKeySequence shortcut)
+QWidget *ShortcutsSettingsSubTab::shortcut_row_widget(QString id, QString description, QShortcut *shortcut)
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    QLabel *label = new QLabel(name, widget);
+    QLabel *label = new QLabel(description, widget);
     label->setFont(Theme::font_16);
     layout->addWidget(label, 1);
 
-    ShortcutInput *input = new ShortcutInput(shortcut.toString(), widget);
+    ShortcutInput *input = new ShortcutInput(shortcut->key().toString(), widget);
+    input->setProperty("add_hint", true);
     input->setFlat(true);
     input->setFont(QFont("Titillium Web", 18));
-    connect(input, &ShortcutInput::shortcut_updated,
-            [this, key](QKeySequence shortcut) { this->config->set_shortcut(key, shortcut); });
+    connect(input, &ShortcutInput::shortcut_updated, [this, id](QKeySequence shortcut) {
+        this->shortcuts->update_shortcut(id, shortcut);
+        this->config->set_shortcut(id, shortcut.toString());
+    });
     layout->addWidget(input, 1, Qt::AlignHCenter);
 
     return widget;

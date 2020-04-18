@@ -7,6 +7,7 @@
 
 #include <app/bluetooth.hpp>
 #include <app/config.hpp>
+#include <app/shortcuts.hpp>
 #include <app/theme.hpp>
 
 namespace aasdk = f1x::aasdk;
@@ -63,9 +64,10 @@ class ShortcutsSettingsSubTab : public QWidget {
 
    private:
     QWidget *settings_widget();
-    QWidget *shortcut_row_widget(QString key, QString name, QKeySequence shortcut);
+    QWidget *shortcut_row_widget(QString key, QString name, QShortcut *shortcut);
 
     Config *config;
+    Shortcuts *shortcuts;
 };
 
 class OpenAutoSettingsSubTab : public QWidget {

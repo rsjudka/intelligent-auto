@@ -1,6 +1,6 @@
 #include <QElapsedTimer>
 
-#include <app/widgets/shortcut_input.hpp>
+#include <app/shortcuts.hpp>
 
 ShortcutInput::ShortcutInput(QString shortcut, QWidget *parent) : QPushButton(shortcut, parent)
 {
@@ -23,4 +23,16 @@ void ShortcutInput::keyPressEvent(QKeyEvent *event)
     QKeySequence shortcut(event->modifiers() + k);
     this->setText(shortcut.toString());
     emit shortcut_updated(shortcut);
+}
+
+void Shortcuts::add_shortcut(QString id, QString description, QShortcut *shortcut)
+{
+    this->shortcuts[id] = {description, shortcut};
+    emit shortcut_added(id, description, shortcut);
+}
+
+Shortcuts *Shortcuts::get_instance()
+{
+    static Shortcuts shortcuts;
+    return &shortcuts;
 }
