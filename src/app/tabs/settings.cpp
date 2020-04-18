@@ -14,6 +14,7 @@
 #include <app/tabs/settings.hpp>
 #include <app/theme.hpp>
 #include <app/widgets/color_label.hpp>
+#include <app/widgets/shortcut_input.hpp>
 #include <app/widgets/switch.hpp>
 #include <app/window.hpp>
 
@@ -23,6 +24,7 @@ SettingsTab::SettingsTab(QWidget *parent) : QTabWidget(parent)
 
     this->addTab(new GeneralSettingsSubTab(this), "General");
     this->addTab(new BluetoothSettingsSubTab(this), "Bluetooth");
+    this->addTab(new ShortcutsSettingsSubTab(this), "Shortcuts");
     this->addTab(new OpenAutoSettingsSubTab(this), "OpenAuto");
 }
 
@@ -346,6 +348,51 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
     return scroll_area;
 }
 
+ShortcutsSettingsSubTab::ShortcutsSettingsSubTab(QWidget *parent) : QWidget(parent)
+{
+    this->config = Config::get_instance();
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(this->settings_widget());
+}
+
+QWidget *ShortcutsSettingsSubTab::settings_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout(widget);
+
+    QMap<QString, QPair<QString, QKeySequence>> shortcuts = this->config->get_shortcuts();
+    for (auto key : shortcuts.keys()) {
+        QPair<QString, QKeySequence> shortcut = shortcuts[key];
+        layout->addWidget(this->shortcut_row_widget(key, shortcut.first, shortcut.second), 1);
+    }
+
+    QScrollArea *scroll_area = new QScrollArea(this);
+    Theme::to_touch_scroller(scroll_area);
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setWidget(widget);
+
+    return scroll_area;
+}
+
+QWidget *ShortcutsSettingsSubTab::shortcut_row_widget(QString key, QString name, QKeySequence shortcut)
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel(name, widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    ShortcutInput *input = new ShortcutInput(shortcut.toString(), widget);
+    input->setFlat(true);
+    input->setFont(QFont("Titillium Web", 18));
+    connect(input, &ShortcutInput::shortcut_updated,
+            [this, key](QKeySequence shortcut) { this->config->set_shortcut(key, shortcut); });
+    layout->addWidget(input, 1, Qt::AlignHCenter);
+
+    return widget;
+}
+
 OpenAutoSettingsSubTab::OpenAutoSettingsSubTab(QWidget *parent) : QWidget(parent)
 {
     this->bluetooth = Bluetooth::get_instance();
@@ -611,20 +658,21 @@ QWidget *OpenAutoSettingsSubTab::touchscreen_row_widget()
     return widget;
 }
 
-QCheckBox *OpenAutoSettingsSubTab::button_checkbox(Button &button, QWidget *parent)
+QCheckBox *OpenAutoSettingsSubTab::button_checkbox(QString name, QString key,
+                                                   aasdk::proto::enums::ButtonCode::Enum code, QWidget *parent)
 {
-    QCheckBox *checkbox = new QCheckBox(QString("%1 [%2]").arg(button.name).arg(button.key), parent);
+    QCheckBox *checkbox = new QCheckBox(QString("%1 [%2]").arg(name).arg(key), parent);
     checkbox->setFont(Theme::font_14);
     checkbox->setChecked(std::find(this->config->openauto_button_codes.begin(),
                                    this->config->openauto_button_codes.end(),
-                                   button.code) != this->config->openauto_button_codes.end());
-    connect(checkbox, &QCheckBox::toggled, [config = this->config, button](bool checked) {
+                                   code) != this->config->openauto_button_codes.end());
+    connect(checkbox, &QCheckBox::toggled, [config = this->config, code](bool checked) {
         if (checked) {
-            config->openauto_button_codes.push_back(button.code);
+            config->openauto_button_codes.push_back(code);
         }
         else {
             config->openauto_button_codes.erase(
-                std::remove(config->openauto_button_codes.begin(), config->openauto_button_codes.end(), button.code),
+                std::remove(config->openauto_button_codes.begin(), config->openauto_button_codes.end(), code),
                 config->openauto_button_codes.end());
         }
     });
@@ -643,24 +691,24 @@ QWidget *OpenAutoSettingsSubTab::buttons_row_widget()
     QGroupBox *group = new QGroupBox(widget);
     QVBoxLayout *group_layout = new QVBoxLayout(group);
 
-    QList<Button> buttons({{"Enter", "Enter", aasdk::proto::enums::ButtonCode::ENTER},
-                           {"Left", "Left", aasdk::proto::enums::ButtonCode::LEFT},
-                           {"Right", "Right", aasdk::proto::enums::ButtonCode::RIGHT},
-                           {"Up", "Up", aasdk::proto::enums::ButtonCode::UP},
-                           {"Down", "Down", aasdk::proto::enums::ButtonCode::DOWN},
-                           {"Back", "Esc", aasdk::proto::enums::ButtonCode::BACK},
-                           {"Home", "H", aasdk::proto::enums::ButtonCode::HOME},
-                           {"Phone", "P", aasdk::proto::enums::ButtonCode::PHONE},
-                           {"Call End", "O", aasdk::proto::enums::ButtonCode::CALL_END},
-                           {"Play", "X", aasdk::proto::enums::ButtonCode::PLAY},
-                           {"Pause", "C", aasdk::proto::enums::ButtonCode::PAUSE},
-                           {"Prev Track", "V", aasdk::proto::enums::ButtonCode::PREV},
-                           {"Next Track", "N", aasdk::proto::enums::ButtonCode::NEXT},
-                           {"Toggle Play", "B", aasdk::proto::enums::ButtonCode::TOGGLE_PLAY},
-                           {"Voice", "M", aasdk::proto::enums::ButtonCode::MICROPHONE_1},
-                           {"Scroll", "1/2", aasdk::proto::enums::ButtonCode::SCROLL_WHEEL}});
-
-    for (auto button : buttons) group_layout->addWidget(this->button_checkbox(button, widget));
+    group_layout->addWidget(this->button_checkbox("Enter", "Enter", aasdk::proto::enums::ButtonCode::ENTER, widget));
+    group_layout->addWidget(this->button_checkbox("Left", "Left", aasdk::proto::enums::ButtonCode::LEFT, widget));
+    group_layout->addWidget(this->button_checkbox("Right", "Right", aasdk::proto::enums::ButtonCode::RIGHT, widget));
+    group_layout->addWidget(this->button_checkbox("Up", "Up", aasdk::proto::enums::ButtonCode::UP, widget));
+    group_layout->addWidget(this->button_checkbox("Down", "Down", aasdk::proto::enums::ButtonCode::DOWN, widget));
+    group_layout->addWidget(this->button_checkbox("Back", "Esc", aasdk::proto::enums::ButtonCode::BACK, widget));
+    group_layout->addWidget(this->button_checkbox("Home", "H", aasdk::proto::enums::ButtonCode::HOME, widget));
+    group_layout->addWidget(this->button_checkbox("Phone", "P", aasdk::proto::enums::ButtonCode::PHONE, widget));
+    group_layout->addWidget(this->button_checkbox("Call End", "O", aasdk::proto::enums::ButtonCode::CALL_END, widget));
+    group_layout->addWidget(this->button_checkbox("Play", "X", aasdk::proto::enums::ButtonCode::PLAY, widget));
+    group_layout->addWidget(this->button_checkbox("Pause", "C", aasdk::proto::enums::ButtonCode::PAUSE, widget));
+    group_layout->addWidget(this->button_checkbox("Prev Track", "V", aasdk::proto::enums::ButtonCode::PREV, widget));
+    group_layout->addWidget(this->button_checkbox("Next Track", "N", aasdk::proto::enums::ButtonCode::NEXT, widget));
+    group_layout->addWidget(
+        this->button_checkbox("Toggle Play", "B", aasdk::proto::enums::ButtonCode::TOGGLE_PLAY, widget));
+    group_layout->addWidget(this->button_checkbox("Voice", "M", aasdk::proto::enums::ButtonCode::MICROPHONE_1, widget));
+    group_layout->addWidget(
+        this->button_checkbox("Scroll", "1/2", aasdk::proto::enums::ButtonCode::SCROLL_WHEEL, widget));
 
     layout->addWidget(label, 1);
     layout->addWidget(group, 1, Qt::AlignHCenter);

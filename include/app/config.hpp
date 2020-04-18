@@ -3,6 +3,7 @@
 
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 
+#include <QKeySequence>
 #include <QObject>
 #include <QSettings>
 #include <QString>
@@ -59,6 +60,9 @@ class Config : public QObject {
     inline bool get_mouse_active() { return this->mouse_active; }
     inline void set_mouse_active(bool mouse_active) { this->mouse_active = mouse_active; }
 
+    inline void set_shortcut(QString key, QKeySequence shortcut) { this->shortcuts[key] = {this->shortcuts[key].first, shortcut}; }
+    inline QMap<QString, QPair<QString, QKeySequence>> get_shortcuts() { return this->shortcuts; }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
     f1x::openauto::autoapp::configuration::Configuration::ButtonCodes openauto_button_codes;
 
@@ -66,6 +70,7 @@ class Config : public QObject {
 
    private:
     QSettings ia_config;
+    QMap<QString, QPair<QString, QKeySequence>> shortcuts;
     int volume;
     bool dark_mode;
     int brightness;
