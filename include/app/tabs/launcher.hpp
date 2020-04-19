@@ -22,19 +22,16 @@
 #undef Status
 #undef Unsorted
 
-class EmbeddedApp : public QWidget {
+class XWorker : public QObject {
     Q_OBJECT
 
    public:
-    EmbeddedApp(int delay, QWidget *parent = nullptr);
-
-    void start(QString app);
-    void end();
-
-    inline int get_delay() { return this->delay; }
-    inline void set_delay(int delay) { this->delay = delay; }
+    XWorker(QObject *parent = nullptr);
+    int get_window(uint64_t pid);
 
    private:
+    const int MAX_RETRIES = 60;
+
     struct WindowProp {
         WindowProp(char *prop, unsigned long size);
         ~WindowProp();
@@ -44,15 +41,27 @@ class EmbeddedApp : public QWidget {
     };
 
     WindowProp get_window_prop(Window window, Atom type, const char *name);
-    std::list<Window> get_clients();
-    int get_window();
-    QWidget *controls_widget();
+    QList<Window> get_clients();
 
     Display *display;
     Window root_window;
+};
+
+class EmbeddedApp : public QWidget {
+    Q_OBJECT
+
+   public:
+    EmbeddedApp(QWidget *parent = nullptr);
+
+    void start(QString app);
+    void end();
+
+   private:
+    QWidget *controls_widget();
+
     QProcess *process;
     QVBoxLayout *container;
-    int delay;
+    XWorker *worker;
 
    signals:
     void closed();
@@ -69,7 +78,6 @@ class LauncherTab : public QWidget {
     QWidget *launcher_widget();
     QWidget *app_select_widget();
     QWidget *config_widget();
-    QWidget *delay_widget();
     void populate_dirs(QString path);
     void populate_apps(QString path);
 

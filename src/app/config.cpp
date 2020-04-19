@@ -22,7 +22,6 @@ Config::Config()
     this->wireless_address = this->ia_config.value("Wireless/address", "0.0.0.0").toString();
     this->launcher_home = this->ia_config.value("Launcher/home", QDir().absolutePath()).toString();
     this->launcher_auto_launch = this->ia_config.value("Launcher/auto_launch", false).toBool();
-    this->launcher_delay = this->ia_config.value("Launcher/delay", 1).toInt();
     this->launcher_app = this->ia_config.value("Launcher/app", false).toString();
 
     QTimer *timer = new QTimer(this);
@@ -58,8 +57,6 @@ void Config::save()
         this->ia_config.setValue("Launcher/home", this->launcher_home);
     if (this->launcher_auto_launch != this->ia_config.value("Launcher/auto_launch", false).toBool())
         this->ia_config.setValue("Launcher/auto_launch", this->launcher_auto_launch);
-    if (this->launcher_delay != this->ia_config.value("Launcher/app", 1).toInt())
-        this->ia_config.setValue("Launcher/delay", this->launcher_delay);
     if (this->launcher_app != this->ia_config.value("Launcher/app", QString()).toString())
         this->ia_config.setValue("Launcher/app", this->launcher_app);
 

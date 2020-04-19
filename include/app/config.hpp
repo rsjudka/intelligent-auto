@@ -62,9 +62,6 @@ class Config : public QObject {
     inline bool get_launcher_auto_launch() { return this->launcher_auto_launch; }
     inline void set_launcher_auto_launch(bool launcher_auto_launch) { this->launcher_auto_launch = launcher_auto_launch; }
 
-    inline int get_launcher_delay() { return this->launcher_delay; }
-    inline void set_launcher_delay(int launcher_delay) { this->launcher_delay = launcher_delay; }
-
     inline QString get_launcher_app() { return this->launcher_app; }
     inline void set_launcher_app(QString launcher_app) { this->launcher_app = launcher_app; }
 
@@ -87,7 +84,6 @@ class Config : public QObject {
     QString wireless_address;
     QString launcher_home;
     bool launcher_auto_launch;
-    int launcher_delay;
     QString launcher_app;
 
    signals:

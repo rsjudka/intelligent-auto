@@ -2,7 +2,7 @@
 
 #include <app/tabs/launcher.hpp>
 
-EmbeddedApp::WindowProp::WindowProp(char *prop, unsigned long size)
+XWorker::WindowProp::WindowProp(char *prop, unsigned long size)
 {
     this->size = size;
     this->prop = new char[this->size + 1];
@@ -11,7 +11,7 @@ EmbeddedApp::WindowProp::WindowProp(char *prop, unsigned long size)
     ((char *)this->prop)[size] = '\0';
 }
 
-EmbeddedApp::WindowProp::~WindowProp()
+XWorker::WindowProp::~WindowProp()
 {
     if (this->prop != nullptr) {
         delete (char *)this->prop;
@@ -19,11 +19,61 @@ EmbeddedApp::WindowProp::~WindowProp()
     }
 }
 
-EmbeddedApp::EmbeddedApp(int delay, QWidget *parent) : QWidget(parent)
+XWorker::XWorker(QObject *parent) : QObject(parent)
 {
-    this->delay = delay;
     this->display = XOpenDisplay(nullptr);
     this->root_window = DefaultRootWindow(this->display);
+}
+
+int XWorker::get_window(uint64_t pid)
+{
+    int retries = 0;
+    while (retries < MAX_RETRIES) {
+        for (auto client : this->get_clients()) {
+            if (pid == *(uint64_t *)this->get_window_prop(client, XA_CARDINAL, "_NET_WM_PID").prop) return client;
+        }
+        usleep(500000);
+        retries++;
+    }
+
+    return -1;
+}
+
+XWorker::WindowProp XWorker::get_window_prop(Window window, Atom type, const char *name)
+{
+    Atom prop = XInternAtom(this->display, name, false);
+
+    Atom actual_type_return;
+    int actual_format_return;
+    unsigned long nitems_return;
+    unsigned long bytes_after_return;
+    unsigned char *prop_return;
+    XGetWindowProperty(this->display, window, prop, 0, 1024, false, type, &actual_type_return, &actual_format_return,
+                       &nitems_return, &bytes_after_return, &prop_return);
+
+    unsigned long size = (actual_format_return / 8) * nitems_return;
+    if (actual_format_return == 32) size *= sizeof(long) / 4;
+
+    WindowProp window_prop((char *)prop_return, size);
+    XFree(prop_return);
+
+    return window_prop;
+}
+
+QList<Window> XWorker::get_clients()
+{
+    QList<Window> windows;
+
+    WindowProp prop = this->get_window_prop(this->root_window, XA_WINDOW, "_NET_CLIENT_LIST");
+    Window *window_list = (Window *)prop.prop;
+    for (unsigned long i = 0; i < prop.size / sizeof(Window); i++) windows.push_back(window_list[i]);
+
+    return windows;
+}
+
+EmbeddedApp::EmbeddedApp(QWidget *parent) : QWidget(parent)
+{
+    this->worker = new XWorker(this);
 
     this->process = new QProcess();
     process->setStandardOutputFile(QProcess::nullDevice());
@@ -67,9 +117,8 @@ void EmbeddedApp::start(QString app)
     this->process->start();
 
     this->process->waitForStarted();
-    sleep(this->delay);
 
-    QWindow *window = QWindow::fromWinId(this->get_window());
+    QWindow *window = QWindow::fromWinId(worker->get_window(this->process->processId()));
     window->setFlags(Qt::FramelessWindowHint);
     usleep(500000);
 
@@ -85,50 +134,6 @@ void EmbeddedApp::end()
     emit closed();
 }
 
-EmbeddedApp::WindowProp EmbeddedApp::get_window_prop(Window window, Atom type, const char *name)
-{
-    Atom prop = XInternAtom(this->display, name, false);
-
-    Atom actual_type_return;
-    int actual_format_return;
-    unsigned long nitems_return, bytes_after_return;
-    unsigned char *prop_return;
-    XGetWindowProperty(this->display, window, prop, 0, 1024, false, type, &actual_type_return, &actual_format_return,
-                       &nitems_return, &bytes_after_return, &prop_return);
-
-    unsigned long size = (actual_format_return / 8) * nitems_return;
-    if (actual_format_return == 32) size *= sizeof(long) / 4;
-
-    WindowProp window_prop((char *)prop_return, size);
-    XFree(prop_return);
-
-    return window_prop;
-}
-
-std::list<Window> EmbeddedApp::get_clients()
-{
-    std::list<Window> windows;
-
-    WindowProp prop = this->get_window_prop(this->root_window, XA_WINDOW, "_NET_CLIENT_LIST");
-    Window *window_list = (Window *)prop.prop;
-    for (unsigned long i = 0; i < prop.size / sizeof(Window); i++) windows.push_back(window_list[i]);
-
-    return windows;
-}
-
-int EmbeddedApp::get_window()
-{
-    uint64_t pid;
-    for (auto client : this->get_clients()) {
-        pid = *(uint64_t *)this->get_window_prop(client, XA_CARDINAL, "_NET_WM_PID").prop;
-        if ((uint64_t)this->process->processId() == pid) {
-            return client;
-        }
-    }
-
-    return -1;
-}
-
 LauncherTab::LauncherTab(QWidget *parent) : QWidget(parent)
 {
     this->theme = Theme::get_instance();
@@ -137,7 +142,7 @@ LauncherTab::LauncherTab(QWidget *parent) : QWidget(parent)
     QStackedLayout *layout = new QStackedLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    this->app = new EmbeddedApp(this->config->get_launcher_delay(), parent);
+    this->app = new EmbeddedApp(parent);
     connect(this->app, &EmbeddedApp::opened, [layout]() { layout->setCurrentIndex(1); });
     connect(this->app, &EmbeddedApp::closed, [layout]() { layout->setCurrentIndex(0); });
 
@@ -156,9 +161,11 @@ QWidget *LauncherTab::launcher_widget()
     this->path_label = new QLabel(this->config->get_launcher_home(), this);
     this->path_label->setFont(Theme::font_14);
 
+    layout->addStretch(1);
     layout->addWidget(this->path_label, 1);
     layout->addWidget(this->app_select_widget(), 6);
     layout->addWidget(this->config_widget(), 1, Qt::AlignRight);
+    layout->addStretch(1);
 
     return widget;
 }
@@ -214,7 +221,6 @@ QWidget *LauncherTab::config_widget()
 {
     QWidget *widget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(widget);
-    layout->setSpacing(0);
 
     QCheckBox *checkbox = new QCheckBox("launch at startup", widget);
     checkbox->setFont(Theme::font_14);
@@ -238,34 +244,6 @@ QWidget *LauncherTab::config_widget()
     });
 
     layout->addWidget(checkbox);
-    layout->addWidget(this->delay_widget());
-
-    return widget;
-}
-
-QWidget *LauncherTab::delay_widget()
-{
-    QWidget *widget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(widget);
-    layout->addStretch();
-    layout->setSpacing(0);
-
-    QPushButton *button = new QPushButton(QString::number(this->app->get_delay()), widget);
-    button->setFont(QFont("Titillium Web", 18));
-    button->setFlat(true);
-    QElapsedTimer *timer = new QElapsedTimer();
-    connect(button, &QPushButton::pressed, [timer]() { timer->start(); });
-    connect(button, &QPushButton::released, [this, timer, button]() {
-        int delay = timer->hasExpired(500) ? 1 : (button->text().toInt() + 1);
-        button->setText(QString::number(delay));
-        this->app->set_delay(delay);
-        this->config->set_launcher_delay(delay);
-    });
-    layout->addWidget(button);
-
-    QLabel *label = new QLabel("s delay", widget);
-    label->setFont(Theme::font_14);
-    layout->addWidget(label);
 
     return widget;
 }
