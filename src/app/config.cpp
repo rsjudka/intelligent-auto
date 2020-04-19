@@ -22,7 +22,9 @@ Config::Config()
     this->wireless_active = this->ia_config.value("Wireless/active", false).toBool();
     this->wireless_address = this->ia_config.value("Wireless/address", "0.0.0.0").toString();
     this->mouse_active = this->ia_config.value("mouse_active", true).toBool();
-
+    this->launcher_home = this->ia_config.value("Launcher/home", QDir().absolutePath()).toString();
+    this->launcher_auto_launch = this->ia_config.value("Launcher/auto_launch", false).toBool();
+    this->launcher_app = this->ia_config.value("Launcher/app", QString()).toString();
     this->ia_config.beginGroup("Shortcuts");
     for (auto key : this->ia_config.childKeys())
         this->shortcuts[key] = this->ia_config.value(key, QString()).toString();
@@ -57,6 +59,12 @@ void Config::save()
         this->ia_config.setValue("Wireless/active", this->wireless_active);
     if (this->wireless_address != this->ia_config.value("Wireless/address", "0.0.0.0").toBool())
         this->ia_config.setValue("Wireless/address", this->wireless_address);
+    if (this->launcher_home != this->ia_config.value("Launcher/home", QDir().absolutePath()).toString())
+        this->ia_config.setValue("Launcher/home", this->launcher_home);
+    if (this->launcher_auto_launch != this->ia_config.value("Launcher/auto_launch", false).toBool())
+        this->ia_config.setValue("Launcher/auto_launch", this->launcher_auto_launch);
+    if (this->launcher_app != this->ia_config.value("Launcher/app", QString()).toString())
+        this->ia_config.setValue("Launcher/app", this->launcher_app);
     if (this->mouse_active != this->ia_config.value("mouse_active", true).toBool())
         this->ia_config.setValue("mouse_active", this->mouse_active);
     for (auto id : this->shortcuts.keys()) {

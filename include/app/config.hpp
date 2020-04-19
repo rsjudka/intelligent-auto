@@ -57,6 +57,15 @@ class Config : public QObject {
     inline QString get_wireless_address() { return this->wireless_address; }
     inline void set_wireless_address(QString wireless_address) { this->wireless_address = wireless_address; }
 
+    inline QString get_launcher_home() { return this->launcher_home; }
+    inline void set_launcher_home(QString launcher_home) { this->launcher_home = launcher_home; }
+
+    inline bool get_launcher_auto_launch() { return this->launcher_auto_launch; }
+    inline void set_launcher_auto_launch(bool launcher_auto_launch) { this->launcher_auto_launch = launcher_auto_launch; }
+
+    inline QString get_launcher_app() { return this->launcher_app; }
+    inline void set_launcher_app(QString launcher_app) { this->launcher_app = launcher_app; }
+
     inline bool get_mouse_active() { return this->mouse_active; }
     inline void set_mouse_active(bool mouse_active) { this->mouse_active = mouse_active; }
 
@@ -81,6 +90,9 @@ class Config : public QObject {
     QString media_home;
     bool wireless_active;
     QString wireless_address;
+    QString launcher_home;
+    bool launcher_auto_launch;
+    QString launcher_app;
     bool mouse_active;
     QMap<QString, QString> shortcuts;
 

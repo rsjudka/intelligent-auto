@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <app/tabs/data.hpp>
+#include <app/tabs/launcher.hpp>
 #include <app/tabs/media.hpp>
 #include <app/tabs/openauto.hpp>
 #include <app/tabs/settings.hpp>
@@ -69,11 +70,17 @@ QTabWidget *MainWindow::tabs_widget()
     this->shortcuts->add_shortcut("data_tab", "Open Data Tab", data_key);
     QObject::connect(data_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(2); });
 
+    widget->addTab(new LauncherTab(this), "");
+    this->theme->add_tab_icon("widgets", 3, Qt::Orientation::Vertical);
+    QShortcut *launcher_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("launcher_tab")), this);
+    this->shortcuts->add_shortcut("launcher_tab", "Open Launcher Tab", launcher_key);
+    QObject::connect(launcher_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(3); });
+
     widget->addTab(new SettingsTab(this), "");
-    this->theme->add_tab_icon("tune", 3, Qt::Orientation::Vertical);
+    this->theme->add_tab_icon("tune", 4, Qt::Orientation::Vertical);
     QShortcut *settings_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("settings_tab")), this);
     this->shortcuts->add_shortcut("settings_tab", "Open Settings Tab", settings_key);
-    QObject::connect(settings_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(3); });
+    QObject::connect(settings_key, &QShortcut::activated, [widget]() { widget->setCurrentIndex(4); });
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         this->setWindowOpacity(position / 255.0);
@@ -116,13 +123,13 @@ QWidget *MainWindow::controls_widget()
     this->theme->add_button_icon("close", exit_button);
     connect(exit_button, &QPushButton::clicked, []() { qApp->exit(); });
 
-    QElapsedTimer timer;
-    connect(shutdown_button, &QPushButton::pressed, [&timer]() { timer.start(); });
-    connect(shutdown_button, &QPushButton::released, [&timer]() {
+    QElapsedTimer *timer = new QElapsedTimer();
+    connect(shutdown_button, &QPushButton::pressed, [timer]() { timer->start(); });
+    connect(shutdown_button, &QPushButton::released, [timer]() {
         sync();
 
         std::stringstream cmd;
-        cmd << "shutdown -" << (timer.hasExpired(2000) ? 'r' : 'h') << " now";
+        cmd << "shutdown -" << (timer->hasExpired(2000) ? 'r' : 'h') << " now";
         if (system(cmd.str().c_str()) < 0) qApp->exit();
     });
 
