@@ -41,7 +41,6 @@ class XWorker : public QObject {
     };
 
     WindowProp get_window_prop(Window window, Atom type, const char *name);
-    QList<Window> get_clients();
 
     Display *display;
     Window root_window;

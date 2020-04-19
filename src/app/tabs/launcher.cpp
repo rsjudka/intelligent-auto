@@ -29,8 +29,11 @@ int XWorker::get_window(uint64_t pid)
 {
     int retries = 0;
     while (retries < MAX_RETRIES) {
-        for (auto client : this->get_clients()) {
-            if (pid == *(uint64_t *)this->get_window_prop(client, XA_CARDINAL, "_NET_WM_PID").prop) return client;
+        WindowProp client_list = this->get_window_prop(this->root_window, XA_WINDOW, "_NET_CLIENT_LIST");
+        Window *windows = (Window *)client_list.prop;
+        for (unsigned long i = 0; i < client_list.size / sizeof(Window); i++) {
+            if (pid == *(uint64_t *)this->get_window_prop(windows[i], XA_CARDINAL, "_NET_WM_PID").prop)
+                return windows[i];
         }
         usleep(500000);
         retries++;
@@ -58,17 +61,6 @@ XWorker::WindowProp XWorker::get_window_prop(Window window, Atom type, const cha
     XFree(prop_return);
 
     return window_prop;
-}
-
-QList<Window> XWorker::get_clients()
-{
-    QList<Window> windows;
-
-    WindowProp prop = this->get_window_prop(this->root_window, XA_WINDOW, "_NET_CLIENT_LIST");
-    Window *window_list = (Window *)prop.prop;
-    for (unsigned long i = 0; i < prop.size / sizeof(Window); i++) windows.push_back(window_list[i]);
-
-    return windows;
 }
 
 EmbeddedApp::EmbeddedApp(QWidget *parent) : QWidget(parent)
