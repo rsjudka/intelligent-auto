@@ -22,7 +22,7 @@ Config::Config()
     this->wireless_address = this->ia_config.value("Wireless/address", "0.0.0.0").toString();
     this->launcher_home = this->ia_config.value("Launcher/home", QDir().absolutePath()).toString();
     this->launcher_auto_launch = this->ia_config.value("Launcher/auto_launch", false).toBool();
-    this->launcher_app = this->ia_config.value("Launcher/app", false).toString();
+    this->launcher_app = this->ia_config.value("Launcher/app", QString()).toString();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
