@@ -33,6 +33,7 @@ GeneralSettingsSubTab::GeneralSettingsSubTab(QWidget *parent) : QWidget(parent)
 {
     this->theme = Theme::get_instance();
     this->config = Config::get_instance();
+    this->shortcuts = Shortcuts::get_instance();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -76,6 +77,10 @@ QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
         theme->set_mode(state);
         config->set_dark_mode(state);
     });
+    QShortcut *key =
+        new QShortcut(QKeySequence::fromString(this->config->get_shortcut("dark_mode_toggle")), this->window());
+    this->shortcuts->add_shortcut("dark_mode_toggle", "Toggle Dark Mode", key);
+    QObject::connect(key, &QShortcut::activated, [toggle]() { toggle->click(); });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
     return widget;
@@ -105,6 +110,16 @@ QWidget *GeneralSettingsSubTab::brightness_widget()
     slider->setSliderPosition(this->config->get_brightness());
     connect(slider, &QSlider::valueChanged,
             [config = this->config](int position) { config->set_brightness(position); });
+    QShortcut *dim_key =
+        new QShortcut(QKeySequence::fromString(this->config->get_shortcut("brightness_down")), this->window());
+    this->shortcuts->add_shortcut("brightness_down", "Decrease Brightness", dim_key);
+    QObject::connect(dim_key, &QShortcut::activated,
+                     [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 4)); });
+    QShortcut *brighten_key =
+        new QShortcut(QKeySequence::fromString(this->config->get_shortcut("brightness_up")), this->window());
+    this->shortcuts->add_shortcut("brightness_up", "Increase Brightness", brighten_key);
+    QObject::connect(brighten_key, &QShortcut::activated,
+                     [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 4)); });
 
     QPushButton *dim_button = new QPushButton(widget);
     dim_button->setFlat(true);

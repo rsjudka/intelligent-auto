@@ -37,6 +37,7 @@ class GeneralSettingsSubTab : public QWidget {
 
     Config *config;
     Theme *theme;
+    Shortcuts *shortcuts;
 };
 
 class BluetoothSettingsSubTab : public QWidget {

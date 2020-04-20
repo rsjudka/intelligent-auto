@@ -157,36 +157,28 @@ QWidget *MainWindow::volume_widget()
         config->set_volume(position);
         MainWindow::update_system_volume(position);
     });
+    QShortcut *lower_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("volume_down")), this);
+    this->shortcuts->add_shortcut("volume_down", "Decrease Volume", lower_key);
+    QObject::connect(lower_key, &QShortcut::activated,
+                     [slider]() { slider->setSliderPosition(slider->sliderPosition() - 2); });
+    QShortcut *upper_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("volume_up")), this);
+    this->shortcuts->add_shortcut("volume_up", "Increase Volume", upper_key);
+    QObject::connect(upper_key, &QShortcut::activated,
+                     [slider]() { slider->setSliderPosition(slider->sliderPosition() + 2); });
 
     QPushButton *lower_button = new QPushButton(widget);
     lower_button->setFlat(true);
     lower_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("volume_down", lower_button);
-    connect(lower_button, &QPushButton::clicked, [slider]() {
-        int position = slider->sliderPosition() - 10;
-        slider->setSliderPosition(position);
-    });
-    QShortcut *lower_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("volume_down")), this);
-    this->shortcuts->add_shortcut("volume_down", "Decrease Volume", lower_key);
-    QObject::connect(lower_key, &QShortcut::activated, [slider]() {
-        int position = slider->sliderPosition() - 2;
-        slider->setSliderPosition(position);
-    });
+    connect(lower_button, &QPushButton::clicked,
+            [slider]() { slider->setSliderPosition(slider->sliderPosition() - 10); });
 
     QPushButton *raise_button = new QPushButton(widget);
     raise_button->setFlat(true);
     raise_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("volume_up", raise_button);
-    connect(raise_button, &QPushButton::clicked, [slider]() {
-        int position = slider->sliderPosition() + 10;
-        slider->setSliderPosition(position);
-    });
-    QShortcut *upper_key = new QShortcut(QKeySequence::fromString(this->config->get_shortcut("volume_up")), this);
-    this->shortcuts->add_shortcut("volume_up", "Increase Volume", upper_key);
-    QObject::connect(upper_key, &QShortcut::activated, [slider]() {
-        int position = slider->sliderPosition() + 2;
-        slider->setSliderPosition(position);
-    });
+    connect(raise_button, &QPushButton::clicked,
+            [slider]() { slider->setSliderPosition(slider->sliderPosition() + 10); });
 
     layout->addWidget(lower_button);
     layout->addWidget(slider, 4);
