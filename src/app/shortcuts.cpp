@@ -4,10 +4,10 @@
 #include <app/shortcuts.hpp>
 
 static const QRegExp GPIOX_REGEX("gpio\\d+");
-static const QString GPIO_DIR("/home/robert/dummy_gpio");
+static const QString GPIO_DIR("/sys/class/gpio");
 static const QString GPIOX_DIR(GPIO_DIR + "/%1");
 static const QString GPIOX_VALUE_PATH(GPIOX_DIR + "/value");
-static const QString GPIOX_ACTIVE_LOW_PATH(GPIOX_DIR + "/value");
+static const QString GPIOX_ACTIVE_LOW_PATH(GPIOX_DIR + "/active_low");
 
 GpioWatcher::GpioWatcher(QObject *parent) : QObject(parent)
 {
