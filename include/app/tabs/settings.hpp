@@ -65,7 +65,7 @@ class ShortcutsSettingsSubTab : public QWidget {
 
    private:
     QWidget *settings_widget();
-    QWidget *shortcut_row_widget(QString key, QString name, QShortcut *shortcut);
+    QWidget *shortcut_row_widget(QString key, QString name, Shortcut *shortcut);
 
     Config *config;
     Shortcuts *shortcuts;

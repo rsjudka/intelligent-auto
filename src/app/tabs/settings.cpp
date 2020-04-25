@@ -77,10 +77,9 @@ QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
         theme->set_mode(state);
         config->set_dark_mode(state);
     });
-    QShortcut *key =
-        new QShortcut(QKeySequence::fromString(this->config->get_shortcut("dark_mode_toggle")), this->window());
-    this->shortcuts->add_shortcut("dark_mode_toggle", "Toggle Dark Mode", key);
-    QObject::connect(key, &QShortcut::activated, [toggle]() { toggle->click(); });
+    Shortcut *shortcut = new Shortcut(this->config->get_shortcut("dark_mode_toggle"), this->window());
+    this->shortcuts->add_shortcut("dark_mode_toggle", "Toggle Dark Mode", shortcut);
+    connect(shortcut, &Shortcut::activated, [toggle]() { toggle->click(); });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
     return widget;
@@ -110,16 +109,14 @@ QWidget *GeneralSettingsSubTab::brightness_widget()
     slider->setSliderPosition(this->config->get_brightness());
     connect(slider, &QSlider::valueChanged,
             [config = this->config](int position) { config->set_brightness(position); });
-    QShortcut *dim_key =
-        new QShortcut(QKeySequence::fromString(this->config->get_shortcut("brightness_down")), this->window());
-    this->shortcuts->add_shortcut("brightness_down", "Decrease Brightness", dim_key);
-    QObject::connect(dim_key, &QShortcut::activated,
-                     [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 4)); });
-    QShortcut *brighten_key =
-        new QShortcut(QKeySequence::fromString(this->config->get_shortcut("brightness_up")), this->window());
-    this->shortcuts->add_shortcut("brightness_up", "Increase Brightness", brighten_key);
-    QObject::connect(brighten_key, &QShortcut::activated,
-                     [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 4)); });
+    Shortcut *dim_shortcut = new Shortcut(this->config->get_shortcut("brightness_down"), this->window());
+    this->shortcuts->add_shortcut("brightness_down", "Decrease Brightness", dim_shortcut);
+    connect(dim_shortcut, &Shortcut::activated,
+            [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 4)); });
+    Shortcut *brighten_shortcut = new Shortcut(this->config->get_shortcut("brightness_up"), this->window());
+    this->shortcuts->add_shortcut("brightness_up", "Increase Brightness", brighten_shortcut);
+    connect(brighten_shortcut, &Shortcut::activated,
+            [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 4)); });
 
     QPushButton *dim_button = new QPushButton(widget);
     dim_button->setFlat(true);
@@ -377,13 +374,13 @@ QWidget *ShortcutsSettingsSubTab::settings_widget()
     QWidget *widget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
-    QMap<QString, QPair<QString, QShortcut *>> shortcuts = this->shortcuts->get_shortcuts();
+    QMap<QString, QPair<QString, Shortcut *>> shortcuts = this->shortcuts->get_shortcuts();
     for (auto id : shortcuts.keys()) {
-        QPair<QString, QShortcut *> shortcut = shortcuts[id];
+        QPair<QString, Shortcut *> shortcut = shortcuts[id];
         layout->addWidget(this->shortcut_row_widget(id, shortcut.first, shortcut.second));
     }
     connect(this->shortcuts, &Shortcuts::shortcut_added,
-            [this, layout](QString id, QString description, QShortcut *shortcut) {
+            [this, layout](QString id, QString description, Shortcut *shortcut) {
                 layout->addWidget(this->shortcut_row_widget(id, description, shortcut));
             });
 
@@ -395,7 +392,7 @@ QWidget *ShortcutsSettingsSubTab::settings_widget()
     return scroll_area;
 }
 
-QWidget *ShortcutsSettingsSubTab::shortcut_row_widget(QString id, QString description, QShortcut *shortcut)
+QWidget *ShortcutsSettingsSubTab::shortcut_row_widget(QString id, QString description, Shortcut *shortcut)
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -404,13 +401,13 @@ QWidget *ShortcutsSettingsSubTab::shortcut_row_widget(QString id, QString descri
     label->setFont(Theme::font_16);
     layout->addWidget(label, 1);
 
-    ShortcutInput *input = new ShortcutInput(shortcut->key().toString(), widget);
+    ShortcutInput *input = new ShortcutInput(shortcut->to_str(), widget);
     input->setProperty("add_hint", true);
     input->setFlat(true);
     input->setFont(QFont("Titillium Web", 18));
-    connect(input, &ShortcutInput::shortcut_updated, [this, id](QKeySequence shortcut) {
+    connect(input, &ShortcutInput::shortcut_updated, [this, id](QString shortcut) {
         this->shortcuts->update_shortcut(id, shortcut);
-        this->config->set_shortcut(id, shortcut.toString());
+        this->config->set_shortcut(id, shortcut);
     });
     layout->addWidget(input, 1, Qt::AlignHCenter);
 
