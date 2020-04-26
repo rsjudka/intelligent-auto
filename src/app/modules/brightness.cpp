@@ -16,7 +16,7 @@ void MockedBrightnessModule::set_brightness(int brightness) { this->window->setW
 
 RpiBrightnessModule::RpiBrightnessModule() : BrightnessModule(false), stream(new QFile(this->PATH))
 {
-    this->stream.device()->open(QIODevice::WriteOnly | QIODevice::ExistingOnly);
+    this->stream.device()->open(QIODevice::ReadWrite | QIODevice::ExistingOnly);
 }
 
 RpiBrightnessModule::~RpiBrightnessModule()
