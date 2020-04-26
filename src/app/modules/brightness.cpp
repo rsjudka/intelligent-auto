@@ -1,3 +1,4 @@
+#include <QFile>
 #include <QGuiApplication>
 #include <QProcess>
 #include <QWindow>
@@ -13,17 +14,27 @@ MockedBrightnessModule::MockedBrightnessModule(QMainWindow *window) : Brightness
 
 void MockedBrightnessModule::set_brightness(int brightness) { this->window->setWindowOpacity(brightness / 255.0); }
 
-void RpiBrightnessModule::set_brightness(int brightness)
+RpiBrightnessModule::RpiBrightnessModule() : BrightnessModule(false), stream(new QFile(this->PATH))
 {
-    QProcess process(this);
-    process.start(QString("echo %1 > /sys/class/backlight/rpi_backlight/brightness").arg(brightness));
-    process.waitForFinished();
+    this->stream.device()->open(QIODevice::WriteOnly | QIODevice::ExistingOnly);
 }
 
-XBrightnessModule::XBrightnessModule() : BrightnessModule(false)
+RpiBrightnessModule::~RpiBrightnessModule()
 {
-    this->screen = QGuiApplication::primaryScreen();
+    QIODevice *device = this->stream.device();
+    if (device->isOpen()) device->close();
 }
+
+void RpiBrightnessModule::set_brightness(int brightness)
+{
+    QFileDevice *device = qobject_cast<QFileDevice *>(this->stream.device());
+    if (device->isOpen()) {
+        device->resize(0);
+        this->stream << brightness << endl;
+    }
+}
+
+XBrightnessModule::XBrightnessModule() : BrightnessModule(false) { this->screen = QGuiApplication::primaryScreen(); }
 
 void XBrightnessModule::set_brightness(int brightness)
 {

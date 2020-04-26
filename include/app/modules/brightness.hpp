@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QObject>
 #include <QScreen>
+#include <QTextStream>
 
 class BrightnessModule : public QObject {
     Q_OBJECT
@@ -33,8 +34,15 @@ class RpiBrightnessModule : public BrightnessModule {
     Q_OBJECT
 
    public:
-    RpiBrightnessModule() : BrightnessModule(false) {}
+    RpiBrightnessModule();
+    ~RpiBrightnessModule();
+
     void set_brightness(int brightness);
+
+   private:
+    const QString PATH = "/sys/class/backlight/rpi_backlight/brightness";
+
+    QTextStream stream;
 };
 
 class XBrightnessModule : public BrightnessModule {
