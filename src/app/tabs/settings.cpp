@@ -363,6 +363,7 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
 
 ShortcutsSettingsSubTab::ShortcutsSettingsSubTab(QWidget *parent) : QWidget(parent)
 {
+    this->theme = Theme::get_instance();
     this->config = Config::get_instance();
     this->shortcuts = Shortcuts::get_instance();
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -399,17 +400,53 @@ QWidget *ShortcutsSettingsSubTab::shortcut_row_widget(QString id, QString descri
 
     QLabel *label = new QLabel(description, widget);
     label->setFont(Theme::font_16);
+
     layout->addWidget(label, 1);
+    layout->addWidget(this->shortcut_input_widget(id, shortcut), 1);
+
+    return widget;
+}
+
+QWidget *ShortcutsSettingsSubTab::shortcut_input_widget(QString id, Shortcut *shortcut)
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QPushButton *symbol = new QPushButton(widget);
+    QSizePolicy symbol_policy = symbol->sizePolicy();
+    symbol_policy.setRetainSizeWhenHidden(true);
+    symbol->setSizePolicy(symbol_policy);
+    symbol->setFocusPolicy(Qt::NoFocus);
+    symbol->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    symbol->setFlat(true);
+    symbol->setCheckable(true);
+    if (shortcut->to_str().isEmpty())
+        symbol->hide();
+    else
+        symbol->setChecked(shortcut->to_str().startsWith("gpio"));
+    symbol->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("videogame_asset", symbol, "keyboard");
 
     ShortcutInput *input = new ShortcutInput(shortcut->to_str(), widget);
     input->setProperty("add_hint", true);
     input->setFlat(true);
     input->setFont(QFont("Titillium Web", 18));
-    connect(input, &ShortcutInput::shortcut_updated, [this, id](QString shortcut) {
+    connect(input, &ShortcutInput::shortcut_updated, [this, id, symbol](QString shortcut) {
+        if (shortcut.isEmpty()) {
+            symbol->hide();
+        }
+        else {
+            symbol->setChecked(shortcut.startsWith("gpio"));
+            symbol->show();
+        }
         this->shortcuts->update_shortcut(id, shortcut);
         this->config->set_shortcut(id, shortcut);
     });
-    layout->addWidget(input, 1, Qt::AlignHCenter);
+
+    layout->addStretch(1);
+    layout->addWidget(input, 3);
+    layout->addStretch(1);
+    layout->addWidget(symbol, 1, Qt::AlignRight);
 
     return widget;
 }
