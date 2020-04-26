@@ -11,12 +11,12 @@ static const QString GPIOX_ACTIVE_LOW_PATH(GPIOX_DIR + "/active_low");
 
 GpioWatcher::GpioWatcher(QObject *parent) : QObject(parent)
 {
-    QStringList gpios;
+    this->watcher = new QFileSystemWatcher(this);
     for (auto gpio : QDir(GPIO_DIR).entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        if (GPIOX_REGEX.exactMatch(gpio)) gpios.append(GPIOX_VALUE_PATH.arg(gpio));
+        if (GPIOX_REGEX.exactMatch(gpio) && QFile(GPIOX_ACTIVE_LOW_PATH.arg(gpio)).exists())
+            this->watcher->addPath(GPIOX_VALUE_PATH.arg(gpio));
     }
 
-    this->watcher = new QFileSystemWatcher(gpios, this);
     connect(this->watcher, &QFileSystemWatcher::fileChanged,
             [this](QString path) { emit gpio_triggered(path.split('/')[4]); });
 
@@ -52,36 +52,46 @@ void ShortcutInput::keyPressEvent(QKeyEvent *event)
     emit shortcut_updated(this->text());
 }
 
-Shortcut::Shortcut(QString shortcut, QWidget *parent) : QObject(parent)
+Shortcut::Shortcut(QString shortcut, QWidget *parent) : QObject(parent), gpio_value_attribute(parent)
 {
     this->shortcut = shortcut;
     this->key = new QShortcut(parent);
     this->gpio = new QFileSystemWatcher(parent);
 
     this->set_shortcut(shortcut);
-    connect(this->gpio, &QFileSystemWatcher::fileChanged, [this](QString path) {
-        QFile value_attribute(path);
-        value_attribute.open(QIODevice::ReadOnly);
-        int gpio_value = value_attribute.read(1).at(0);
-        value_attribute.close();
-        if (this->gpio_active_low == gpio_value) emit activated();
+    connect(this->gpio, &QFileSystemWatcher::fileChanged, [this](QString) {
+        if (this->gpio_value_attribute.isOpen()) {
+            this->gpio_value_attribute.seek(0);
+            if (this->gpio_active_low == this->gpio_value_attribute.read(1).at(0)) emit activated();
+        }
     });
     connect(this->key, &QShortcut::activated, [this]() { emit activated(); });
 }
 
+Shortcut::~Shortcut()
+{
+    if (this->gpio_value_attribute.isOpen()) this->gpio_value_attribute.close();
+}
+
 void Shortcut::set_shortcut(QString shortcut)
 {
-    QStringList gpios = this->gpio->files();
-    if (gpios.size() > 0) this->gpio->removePaths(gpios);
     this->key->setKey(QKeySequence());
+
+    QStringList gpios = this->gpio->files();
+    if (!gpios.isEmpty()) this->gpio->removePaths(gpios);
+    if (this->gpio_value_attribute.isOpen()) this->gpio_value_attribute.close();
 
     this->shortcut = shortcut;
     if (this->shortcut.startsWith("gpio")) {
-        QFile active_low_attribute(GPIOX_ACTIVE_LOW_PATH.arg(this->shortcut));
-        active_low_attribute.open(QIODevice::ReadOnly);
-        this->gpio_active_low = active_low_attribute.read(1)[0];
-        active_low_attribute.close();
-        this->gpio->addPath(GPIOX_VALUE_PATH.arg(this->shortcut));
+        this->gpio_value_attribute.setFileName(GPIOX_VALUE_PATH.arg(this->shortcut));
+        if (this->gpio_value_attribute.open(QIODevice::ReadOnly)) {
+            QFile active_low_attribute(GPIOX_ACTIVE_LOW_PATH.arg(this->shortcut));
+            if (active_low_attribute.open(QIODevice::ReadOnly)) {
+                this->gpio_active_low = active_low_attribute.read(1)[0];
+                active_low_attribute.close();
+                this->gpio->addPath(this->gpio_value_attribute.fileName());
+            }
+        }
     }
     else {
         this->key->setKey(QKeySequence::fromString(this->shortcut));

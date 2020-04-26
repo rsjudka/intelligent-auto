@@ -2,6 +2,7 @@
 #define SHORTCUTS_HPP_
 
 #include <QApplication>
+#include <QFile>
 #include <QFileSystemWatcher>
 #include <QKeyEvent>
 #include <QPushButton>
@@ -48,6 +49,7 @@ class Shortcut : public QObject {
 
    public:
     Shortcut(QString shortcut, QWidget *parent);
+    ~Shortcut();
 
     inline QString to_str() { return this->shortcut; }
     void set_shortcut(QString shortcut);
@@ -56,6 +58,7 @@ class Shortcut : public QObject {
     QString shortcut;
     QShortcut *key;
     QFileSystemWatcher *gpio;
+    QFile gpio_value_attribute;
     int gpio_active_low;
 
    signals:
