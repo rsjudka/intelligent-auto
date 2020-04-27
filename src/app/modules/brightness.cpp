@@ -14,27 +14,22 @@ MockedBrightnessModule::MockedBrightnessModule(QMainWindow *window) : Brightness
 
 void MockedBrightnessModule::set_brightness(int brightness) { this->window->setWindowOpacity(brightness / 255.0); }
 
-RpiBrightnessModule::RpiBrightnessModule() : BrightnessModule(false), stream(new QFile(this->PATH))
+RpiBrightnessModule::RpiBrightnessModule() : BrightnessModule(false), brightness_attribute(this->PATH)
 {
-    if (!this->stream.device()->open(QIODevice::ReadWrite | QIODevice::ExistingOnly))
-        printf("\nFAILED TO OPEN BRIGHTNESS FILE\n\n");
+    this->brightness_attribute.open(QIODevice::WriteOnly | QIODevice::ExistingOnly);
 }
 
 RpiBrightnessModule::~RpiBrightnessModule()
 {
-    QIODevice *device = this->stream.device();
-    if (device->isOpen()) device->close();
+    if (this->brightness_attribute.isOpen()) this->brightness_attribute.close();
 }
 
 void RpiBrightnessModule::set_brightness(int brightness)
 {
-    QFileDevice *device = qobject_cast<QFileDevice *>(this->stream.device());
-    if (device->isOpen()) {
-        printf("\nRESIZE BRIGHTNESS FILE STATUS: %d\n\n", device->resize(0));
-        this->stream << brightness << endl;
-    }
-    else {
-        printf("\nBRIGHTNESS FILE IS NOT OPEN\n\n");
+    if (this->brightness_attribute.isOpen()) {
+        this->brightness_attribute.reset();
+        this->brightness_attribute.write(std::to_string(brightness).c_str());
+        this->brightness_attribute.flush();
     }
 }
 
