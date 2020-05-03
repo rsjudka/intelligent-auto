@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <QApplication>
 #include <QFile>
 #include <QFontDatabase>
@@ -6,25 +8,26 @@
 #include <QPainter>
 #include <QPair>
 #include <QPixmap>
+#include <QRegularExpression>
 #include <QTextStream>
 #include <QTransform>
 
 #include <app/theme.hpp>
 
-const QFont Theme::font_14 = QFont("Montserrat", 14);
-const QFont Theme::font_16 = QFont("Montserrat", 16);
-const QFont Theme::font_18 = QFont("Montserrat", 18);
-const QFont Theme::font_36 = QFont("Montserrat", 36);
+const QFont Theme::font_14 = QFont("Montserrat", 14 * RESOLUTION);
+const QFont Theme::font_16 = QFont("Montserrat", 16 * RESOLUTION);
+const QFont Theme::font_18 = QFont("Montserrat", 18 * RESOLUTION);
+const QFont Theme::font_36 = QFont("Montserrat", 36 * RESOLUTION);
 
-const QSize Theme::icon_16 = QSize(16, 16);
-const QSize Theme::icon_24 = QSize(24, 24);
-const QSize Theme::icon_32 = QSize(32, 32);
-const QSize Theme::icon_36 = QSize(36, 36);
-const QSize Theme::icon_42 = QSize(42, 42);
-const QSize Theme::icon_48 = QSize(48, 48);
-const QSize Theme::icon_56 = QSize(56, 56);
-const QSize Theme::icon_84 = QSize(84, 84);
-const QSize Theme::icon_96 = QSize(96, 96);
+const QSize Theme::icon_16 = QSize(16 * RESOLUTION, 16 * RESOLUTION);
+const QSize Theme::icon_24 = QSize(24 * RESOLUTION, 24 * RESOLUTION);
+const QSize Theme::icon_32 = QSize(32 * RESOLUTION, 32 * RESOLUTION);
+const QSize Theme::icon_36 = QSize(36 * RESOLUTION, 36 * RESOLUTION);
+const QSize Theme::icon_42 = QSize(42 * RESOLUTION, 42 * RESOLUTION);
+const QSize Theme::icon_48 = QSize(48 * RESOLUTION, 48 * RESOLUTION);
+const QSize Theme::icon_56 = QSize(56 * RESOLUTION, 56 * RESOLUTION);
+const QSize Theme::icon_84 = QSize(84 * RESOLUTION, 84 * RESOLUTION);
+const QSize Theme::icon_96 = QSize(96 * RESOLUTION, 96 * RESOLUTION);
 
 const QColor Theme::danger_color = QColor(211, 47, 47);
 const QColor Theme::success_color = QColor(56, 142, 60);
@@ -45,15 +48,21 @@ Theme::Theme() : QObject(qApp), palette(), color("azure")
 
 QString Theme::parse_stylesheet(QString file)
 {
-    QString stylesheet;
+    QFile f(file);
+    f.open(QFile::ReadOnly | QFile::Text);
+    QTextStream s(&f);
+    QString stylesheet(s.readAll());
+    f.close();
 
-    QFile *f = new QFile(file);
-    f->open(QFile::ReadOnly | QFile::Text);
-    QTextStream s(f);
-    stylesheet = s.readAll();
-    f->close();
-
-    delete f;
+    QRegularExpression reA(" (-?\\d+)px");
+    QRegularExpressionMatchIterator i = reA.globalMatch(stylesheet);
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        if (match.hasMatch()) {
+            int scaled_px = ceil(match.captured(1).toInt() * RESOLUTION);
+            stylesheet.replace(match.captured(), QString("%1px").arg(scaled_px));
+        }
+    }
 
     return stylesheet;
 }
@@ -85,7 +94,7 @@ void Theme::add_tab_icon(QString name, int index, Qt::Orientation orientation)
     QTransform t;
     t.rotate((orientation == Qt::Orientation::Horizontal) ? 0 : 90);
 
-    QPixmap dark_base = QIcon(QString(":/icons/dark/%1-24px.svg").arg(name)).pixmap(512, 512).transformed(t);
+    QPixmap dark_base = QIcon(QString(":/icons/dark/%1.svg").arg(name)).pixmap(512, 512).transformed(t);
     QPixmap dark_active = this->create_pixmap_variant(dark_base, .87);
     QPixmap dark_normal = this->create_pixmap_variant(dark_base, .54);
     QPixmap dark_disabled = this->create_pixmap_variant(dark_base, .38);
@@ -95,7 +104,7 @@ void Theme::add_tab_icon(QString name, int index, Qt::Orientation orientation)
     dark_icon.addPixmap(dark_disabled, QIcon::Disabled);
     this->tab_icons["dark"].append({index, dark_icon});
 
-    QPixmap light_base = QIcon(QString(":/icons/light/%1-24px.svg").arg(name)).pixmap(512, 512).transformed(t);
+    QPixmap light_base = QIcon(QString(":/icons/light/%1.svg").arg(name)).pixmap(512, 512).transformed(t);
     QPixmap light_active = this->create_pixmap_variant(light_base, 1);
     QPixmap light_normal = this->create_pixmap_variant(light_base, .7);
     QPixmap light_disabled = this->create_pixmap_variant(light_base, .5);
@@ -112,8 +121,8 @@ void Theme::add_button_icon(QString name, QPushButton *button, QString normal_na
 {
     bool set_down_state = button->isCheckable() && button->text().isNull();
 
-    QPixmap dark_base = QIcon(QString(":/icons/dark/%1-24px.svg").arg(name)).pixmap(512, 512);
-    QPixmap light_base = QIcon(QString(":/icons/light/%1-24px.svg").arg(name)).pixmap(512, 512);
+    QPixmap dark_base = QIcon(QString(":/icons/dark/%1.svg").arg(name)).pixmap(512, 512);
+    QPixmap light_base = QIcon(QString(":/icons/light/%1.svg").arg(name)).pixmap(512, 512);
 
     QPixmap dark_active = this->create_pixmap_variant(dark_base, .87);
     QPixmap dark_disabled = this->create_pixmap_variant(dark_base, .38);
@@ -128,8 +137,8 @@ void Theme::add_button_icon(QString name, QPushButton *button, QString normal_na
         light_normal = set_down_state ? this->create_pixmap_variant(light_base, .7) : light_active;
     }
     else {
-        QPixmap dark_normal_base = QIcon(QString(":/icons/dark/%1-24px.svg").arg(normal_name)).pixmap(512, 512);
-        QPixmap light_normal_base = QIcon(QString(":/icons/light/%1-24px.svg").arg(normal_name)).pixmap(512, 512);
+        QPixmap dark_normal_base = QIcon(QString(":/icons/dark/%1.svg").arg(normal_name)).pixmap(512, 512);
+        QPixmap light_normal_base = QIcon(QString(":/icons/light/%1.svg").arg(normal_name)).pixmap(512, 512);
 
         dark_normal = this->create_pixmap_variant(dark_normal_base, .87);
         light_normal = this->create_pixmap_variant(light_normal_base, 1);

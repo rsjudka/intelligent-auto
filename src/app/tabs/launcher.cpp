@@ -222,15 +222,20 @@ QWidget *LauncherTab::config_widget()
                                     "}")
                                 .arg(Theme::font_14.pointSize()));
     checkbox->setChecked(this->config->get_launcher_auto_launch());
-    connect(checkbox, &QCheckBox::toggled, [this](bool checked) {
+    connect(checkbox, &QCheckBox::toggled, [this, checkbox](bool checked) {
         this->config->set_launcher_auto_launch(checked);
         QString launcher_app;
         if (checked) {
             launcher_app.append(this->path_label->text() + '/');
-            if (this->apps->currentItem() == nullptr)
-                launcher_app.append(this->apps->item(0)->text());
-            else
+            if (this->apps->currentItem() == nullptr) {
+                if (this->apps->count() > 0)
+                    launcher_app.append(this->apps->item(0)->text());
+                else
+                    checkbox->setChecked(false);
+            }
+            else {
                 launcher_app.append(this->apps->currentItem()->text());
+            }
         }
         this->config->set_launcher_app(launcher_app);
     });

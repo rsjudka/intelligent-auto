@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <QPainter>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
@@ -17,7 +19,7 @@ ProgressIndicator::ProgressIndicator(QWidget* parent) : QFrame(parent)
     QPropertyAnimation *length_animation = new QPropertyAnimation(this, "dash_length");
     length_animation->setEasingCurve(QEasingCurve::InOutQuad);
     length_animation->setStartValue(0.1);
-    length_animation->setKeyValueAt(0.15, 1);
+    length_animation->setKeyValueAt(0.15, 4);
     length_animation->setKeyValueAt(0.5, 18);
     length_animation->setKeyValueAt(0.6, 18);
     length_animation->setEndValue(18);
@@ -66,11 +68,11 @@ void ProgressIndicator::paintEvent(QPaintEvent*)
 
     if (!enabled) return;
 
-    painter.translate(width() / 2, height() / 2);
+    painter.translate(this->width() / 2, this->height() / 2);
     painter.rotate(this->angle);
 
     QPen pen;
-    pen.setWidth(3);
+    pen.setWidth(ceil(3 * RESOLUTION));
     pen.setColor(palette().color(QPalette::Base));
 
     QVector<qreal> pattern;
@@ -81,5 +83,6 @@ void ProgressIndicator::paintEvent(QPaintEvent*)
 
     painter.setPen(pen);
 
-    painter.drawEllipse(QPoint(0, 0), 48 / 3, 48 / 3);
+    int scaled_point = 48 / ceil(3 / RESOLUTION);
+    painter.drawEllipse(QPoint(0, 0), scaled_point, scaled_point);
 }

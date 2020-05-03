@@ -109,14 +109,14 @@ QWidget *DataTab::speedo_tach_widget()
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    Gauge *speed = new Gauge({"mph", "km/h"}, QFont("Titillium Web", 72), QFont("Montserrat", 16, QFont::Light, true),
+    Gauge *speed = new Gauge({"mph", "km/h"}, QFont("Titillium Web", 72 * RESOLUTION), QFont("Montserrat", 16 * RESOLUTION, QFont::Light, true),
                              Gauge::BOTTOM, 100, {cmds.SPEED}, 0,
                              [](std::vector<double> x, bool si) { return si ? x[0] : kph_to_mph(x[0]); }, widget);
     layout->addWidget(speed);
     this->gauges.push_back(speed);
 
-    Gauge *rpm = new Gauge({"x1000rpm", "x1000rpm"}, QFont("Titillium Web", 72),
-                           QFont("Montserrat", 16, QFont::Light, true), Gauge::BOTTOM, 100, {cmds.RPM}, 1,
+    Gauge *rpm = new Gauge({"x1000rpm", "x1000rpm"}, QFont("Titillium Web", 72 * RESOLUTION),
+                           QFont("Montserrat", 16 * RESOLUTION, QFont::Light, true), Gauge::BOTTOM, 100, {cmds.RPM}, 1,
                            [](std::vector<double> x, bool _) { return x[0] / 1000.0; }, widget);
     layout->addWidget(rpm);
     this->gauges.push_back(rpm);
@@ -129,7 +129,7 @@ QWidget *DataTab::mileage_data_widget()
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    Gauge *mileage = new Gauge({"mpg", "km/L"}, QFont("Titillium Web", 36), QFont("Montserrat", 14, QFont::Light, true),
+    Gauge *mileage = new Gauge({"mpg", "km/L"}, QFont("Titillium Web", 36 * RESOLUTION), QFont("Montserrat", 14 * RESOLUTION, QFont::Light, true),
                                Gauge::BOTTOM, 100, {cmds.SPEED, cmds.MAF}, 1,
                                [](std::vector<double> x, bool si) {
                                    return (si ? x[0] : kph_to_mph(x[0])) / (si ? gps_to_lph(x[1]) : gps_to_gph(x[1]));
@@ -163,13 +163,13 @@ QWidget *DataTab::coolant_temp_widget()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     Gauge *coolant_temp = new Gauge(
-        {"°F", "°C"}, QFont("Titillium Web", 36), QFont("Montserrat", 14, QFont::Light, true), Gauge::RIGHT, 5000,
+        {"°F", "°C"}, QFont("Titillium Web", 36 * RESOLUTION), QFont("Montserrat", 14 * RESOLUTION, QFont::Light, true), Gauge::RIGHT, 5000,
         {cmds.COOLANT_TEMP}, 1, [](std::vector<double> x, bool si) { return si ? x[0] : c_to_f(x[0]); }, widget);
     layout->addWidget(coolant_temp);
     this->gauges.push_back(coolant_temp);
 
     QLabel *coolant_temp_label = new QLabel("coolant", widget);
-    coolant_temp_label->setFont(QFont("Montserrat", 14, QFont::Light));
+    coolant_temp_label->setFont(QFont("Montserrat", 14 * RESOLUTION, QFont::Light));
     coolant_temp_label->setAlignment(Qt::AlignHCenter);
     layout->addWidget(coolant_temp_label);
 
@@ -182,13 +182,13 @@ QWidget *DataTab::engine_load_widget()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     Gauge *engine_load =
-        new Gauge({"%", "%"}, QFont("Titillium Web", 36), QFont("Montserrat", 14, QFont::Light, true), Gauge::RIGHT,
+        new Gauge({"%", "%"}, QFont("Titillium Web", 36 * RESOLUTION), QFont("Montserrat", 14 * RESOLUTION, QFont::Light, true), Gauge::RIGHT,
                   500, {cmds.LOAD}, 1, [](std::vector<double> x, bool _) { return x[0]; }, widget);
     layout->addWidget(engine_load);
     this->gauges.push_back(engine_load);
 
     QLabel *engine_load_label = new QLabel("load", widget);
-    engine_load_label->setFont(QFont("Montserrat", 14, QFont::Light));
+    engine_load_label->setFont(QFont("Montserrat", 14 * RESOLUTION, QFont::Light));
     engine_load_label->setAlignment(Qt::AlignHCenter);
     layout->addWidget(engine_load_label);
     return widget;

@@ -3,6 +3,10 @@
 
 #include <app/window.hpp>
 
+#ifndef RESOLUTION
+    #define RESOLUTION 1
+#endif
+
 int main(int argc, char *argv[])
 {
     QApplication ia(argc, argv);
