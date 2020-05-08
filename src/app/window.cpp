@@ -46,7 +46,11 @@ QWidget *MainWindow::window_widget()
     layout->setSpacing(0);
 
     layout->addWidget(this->tabs_widget());
-    layout->addWidget(this->controls_widget());
+    QWidget *controls_widget = this->controls_widget();
+    if (!this->config->get_controls_bar()) controls_widget->hide();
+    connect(this->config, &Config::controls_bar_changed,
+            [controls_widget](bool controls_bar) { controls_bar ? controls_widget->show() : controls_widget->hide(); });
+    layout->addWidget(controls_widget);
 
     return widget;
 }

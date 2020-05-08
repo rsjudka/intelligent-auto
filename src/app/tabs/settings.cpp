@@ -51,6 +51,7 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(this->brightness_module_row_widget(), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->controls_bar_widget(), 1);
     layout->addWidget(this->quick_view_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
@@ -254,6 +255,23 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
     layout->addWidget(label, 2);
     layout->addWidget(right_button);
     layout->addStretch(1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::controls_bar_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Controls Bar", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    Switch *toggle = new Switch(widget);
+    toggle->setChecked(this->config->get_controls_bar());
+    connect(toggle, &Switch::stateChanged, [config = this->config](bool state) { config->set_controls_bar(state); });
+    layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
     return widget;
 }

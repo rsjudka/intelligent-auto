@@ -88,6 +88,13 @@ class Config : public QObject {
         this->brightness_modules[name] = module;
     }
 
+    inline bool get_controls_bar() { return this->controls_bar; }
+    inline void set_controls_bar(bool controls_bar)
+    {
+        this->controls_bar = controls_bar;
+        emit controls_bar_changed(this->controls_bar);
+    }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
@@ -113,11 +120,13 @@ class Config : public QObject {
     QString launcher_app;
     QString quick_view;
     QString brightness_module;
+    bool controls_bar;
 
    signals:
     void brightness_changed(unsigned int brightness);
     void si_units_changed(bool si_units);
     void quick_view_changed(QString quick_view);
+    void controls_bar_changed(bool controls_bar);
 };
 
 #endif
