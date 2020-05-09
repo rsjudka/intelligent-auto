@@ -95,6 +95,13 @@ class Config : public QObject {
         emit controls_bar_changed(this->controls_bar);
     }
 
+    inline double get_scale() { return this->scale; }
+    inline void set_scale(double scale)
+    {
+        this->scale = scale;
+        emit scale_changed(this->scale);
+    }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
@@ -121,12 +128,14 @@ class Config : public QObject {
     QString quick_view;
     QString brightness_module;
     bool controls_bar;
+    double scale;
 
    signals:
     void brightness_changed(unsigned int brightness);
     void si_units_changed(bool si_units);
     void quick_view_changed(QString quick_view);
     void controls_bar_changed(bool controls_bar);
+    void scale_changed(double scale);
 };
 
 #endif

@@ -54,12 +54,17 @@ QString Theme::parse_stylesheet(QString file)
     QString stylesheet(s.readAll());
     f.close();
 
-    QRegularExpression reA(" (-?\\d+)px");
-    QRegularExpressionMatchIterator i = reA.globalMatch(stylesheet);
+    return stylesheet;
+}
+
+QString Theme::scale_stylesheet(QString stylesheet)
+{
+    QRegularExpression px_regex(" (-?\\d+)px");
+    QRegularExpressionMatchIterator i = px_regex.globalMatch(stylesheet);
     while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
         if (match.hasMatch()) {
-            int scaled_px = ceil(match.captured(1).toInt() * RESOLUTION);
+            int scaled_px = ceil(match.captured(1).toInt() * this->scale);
             stylesheet.replace(match.captured(), QString("%1px").arg(scaled_px));
         }
     }
@@ -147,12 +152,12 @@ void Theme::add_button_icon(QString name, QPushButton *button, QString normal_na
     QIcon dark_icon = QIcon(dark_normal);
     dark_icon.addPixmap(dark_active, QIcon::Active, QIcon::On);
     dark_icon.addPixmap(dark_disabled, QIcon::Disabled);
-    this->button_icons["dark"].append({button, dark_icon});
+    this->button_icons["dark"].append({button, dark_icon, button->iconSize()});
 
     QIcon light_icon = QIcon(light_normal);
     light_icon.addPixmap(light_active, QIcon::Active, QIcon::On);
     light_icon.addPixmap(light_disabled, QIcon::Disabled);
-    this->button_icons["light"].append({button, light_icon});
+    this->button_icons["light"].append({button, light_icon, button->iconSize()});
 
     this->update();
 }
@@ -160,11 +165,11 @@ void Theme::add_button_icon(QString name, QPushButton *button, QString normal_na
 void Theme::update()
 {
     this->set_palette();
-    qApp->setStyleSheet(this->stylesheets[this->mode ? "dark" : "light"]);
+    qApp->setStyleSheet(this->scale_stylesheet(this->stylesheets[this->mode ? "dark" : "light"]));
 
     emit mode_updated(this->mode);
     emit icons_updated(this->tab_icons[this->mode ? "dark" : "light"],
-                       this->button_icons[this->mode ? "dark" : "light"]);
+                       this->button_icons[this->mode ? "dark" : "light"], this->scale);
     emit color_updated();
 }
 

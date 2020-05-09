@@ -26,6 +26,7 @@ Config::Config()
     this->quick_view = this->ia_config.value("quick_view", "volume").toString();
     this->brightness_module = this->ia_config.value("brightness_module", "mocked").toString();
     this->controls_bar = this->ia_config.value("controls_bar", false).toBool();
+    this->scale = this->ia_config.value("scale", 1.0).toDouble();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
@@ -68,6 +69,8 @@ void Config::save()
         this->ia_config.setValue("brightness_module", this->brightness_module);
     if (this->controls_bar != this->ia_config.value("controls_bar", false).toBool())
         this->ia_config.setValue("controls_bar", this->controls_bar);
+    if (this->scale != this->ia_config.value("scale", 1.0).toDouble())
+        this->ia_config.setValue("scale", this->scale);
 
     this->openauto_config->save();
 }

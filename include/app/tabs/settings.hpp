@@ -34,6 +34,8 @@ class GeneralSettingsSubTab : public QWidget {
     QWidget *controls_bar_widget();
     QWidget *quick_view_row_widget();
     QWidget *quick_view_select_widget();
+    QWidget *scale_row_widget();
+    QWidget *scale_widget();
 
     Config *config;
     Theme *theme;

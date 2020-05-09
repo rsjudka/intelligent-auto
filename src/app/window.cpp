@@ -19,6 +19,9 @@ MainWindow::MainWindow()
     this->theme = Theme::get_instance();
     this->theme->set_mode(this->config->get_dark_mode());
     this->theme->set_color(this->config->get_color());
+    this->theme->set_scale(this->config->get_scale());
+
+    connect(this->config, &Config::scale_changed, [theme = this->theme](double scale) { theme->set_scale(scale); });
 
     this->config->add_quick_view("volume", this->volume_widget());
     this->config->add_quick_view("none", new QFrame(this));
@@ -82,9 +85,18 @@ QTabWidget *MainWindow::tabs_widget()
         if (widget->currentIndex() == 0 && module->update_androidauto()) emit set_openauto_state(position);
     });
     connect(this->theme, &Theme::icons_updated,
-            [widget](QList<tab_icon_t> &tab_icons, QList<button_icon_t> &button_icons) {
+            [widget, tab_size = this->TAB_SIZE](QList<tab_icon_t> &tab_icons, QList<button_icon_t> &button_icons,
+                                                double scale) {
+                widget->tabBar()->setIconSize(tab_size * scale);
                 for (auto &icon : tab_icons) widget->tabBar()->setTabIcon(icon.first, icon.second);
-                for (auto &icon : button_icons) icon.first->setIcon(icon.second);
+                for (auto &icon : button_icons) {
+                    QPushButton *button = std::get<0>(icon);
+                    QSize size = std::get<2>(icon);
+                    size.rwidth() *= scale;
+                    size.rheight() *= scale;
+                    button->setIconSize(size);
+                    button->setIcon(std::get<1>(icon));
+                }
             });
     connect(widget, &QTabWidget::currentChanged, [this](int index) {
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());

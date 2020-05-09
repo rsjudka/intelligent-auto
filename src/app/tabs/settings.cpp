@@ -53,6 +53,8 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->controls_bar_widget(), 1);
     layout->addWidget(this->quick_view_row_widget(), 1);
+    layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->scale_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
     Theme::to_touch_scroller(scroll_area);
@@ -327,6 +329,43 @@ QWidget *GeneralSettingsSubTab::quick_view_select_widget()
     layout->addWidget(label, 2);
     layout->addWidget(right_button);
     layout->addStretch(1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::scale_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Scale", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    layout->addWidget(this->scale_widget(), 1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::scale_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setRange(1, 4);
+    slider->setSliderPosition(this->config->get_scale() * 4);
+    QLabel *value = new QLabel(QString("x%1").arg(slider->sliderPosition() / 4.0), widget);
+    value->setFont(Theme::font_14);
+    connect(slider, &QSlider::valueChanged, [config = this->config, value](int position) {
+        double scale = position / 4.0;
+        value->setText(QString("x%1").arg(scale));
+        config->set_scale(scale);
+    });
+
+    layout->addStretch(2);
+    layout->addWidget(slider, 4);
+    layout->addWidget(value, 2);
 
     return widget;
 }
@@ -621,8 +660,7 @@ QWidget *OpenAutoSettingsSubTab::dpi_widget()
 
     layout->addStretch(2);
     layout->addWidget(slider, 4);
-    layout->addWidget(value, 1);
-    layout->addStretch(1);
+    layout->addWidget(value, 2);
 
     return widget;
 }

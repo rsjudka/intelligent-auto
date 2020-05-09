@@ -46,7 +46,7 @@ QSlider {
 
 QSlider::groove {
     background-color: palette(alternate-base);
-    height: 4px;
+    height: 5px;
     border-radius: 2px;
 }
 
@@ -146,8 +146,8 @@ QCheckBox::indicator {
 }
 
 QRadioButton::indicator {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     border: 2px solid rgb(255, 255, 255);
     border-radius: 11px;
 }
