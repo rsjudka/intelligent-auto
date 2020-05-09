@@ -114,7 +114,9 @@ QWidget *MainWindow::controls_widget()
     layout->setContentsMargins(0, 0, 0, 0);
 
     QWidget *tab_spacer = new QWidget(this);
-    tab_spacer->setFixedWidth(this->TAB_SIZE.width());
+    tab_spacer->setFixedWidth(this->TAB_SIZE.width() * this->config->get_scale());
+    connect(this->config, &Config::scale_changed,
+            [tab_spacer, width = this->TAB_SIZE.width()](double scale) { tab_spacer->setFixedWidth(width * scale); });
 
     QPushButton *save_button = new QPushButton(widget);
     save_button->setFlat(true);

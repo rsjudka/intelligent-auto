@@ -74,7 +74,9 @@ QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->get_dark_mode());
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged, [theme = this->theme, config = this->config](bool state) {
         theme->set_mode(state);
         config->set_dark_mode(state);
@@ -198,7 +200,9 @@ QWidget *GeneralSettingsSubTab::si_units_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->get_si_units());
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) { config->set_si_units(state); });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
@@ -271,7 +275,9 @@ QWidget *GeneralSettingsSubTab::controls_bar_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->get_controls_bar());
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) { config->set_controls_bar(state); });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
@@ -542,8 +548,10 @@ QWidget *OpenAutoSettingsSubTab::rhd_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->openauto_config->getHandednessOfTrafficType() ==
                        autoapp::configuration::HandednessOfTrafficType::RIGHT_HAND_DRIVE);
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
         config->openauto_config->setHandednessOfTrafficType(
             state ? autoapp::configuration::HandednessOfTrafficType::RIGHT_HAND_DRIVE
@@ -675,8 +683,10 @@ QWidget *OpenAutoSettingsSubTab::rt_audio_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->openauto_config->getAudioOutputBackendType() ==
                        autoapp::configuration::AudioOutputBackendType::RTAUDIO);
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
         config->openauto_config->setAudioOutputBackendType(state
                                                                ? autoapp::configuration::AudioOutputBackendType::RTAUDIO
@@ -729,8 +739,10 @@ QWidget *OpenAutoSettingsSubTab::bluetooth_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->openauto_config->getBluetoothAdapterType() ==
                        autoapp::configuration::BluetoothAdapterType::LOCAL);
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
         config->openauto_config->setBluetoothAdapterType(state ? autoapp::configuration::BluetoothAdapterType::LOCAL
                                                                : autoapp::configuration::BluetoothAdapterType::NONE);
