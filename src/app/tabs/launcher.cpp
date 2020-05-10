@@ -181,11 +181,13 @@ QWidget *LauncherTab::app_select_widget()
     layout->addWidget(home_button, 0, Qt::AlignTop);
 
     this->folders = new QListWidget(widget);
+    this->folders->setFont(Theme::font_16);
     Theme::to_touch_scroller(this->folders);
     this->populate_dirs(root_path);
     layout->addWidget(this->folders, 4);
 
     this->apps = new QListWidget(widget);
+    this->apps->setFont(Theme::font_16);
     Theme::to_touch_scroller(this->apps);
     this->populate_apps(root_path);
     connect(this->apps, &QListWidget::itemClicked, [this](QListWidgetItem *item) {
@@ -261,15 +263,11 @@ void LauncherTab::populate_dirs(QString path)
         else {
             item->setText(dir.fileName());
         }
-        item->setFont(Theme::font_16);
         item->setData(Qt::UserRole, QVariant(dir.absoluteFilePath()));
     }
 }
 
 void LauncherTab::populate_apps(QString path)
 {
-    for (QString app : QDir(path).entryList(QDir::Files | QDir::Executable)) {
-        QListWidgetItem *item = new QListWidgetItem(app, this->apps);
-        item->setFont(Theme::font_16);
-    }
+    for (QString app : QDir(path).entryList(QDir::Files | QDir::Executable)) new QListWidgetItem(app, this->apps);
 }

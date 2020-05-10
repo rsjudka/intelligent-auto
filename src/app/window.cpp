@@ -64,19 +64,25 @@ QTabWidget *MainWindow::tabs_widget()
     widget->setTabPosition(QTabWidget::TabPosition::West);
     widget->tabBar()->setIconSize(this->TAB_SIZE);
 
-    widget->addTab(new OpenAutoTab(this), QString());
+    OpenAutoTab *openauto = new OpenAutoTab(this);
+    SettingsTab *settings = new SettingsTab(this);
+    MediaTab *media = new MediaTab(this);
+    DataTab *data = new DataTab(this);
+    LauncherTab *launcher = new LauncherTab(this);
+
+    widget->addTab(openauto, QString());
     this->theme->add_tab_icon("directions_car", 0, Qt::Orientation::Vertical);
 
-    widget->addTab(new MediaTab(this), QString());
+    widget->addTab(media, QString());
     this->theme->add_tab_icon("play_circle_outline", 1, Qt::Orientation::Vertical);
 
-    widget->addTab(new DataTab(this), QString());
+    widget->addTab(data, QString());
     this->theme->add_tab_icon("speed", 2, Qt::Orientation::Vertical);
 
-    widget->addTab(new LauncherTab(this), "");
+    widget->addTab(launcher, QString());
     this->theme->add_tab_icon("widgets", 3, Qt::Orientation::Vertical);
 
-    widget->addTab(new SettingsTab(this), "");
+    widget->addTab(settings, QString());
     this->theme->add_tab_icon("tune", 4, Qt::Orientation::Vertical);
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {

@@ -167,6 +167,12 @@ void Theme::update()
     this->set_palette();
     qApp->setStyleSheet(this->scale_stylesheet(this->stylesheets[this->mode ? "dark" : "light"]));
 
+    for (QWidget *widget : qApp->allWidgets()) {
+        QFont font = widget->font();
+        font.setPointSize(std::ceil(font.pointSize() * this->scale));
+        widget->setFont(font);
+    }
+
     emit mode_updated(this->mode);
     emit icons_updated(this->tab_icons[this->mode ? "dark" : "light"],
                        this->button_icons[this->mode ? "dark" : "light"], this->scale);

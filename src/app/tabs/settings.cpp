@@ -232,6 +232,7 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
 
     ColorLabel *label = new ColorLabel(Theme::icon_16, widget);
     label->setFont(Theme::font_16);
+    connect(this->config, &Config::scale_changed, [label](double scale) { label->scale(scale); });
 
     QPushButton *left_button = new QPushButton(widget);
     left_button->setFlat(true);
@@ -472,7 +473,9 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
     }
     connect(this->bluetooth, &Bluetooth::device_added, [this, layout, widget](BluezQt::DevicePtr device) {
         QPushButton *button = new QPushButton(device->name(), widget);
-        button->setFont(Theme::font_16);
+        QFont font = Theme::font_16;
+        font.setPointSize(font.pointSize() * this->config->get_scale());
+        button->setFont(font);
         button->setCheckable(true);
         if (device->isConnected()) button->setChecked(true);
         connect(button, &QPushButton::clicked, [button, device](bool checked = false) {
