@@ -172,11 +172,6 @@ QWidget *OpenAutoTab::msg_widget()
 
     QCheckBox *wireless_button = new QCheckBox("Wireless", widget);
     wireless_button->setFont(Theme::font_14);
-    wireless_button->setStyleSheet(QString("QCheckBox::indicator {"
-                                           "    width: %1px;"
-                                           "    height: %1px;"
-                                           "}")
-                                       .arg(Theme::font_14.pointSize()));
     wireless_button->setChecked(this->config->get_wireless_active());
     connect(wireless_button, &QCheckBox::toggled, [config = this->config, connection](bool checked) {
         checked ? connection->show() : connection->hide();

@@ -218,11 +218,6 @@ QWidget *LauncherTab::config_widget()
 
     QCheckBox *checkbox = new QCheckBox("launch at startup", widget);
     checkbox->setFont(Theme::font_14);
-    checkbox->setStyleSheet(QString("QCheckBox::indicator {"
-                                    "    width: %1px;"
-                                    "    height: %1px;"
-                                    "}")
-                                .arg(Theme::font_14.pointSize()));
     checkbox->setChecked(this->config->get_launcher_auto_launch());
     connect(checkbox, &QCheckBox::toggled, [this, checkbox](bool checked) {
         this->config->set_launcher_auto_launch(checked);
