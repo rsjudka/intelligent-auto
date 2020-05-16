@@ -307,13 +307,15 @@ QWidget *LayoutSettingsSubTab::pages_widget()
     QVBoxLayout *group_layout = new QVBoxLayout(group);
 
     for (tab_icon_t page : this->theme->get_tab_icons()) {
-        QCheckBox *button = new QCheckBox(page.first->metaObject()->className(), group);
-        button->setFont(Theme::font_14);
-        button->setChecked(page.first->isEnabled());
-        connect(button, &QCheckBox::toggled, [page, config = this->config](bool checked) {
-            config->set_page(page.first, checked);
-        });
-        group_layout->addWidget(button);
+        if (!page.first->property("prevent_disable").toBool()) {
+            QCheckBox *button = new QCheckBox(page.first->objectName(), group);
+            button->setFont(Theme::font_14);
+            button->setChecked(page.first->isEnabled());
+            connect(button, &QCheckBox::toggled, [page, config = this->config](bool checked) {
+                config->set_page(page.first, checked);
+            });
+            group_layout->addWidget(button);
+        }
     }
 
     layout->addWidget(group, 1, Qt::AlignHCenter);

@@ -65,20 +65,30 @@ QTabWidget *MainWindow::tabs_widget()
     widget->setIconSize(this->TAB_SIZE);
 
     OpenAutoTab *openauto = new OpenAutoTab(this);
+    openauto->setObjectName("OpenAuto");
     MediaTab *media = new MediaTab(this);
+    media->setObjectName("Media");
     DataTab *data = new DataTab(this);
+    data->setObjectName("Data");
     LauncherTab *launcher = new LauncherTab(this);
+    launcher->setObjectName("Launcher");
     SettingsTab *settings = new SettingsTab(this);
+    settings->setProperty("prevent_disable", true);
 
-    widget->addTab(openauto, QString());
+    int idx;
+    idx = widget->addTab(openauto, QString());
     this->theme->add_tab_icon("directions_car", openauto, Qt::Orientation::Vertical);
-    widget->addTab(media, QString());
+    widget->setTabEnabled(idx, this->config->get_page(openauto));
+    idx = widget->addTab(media, QString());
     this->theme->add_tab_icon("play_circle_outline", media, Qt::Orientation::Vertical);
-    widget->addTab(data, QString());
+    widget->setTabEnabled(idx, this->config->get_page(media));
+    idx = widget->addTab(data, QString());
     this->theme->add_tab_icon("speed", data, Qt::Orientation::Vertical);
-    widget->addTab(launcher, QString());
+    widget->setTabEnabled(idx, this->config->get_page(data));
+    idx = widget->addTab(launcher, QString());
     this->theme->add_tab_icon("widgets", launcher, Qt::Orientation::Vertical);
-    widget->addTab(settings, QString());
+    widget->setTabEnabled(idx, this->config->get_page(launcher));
+    idx = widget->addTab(settings, QString());
     this->theme->add_tab_icon("tune", settings, Qt::Orientation::Vertical);
 
     media->fill_tabs();

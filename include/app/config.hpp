@@ -102,9 +102,9 @@ class Config : public QObject {
         emit scale_changed(this->scale);
     }
 
-    inline bool get_page(QString name) { return this->pages[name]; }
+    inline bool get_page(QWidget *page) { return this->pages.value(page->objectName(), true); }
     inline void set_page(QWidget *page, bool enabled) {
-        this->pages[page->metaObject()->className()] = enabled;
+        this->pages[page->objectName()] = enabled;
         emit page_changed(page, enabled);
     }
 
