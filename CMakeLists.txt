@@ -80,7 +80,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${TAGLIB_INCLUDE_DIRS}
                     ${X11_INCLUDE_DIR}
                     ${include_directory})
->>>>>>> upstream/develop
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
