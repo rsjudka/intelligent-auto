@@ -76,7 +76,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${BCM_HOST_INCLUDE_DIRS}
                     ${ILCLIENT_INCLUDE_DIRS}
                     ${GST_INCLUDE_DIRS}
-                    ${QTGSTREAMER_INCLUDE_DIR})
+                    ${QTGSTREAMER_INCLUDE_DIR}
                     ${TAGLIB_INCLUDE_DIRS}
                     ${X11_INCLUDE_DIR}
                     ${include_directory})
@@ -112,6 +112,6 @@ target_link_libraries(ia
                       ${QTGSTREAMER_UI_LIBRARIES}
                       ${Qt5QuickWidgets_LIBRARIES}
                       ${QTGSTREAMER_QUICK_LIBRARIES}
-                      ${QTGSTREAMER_QUICK_LIBRARY})
+                      ${QTGSTREAMER_QUICK_LIBRARY}
                       ${TAGLIB_LIBRARIES}
                       ${X11_LIBRARIES})
