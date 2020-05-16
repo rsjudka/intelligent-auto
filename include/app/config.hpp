@@ -102,6 +102,12 @@ class Config : public QObject {
         emit scale_changed(this->scale);
     }
 
+    inline bool get_page(QString name) { return this->pages[name]; }
+    inline void set_page(QWidget *page, bool enabled) {
+        this->pages[page->metaObject()->className()] = enabled;
+        emit page_changed(page, enabled);
+    }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
@@ -129,6 +135,7 @@ class Config : public QObject {
     QString brightness_module;
     bool controls_bar;
     double scale;
+    QMap<QString, bool> pages;
 
    signals:
     void brightness_changed(unsigned int brightness);
@@ -136,6 +143,7 @@ class Config : public QObject {
     void quick_view_changed(QString quick_view);
     void controls_bar_changed(bool controls_bar);
     void scale_changed(double scale);
+    void page_changed(QWidget *page, bool enabled);
 };
 
 #endif

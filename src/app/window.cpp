@@ -62,39 +62,47 @@ QTabWidget *MainWindow::tabs_widget()
 {
     QTabWidget *widget = new QTabWidget(this);
     widget->setTabPosition(QTabWidget::TabPosition::West);
-    widget->tabBar()->setIconSize(this->TAB_SIZE);
+    widget->setIconSize(this->TAB_SIZE);
 
     OpenAutoTab *openauto = new OpenAutoTab(this);
-    SettingsTab *settings = new SettingsTab(this);
     MediaTab *media = new MediaTab(this);
     DataTab *data = new DataTab(this);
     LauncherTab *launcher = new LauncherTab(this);
+    SettingsTab *settings = new SettingsTab(this);
 
     widget->addTab(openauto, QString());
-    this->theme->add_tab_icon("directions_car", 0, Qt::Orientation::Vertical);
-
+    this->theme->add_tab_icon("directions_car", openauto, Qt::Orientation::Vertical);
     widget->addTab(media, QString());
-    this->theme->add_tab_icon("play_circle_outline", 1, Qt::Orientation::Vertical);
-
+    this->theme->add_tab_icon("play_circle_outline", media, Qt::Orientation::Vertical);
     widget->addTab(data, QString());
-    this->theme->add_tab_icon("speed", 2, Qt::Orientation::Vertical);
-
+    this->theme->add_tab_icon("speed", data, Qt::Orientation::Vertical);
     widget->addTab(launcher, QString());
-    this->theme->add_tab_icon("widgets", 3, Qt::Orientation::Vertical);
-
+    this->theme->add_tab_icon("widgets", launcher, Qt::Orientation::Vertical);
     widget->addTab(settings, QString());
-    this->theme->add_tab_icon("tune", 4, Qt::Orientation::Vertical);
+    this->theme->add_tab_icon("tune", settings, Qt::Orientation::Vertical);
+
+    media->fill_tabs();
+    settings->fill_tabs();
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
         module->set_brightness(position);
         if (widget->currentIndex() == 0 && module->update_androidauto()) emit set_openauto_state(position);
     });
+    connect(this->config, &Config::page_changed, [this, widget](QWidget *page, bool enabled) {
+        int idx = widget->indexOf(page);
+        widget->setTabEnabled(idx, enabled);
+        widget->setTabIcon(idx, (enabled) ? this->theme->get_tab_icon(idx) : QIcon());
+        widget->ensurePolished();
+    });
     connect(this->theme, &Theme::icons_updated,
             [widget, tab_size = this->TAB_SIZE](QList<tab_icon_t> &tab_icons, QList<button_icon_t> &button_icons,
                                                 double scale) {
-                widget->tabBar()->setIconSize(tab_size * scale);
-                for (auto &icon : tab_icons) widget->tabBar()->setTabIcon(icon.first, icon.second);
+                widget->setIconSize(tab_size * scale);
+                for (auto &icon : tab_icons) {
+                    int idx = widget->indexOf(icon.first);
+                    if (widget->isTabEnabled(idx)) widget->tabBar()->setTabIcon(idx, icon.second);
+                }
                 for (auto &icon : button_icons) {
                     QPushButton *button = std::get<0>(icon);
                     QSize size = std::get<2>(icon);

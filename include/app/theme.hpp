@@ -1,6 +1,7 @@
 #ifndef THEME_HPP_
 #define THEME_HPP_
 
+#include <QApplication>
 #include <QAbstractScrollArea>
 #include <QFrame>
 #include <QMap>
@@ -13,7 +14,7 @@
 #include <QVariant>
 #include <tuple>
 
-typedef QPair<int, QIcon> tab_icon_t;
+typedef QPair<QWidget *, QIcon> tab_icon_t;
 typedef std::tuple<QPushButton *, QIcon, QSize> button_icon_t;
 
 class Theme : public QObject {
@@ -59,11 +60,15 @@ class Theme : public QObject {
     inline void set_scale(double scale)
     {
         this->scale = scale;
-        this->update();
+        qApp->processEvents();
+        this->update(true);
     }
 
-    void add_tab_icon(QString name, int index, Qt::Orientation orientation = Qt::Orientation::Horizontal);
+    void add_tab_icon(QString name, QWidget *widget, Qt::Orientation orientation = Qt::Orientation::Horizontal);
+    inline QIcon get_tab_icon(int idx) { return this->tab_icons[this->mode ? "dark" : "light"][idx].second; }
+    inline QList<tab_icon_t> get_tab_icons() { return this->tab_icons[this->mode ? "dark" : "light"]; }
     void add_button_icon(QString name, QPushButton *button, QString active_name = QString());
+    void update(bool scaled = false);
 
     inline static QFrame *br(QWidget *parent = nullptr, bool vertical = false)
     {
@@ -116,7 +121,6 @@ class Theme : public QObject {
     QString parse_stylesheet(QString file);
     QString scale_stylesheet(QString stylesheet);
     QPixmap create_pixmap_variant(QPixmap &base, qreal opacity);
-    void update();
 
    signals:
     void mode_updated(bool mode);

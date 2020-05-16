@@ -22,8 +22,12 @@ namespace autoapp = f1x::openauto::autoapp;
 SettingsTab::SettingsTab(QWidget *parent) : QTabWidget(parent)
 {
     this->tabBar()->setFont(Theme::font_18);
+}
 
+void SettingsTab::fill_tabs()
+{
     this->addTab(new GeneralSettingsSubTab(this), "General");
+    this->addTab(new LayoutSettingsSubTab(this), "Layout");
     this->addTab(new BluetoothSettingsSubTab(this), "Bluetooth");
     this->addTab(new OpenAutoSettingsSubTab(this), "OpenAuto");
 }
@@ -50,11 +54,6 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->brightness_module_row_widget(), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
-    layout->addWidget(Theme::br(widget), 1);
-    layout->addWidget(this->controls_bar_widget(), 1);
-    layout->addWidget(this->quick_view_row_widget(), 1);
-    layout->addWidget(Theme::br(widget), 1);
-    layout->addWidget(this->scale_row_widget(), 1);
 
     QScrollArea *scroll_area = new QScrollArea(this);
     Theme::to_touch_scroller(scroll_area);
@@ -266,7 +265,63 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::controls_bar_widget()
+LayoutSettingsSubTab::LayoutSettingsSubTab(QWidget *parent) : QWidget(parent)
+{
+    this->theme = Theme::get_instance();
+    this->config = Config::get_instance();
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(this->settings_widget());
+}
+
+QWidget *LayoutSettingsSubTab::settings_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout(widget);
+
+    layout->addWidget(this->pages_widget());
+    layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->controls_bar_widget(), 1);
+    layout->addWidget(this->quick_view_row_widget(), 1);
+    layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->scale_row_widget(), 1);
+
+    QScrollArea *scroll_area = new QScrollArea(this);
+    Theme::to_touch_scroller(scroll_area);
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setWidget(widget);
+
+    return scroll_area;
+}
+
+QWidget *LayoutSettingsSubTab::pages_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Pages", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    QGroupBox *group = new QGroupBox(widget);
+    QVBoxLayout *group_layout = new QVBoxLayout(group);
+
+    for (tab_icon_t page : this->theme->get_tab_icons()) {
+        QCheckBox *button = new QCheckBox(page.first->metaObject()->className(), group);
+        button->setFont(Theme::font_14);
+        button->setChecked(page.first->isEnabled());
+        connect(button, &QCheckBox::toggled, [page, config = this->config](bool checked) {
+            config->set_page(page.first, checked);
+        });
+        group_layout->addWidget(button);
+    }
+
+    layout->addWidget(group, 1, Qt::AlignHCenter);
+
+    return widget;
+}
+
+QWidget *LayoutSettingsSubTab::controls_bar_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -285,7 +340,7 @@ QWidget *GeneralSettingsSubTab::controls_bar_widget()
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::quick_view_row_widget()
+QWidget *LayoutSettingsSubTab::quick_view_row_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -299,7 +354,7 @@ QWidget *GeneralSettingsSubTab::quick_view_row_widget()
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::quick_view_select_widget()
+QWidget *LayoutSettingsSubTab::quick_view_select_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -340,7 +395,7 @@ QWidget *GeneralSettingsSubTab::quick_view_select_widget()
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::scale_row_widget()
+QWidget *LayoutSettingsSubTab::scale_row_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -354,7 +409,7 @@ QWidget *GeneralSettingsSubTab::scale_row_widget()
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::scale_widget()
+QWidget *LayoutSettingsSubTab::scale_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -433,6 +488,8 @@ QWidget *BluetoothSettingsSubTab::scanner_widget()
     layout->addWidget(button);
 
     ProgressIndicator *loader = new ProgressIndicator(widget);
+    loader->scale(this->config->get_scale());
+    connect(this->config, &Config::scale_changed, [loader](double scale) { loader->scale(scale); });
     connect(this->bluetooth, &Bluetooth::scan_status, [button, loader](bool status) {
         if (status)
             loader->start_animation();
@@ -473,9 +530,7 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
     }
     connect(this->bluetooth, &Bluetooth::device_added, [this, layout, widget](BluezQt::DevicePtr device) {
         QPushButton *button = new QPushButton(device->name(), widget);
-        QFont font = Theme::font_16;
-        font.setPointSize(font.pointSize() * this->config->get_scale());
-        button->setFont(font);
+        button->setFont(Theme::font_16);
         button->setCheckable(true);
         if (device->isConnected()) button->setChecked(true);
         connect(button, &QPushButton::clicked, [button, device](bool checked = false) {
@@ -487,6 +542,8 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
         });
         this->devices[device] = button;
         layout->addWidget(button);
+        qApp->processEvents();
+        this->theme->update();
     });
     connect(this->bluetooth, &Bluetooth::device_changed, [this](BluezQt::DevicePtr device) {
         this->devices[device]->setText(device->name());

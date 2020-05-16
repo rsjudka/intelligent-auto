@@ -192,7 +192,7 @@ QWidget *OpenAutoTab::wireless_widget()
     QWidget *widget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
-    IpInput *ip_input = new IpInput(this->config->get_wireless_address(), QFont("Titillium Web", 24 * RESOLUTION), widget);
+    IpInput *ip_input = new IpInput(this->config->get_wireless_address(), QFont("Titillium Web", 24), widget);
     layout->addWidget(ip_input);
 
     QPushButton *button = new QPushButton("connect", widget);

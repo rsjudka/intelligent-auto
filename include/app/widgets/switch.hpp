@@ -23,8 +23,8 @@ class Switch : public QAbstractButton {
     void set_offset(int offset) { this->offset = offset; }
     void scale(double scale)
     {
-        this->track_radius = BASE_TRACK_RADIUS * scale;
-        this->thumb_radius = BASE_THUMB_RADIUS * scale;
+        this->track_radius = std::ceil(BASE_TRACK_RADIUS * scale);
+        this->thumb_radius = std::ceil(BASE_THUMB_RADIUS * scale);
         this->update_properties();
     }
 

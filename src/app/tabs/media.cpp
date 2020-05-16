@@ -14,7 +14,10 @@
 MediaTab::MediaTab(QWidget *parent) : QTabWidget(parent)
 {
     this->tabBar()->setFont(Theme::font_18);
+}
 
+void MediaTab::fill_tabs()
+{
     // this->addTab(new RadioPlayerSubTab(this), "Radio");
     this->addTab(new BluetoothPlayerSubTab(this), "Bluetooth");
     this->addTab(new LocalPlayerSubTab(this), "Local");

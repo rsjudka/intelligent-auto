@@ -36,8 +36,11 @@ QTabBar::tab:selected:top {
     border-bottom: 2px solid palette(base);
 }
 
-QTabBar::tab:disabled:top {
-    color: rgba(255, 255, 255, 128);
+QTabBar::tab:disabled {
+    height: 0px;
+    width: 0px;
+    padding: 0px;
+    margin: 0px;
 }
 
 QSlider {

@@ -1,5 +1,3 @@
-#include <math.h>
-
 #include <QPainter>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
@@ -11,6 +9,8 @@
 ProgressIndicator::ProgressIndicator(QWidget* parent) : QFrame(parent)
 {
     setFocusPolicy(Qt::NoFocus);
+
+    this->pen_width = BASE_PEN_WIDTH;
 
     QParallelAnimationGroup* group = new QParallelAnimationGroup(this);
     group->setLoopCount(-1);
@@ -72,7 +72,7 @@ void ProgressIndicator::paintEvent(QPaintEvent*)
     painter.rotate(this->angle);
 
     QPen pen;
-    pen.setWidth(ceil(3 * RESOLUTION));
+    pen.setWidth(this->pen_width);
     pen.setColor(palette().color(QPalette::Base));
 
     QVector<qreal> pattern;
@@ -82,7 +82,5 @@ void ProgressIndicator::paintEvent(QPaintEvent*)
     pen.setDashPattern(pattern);
 
     painter.setPen(pen);
-
-    int scaled_point = 48 / ceil(3 / RESOLUTION);
-    painter.drawEllipse(QPoint(0, 0), scaled_point, scaled_point);
+    painter.drawEllipse(QPoint(0, 0), this->ellipse_point, this->ellipse_point);
 }

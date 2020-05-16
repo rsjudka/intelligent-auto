@@ -14,20 +14,20 @@
 
 #include <app/theme.hpp>
 
-const QFont Theme::font_14 = QFont("Montserrat", 14 * RESOLUTION);
-const QFont Theme::font_16 = QFont("Montserrat", 16 * RESOLUTION);
-const QFont Theme::font_18 = QFont("Montserrat", 18 * RESOLUTION);
-const QFont Theme::font_36 = QFont("Montserrat", 36 * RESOLUTION);
+const QFont Theme::font_14 = QFont("Montserrat", 14);
+const QFont Theme::font_16 = QFont("Montserrat", 16);
+const QFont Theme::font_18 = QFont("Montserrat", 18);
+const QFont Theme::font_36 = QFont("Montserrat", 36);
 
-const QSize Theme::icon_16 = QSize(16 * RESOLUTION, 16 * RESOLUTION);
-const QSize Theme::icon_24 = QSize(24 * RESOLUTION, 24 * RESOLUTION);
-const QSize Theme::icon_32 = QSize(32 * RESOLUTION, 32 * RESOLUTION);
-const QSize Theme::icon_36 = QSize(36 * RESOLUTION, 36 * RESOLUTION);
-const QSize Theme::icon_42 = QSize(42 * RESOLUTION, 42 * RESOLUTION);
-const QSize Theme::icon_48 = QSize(48 * RESOLUTION, 48 * RESOLUTION);
-const QSize Theme::icon_56 = QSize(56 * RESOLUTION, 56 * RESOLUTION);
-const QSize Theme::icon_84 = QSize(84 * RESOLUTION, 84 * RESOLUTION);
-const QSize Theme::icon_96 = QSize(96 * RESOLUTION, 96 * RESOLUTION);
+const QSize Theme::icon_16 = QSize(16, 16);
+const QSize Theme::icon_24 = QSize(24, 24);
+const QSize Theme::icon_32 = QSize(32, 32);
+const QSize Theme::icon_36 = QSize(36, 36);
+const QSize Theme::icon_42 = QSize(42, 42);
+const QSize Theme::icon_48 = QSize(48, 48);
+const QSize Theme::icon_56 = QSize(56, 56);
+const QSize Theme::icon_84 = QSize(84, 84);
+const QSize Theme::icon_96 = QSize(96, 96);
 
 const QColor Theme::danger_color = QColor(211, 47, 47);
 const QColor Theme::success_color = QColor(56, 142, 60);
@@ -94,7 +94,7 @@ QPixmap Theme::create_pixmap_variant(QPixmap &base, qreal opacity)
     return image;
 }
 
-void Theme::add_tab_icon(QString name, int index, Qt::Orientation orientation)
+void Theme::add_tab_icon(QString name, QWidget *widget, Qt::Orientation orientation)
 {
     QTransform t;
     t.rotate((orientation == Qt::Orientation::Horizontal) ? 0 : 90);
@@ -107,7 +107,7 @@ void Theme::add_tab_icon(QString name, int index, Qt::Orientation orientation)
     QIcon dark_icon = QIcon(dark_normal);
     dark_icon.addPixmap(dark_active, QIcon::Active, QIcon::On);
     dark_icon.addPixmap(dark_disabled, QIcon::Disabled);
-    this->tab_icons["dark"].append({index, dark_icon});
+    this->tab_icons["dark"].append({widget, dark_icon});
 
     QPixmap light_base = QIcon(QString(":/icons/light/%1.svg").arg(name)).pixmap(512, 512).transformed(t);
     QPixmap light_active = this->create_pixmap_variant(light_base, 1);
@@ -117,7 +117,7 @@ void Theme::add_tab_icon(QString name, int index, Qt::Orientation orientation)
     QIcon light_icon = QIcon(light_normal);
     light_icon.addPixmap(light_active, QIcon::Active, QIcon::On);
     light_icon.addPixmap(light_disabled, QIcon::Disabled);
-    this->tab_icons["light"].append({index, light_icon});
+    this->tab_icons["light"].append({widget, light_icon});
 
     this->update();
 }
@@ -162,7 +162,7 @@ void Theme::add_button_icon(QString name, QPushButton *button, QString normal_na
     this->update();
 }
 
-void Theme::update()
+void Theme::update(bool scaled)
 {
     this->set_palette();
     qApp->setStyleSheet(this->scale_stylesheet(this->stylesheets[this->mode ? "dark" : "light"]));
@@ -172,6 +172,8 @@ void Theme::update()
         font.setPointSize(std::ceil(font.pointSize() * this->scale));
         widget->setFont(font);
     }
+
+    if (!scaled) qApp->processEvents();
 
     emit mode_updated(this->mode);
     emit icons_updated(this->tab_icons[this->mode ? "dark" : "light"],
