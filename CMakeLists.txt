@@ -35,7 +35,7 @@ add_definitions(-DBOOST_ALL_DYN_LINK)
 
 find_package(Boost REQUIRED COMPONENTS system log OPTIONAL_COMPONENTS unit_test_framework)
 find_package(libusb-1.0 REQUIRED)
-find_package(Qt5 COMPONENTS Multimedia MultimediaWidgets Bluetooth Qml Quick)
+find_package(Qt5 COMPONENTS Multimedia MultimediaWidgets Bluetooth Qml Quick QuickWidgets REQUIRED)
 find_package(KF5BluezQt REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -105,6 +105,6 @@ ${QTGSTREAMER_LIBRARY}
 ${QTGSTREAMER_LIBRARIES}
                         ${QTGSTREAMER_UI_LIBRARY}
                         ${QTGSTREAMER_UI_LIBRARIES}
-
+                        ${Qt5QuickWidgets_LIBRARIES}
 ${QTGSTREAMER_QUICK_LIBRARIES}
 ${QTGSTREAMER_QUICK_LIBRARY})
