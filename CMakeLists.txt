@@ -41,6 +41,9 @@ find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(rtaudio REQUIRED)
 find_package(Qt5GStreamer)
+find_package(taglib REQUIRED)
+find_package(X11 REQUIRED)
+
 if(RPI_BUILD)
     add_definitions(-DUSE_OMX -DOMX_SKIP64BIT)
     set(BCM_HOST_LIBRARIES "/opt/vc/lib/libbcm_host.so")
@@ -72,9 +75,12 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${OPENAUTO_INCLUDE_DIRS}
                     ${BCM_HOST_INCLUDE_DIRS}
                     ${ILCLIENT_INCLUDE_DIRS}
-                    ${include_directory}
                     ${GST_INCLUDE_DIRS}
                     ${QTGSTREAMER_INCLUDE_DIR})
+                    ${TAGLIB_INCLUDE_DIRS}
+                    ${X11_INCLUDE_DIR}
+                    ${include_directory})
+>>>>>>> upstream/develop
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
@@ -99,12 +105,14 @@ target_link_libraries(ia
                       ${WINSOCK2_LIBRARIES}
                       ${RTAUDIO_LIBRARIES}
                       ${GST_LIBRARIES}
-${QTGLIB_LIBRARY}
-${QTGLIB_LIBRARIES}
-${QTGSTREAMER_LIBRARY}
-${QTGSTREAMER_LIBRARIES}
-                        ${QTGSTREAMER_UI_LIBRARY}
-                        ${QTGSTREAMER_UI_LIBRARIES}
-                        ${Qt5QuickWidgets_LIBRARIES}
-${QTGSTREAMER_QUICK_LIBRARIES}
-${QTGSTREAMER_QUICK_LIBRARY})
+                      ${QTGLIB_LIBRARY}
+                      ${QTGLIB_LIBRARIES}
+                      ${QTGSTREAMER_LIBRARY}
+                      ${QTGSTREAMER_LIBRARIES}
+                      ${QTGSTREAMER_UI_LIBRARY}
+                      ${QTGSTREAMER_UI_LIBRARIES}
+                      ${Qt5QuickWidgets_LIBRARIES}
+                      ${QTGSTREAMER_QUICK_LIBRARIES}
+                      ${QTGSTREAMER_QUICK_LIBRARY})
+                      ${TAGLIB_LIBRARIES}
+                      ${X11_LIBRARIES})

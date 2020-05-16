@@ -4,8 +4,12 @@
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 
 #include <QObject>
+#include <QWidget>
+#include <QFrame>
 #include <QSettings>
 #include <QString>
+
+#include <app/modules/brightness.hpp>
 
 class Config : public QObject {
     Q_OBJECT
@@ -47,11 +51,51 @@ class Config : public QObject {
     inline bool get_radio_muted() { return this->radio_muted; }
     inline void set_radio_muted(bool radio_muted) { this->radio_muted = radio_muted; }
 
-    std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> open_auto_config;
+    inline QString get_media_home() { return this->media_home; }
+    inline void set_media_home(QString media_home) { this->media_home = media_home; }
+
+    inline bool get_wireless_active() { return this->wireless_active; }
+    inline void set_wireless_active(bool wireless_active) { this->wireless_active = wireless_active; }
+
+    inline QString get_wireless_address() { return this->wireless_address; }
+    inline void set_wireless_address(QString wireless_address) { this->wireless_address = wireless_address; }
+
+    inline QString get_launcher_home() { return this->launcher_home; }
+    inline void set_launcher_home(QString launcher_home) { this->launcher_home = launcher_home; }
+
+    inline bool get_launcher_auto_launch() { return this->launcher_auto_launch; }
+    inline void set_launcher_auto_launch(bool launcher_auto_launch) { this->launcher_auto_launch = launcher_auto_launch; }
+
+    inline QString get_launcher_app() { return this->launcher_app; }
+    inline void set_launcher_app(QString launcher_app) { this->launcher_app = launcher_app; }
+
+    inline QString get_quick_view() { return this->quick_view; }
+    inline void set_quick_view(QString quick_view)
+    {
+        this->quick_view = quick_view;
+        emit quick_view_changed(this->quick_view);
+    }
+    inline QMap<QString, QWidget *> get_quick_views() { return this->quick_views; }
+    inline QWidget *get_quick_view(QString name) { return this->quick_views[name]; }
+    inline void add_quick_view(QString name, QWidget *view) { this->quick_views[name] = view; }
+
+    inline QString get_brightness_module() { return this->brightness_module; }
+    inline void set_brightness_module(QString brightness_module) { this->brightness_module = brightness_module; }
+    inline QMap<QString, BrightnessModule *> get_brightness_modules() { return this->brightness_modules; }
+    inline BrightnessModule *get_brightness_module(QString name) { return this->brightness_modules[name]; }
+    inline void add_brightness_module(QString name, BrightnessModule *module)
+    {
+        this->brightness_modules[name] = module;
+    }
+
+    std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
 
    private:
+    QMap<QString, QWidget *> quick_views;
+    QMap<QString, BrightnessModule *> brightness_modules;
+
     QSettings ia_config;
     int volume;
     bool dark_mode;
@@ -61,10 +105,19 @@ class Config : public QObject {
     QString bluetooth_device;
     double radio_station;
     bool radio_muted;
+    QString media_home;
+    bool wireless_active;
+    QString wireless_address;
+    QString launcher_home;
+    bool launcher_auto_launch;
+    QString launcher_app;
+    QString quick_view;
+    QString brightness_module;
 
    signals:
-    void brightness_changed(unsigned int);
-    void si_units_changed(bool);
+    void brightness_changed(unsigned int brightness);
+    void si_units_changed(bool si_units);
+    void quick_view_changed(QString quick_view);
 };
 
 #endif

@@ -3,6 +3,8 @@
 #include <aasdk_proto/VideoResolutionEnum.pb.h>
 #include <BluezQt/Device>
 #include <BluezQt/PendingCall>
+#include <QLabel>
+#include <QScrollArea>
 #include <f1x/openauto/autoapp/Configuration/AudioOutputBackendType.hpp>
 #include <f1x/openauto/autoapp/Configuration/BluetootAdapterType.hpp>
 #include <f1x/openauto/autoapp/Configuration/HandednessOfTrafficType.hpp>
@@ -10,6 +12,7 @@
 #include <app/config.hpp>
 #include <app/tabs/settings.hpp>
 #include <app/theme.hpp>
+#include <app/widgets/color_label.hpp>
 #include <app/widgets/switch.hpp>
 #include <app/window.hpp>
 
@@ -31,10 +34,8 @@ GeneralSettingsSubTab::GeneralSettingsSubTab(QWidget *parent) : QWidget(parent)
     this->config = Config::get_instance();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
 
     layout->addWidget(this->settings_widget());
-    layout->addWidget(this->controls_widget());
 }
 
 QWidget *GeneralSettingsSubTab::settings_widget()
@@ -47,9 +48,17 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->si_units_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->brightness_module_row_widget(), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
+    layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->quick_view_row_widget(), 1);
 
-    return widget;
+    QScrollArea *scroll_area = new QScrollArea(this);
+    Theme::to_touch_scroller(scroll_area);
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setWidget(widget);
+
+    return scroll_area;
 }
 
 QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
@@ -68,6 +77,62 @@ QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
         config->set_dark_mode(state);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::brightness_module_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Brightness Module", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    layout->addWidget(this->brightness_module_select_widget(), 1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::brightness_module_select_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    const QStringList modules = this->config->get_brightness_modules().keys();
+
+    QLabel *label = new QLabel(this->config->get_brightness_module(), widget);
+    label->setAlignment(Qt::AlignCenter);
+    label->setFont(Theme::font_16);
+
+    QPushButton *left_button = new QPushButton(widget);
+    left_button->setFlat(true);
+    left_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_left", left_button);
+    connect(left_button, &QPushButton::clicked, [this, label, modules]() {
+        int total_modules = modules.size();
+        QString module =
+            modules[((modules.indexOf(label->text()) - 1) % total_modules + total_modules) % total_modules];
+        label->setText(module);
+        this->config->set_brightness_module(module);
+    });
+
+    QPushButton *right_button = new QPushButton(widget);
+    right_button->setFlat(true);
+    right_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_right", right_button);
+    connect(right_button, &QPushButton::clicked, [this, label, modules]() {
+        QString module = modules[(modules.indexOf(label->text()) + 1) % modules.size()];
+        label->setText(module);
+        this->config->set_brightness_module(module);
+    });
+
+    layout->addStretch(1);
+    layout->addWidget(left_button);
+    layout->addWidget(label, 2);
+    layout->addWidget(right_button);
+    layout->addStretch(1);
 
     return widget;
 }
@@ -146,48 +211,104 @@ QWidget *GeneralSettingsSubTab::color_row_widget()
     label->setFont(Theme::font_16);
     layout->addWidget(label, 1);
 
-    QComboBox *box = new QComboBox(widget);
-    box->setMinimumContentsLength(16);
-    box->setItemDelegate(new QStyledItemDelegate());
-    box->setFont(Theme::font_14);
-    QMap<QString, QColor> colors = this->theme->get_colors();
-    QMap<QString, QColor>::iterator it;
-    QPixmap pixmap(Theme::icon_16);
-    for (it = colors.begin(); it != colors.end(); it++) {
-        pixmap.fill(it.value());
-        box->addItem(QIcon(pixmap), it.key());
-    }
-    box->setCurrentText(this->config->get_color());
-    connect(box, QOverload<const QString &>::of(&QComboBox::activated),
-            [theme = this->theme, config = this->config](const QString &color) {
-                theme->set_color(color);
-                config->set_color(color);
-            });
-    connect(this->theme, &Theme::color_updated, [box](QMap<QString, QColor> &colors) {
-        QMap<QString, QColor>::iterator it;
-        QPixmap pixmap(Theme::icon_16);
-        for (it = colors.begin(); it != colors.end(); it++) {
-            pixmap.fill(it.value());
-            box->setItemIcon(box->findText(it.key()), QIcon(pixmap));
-        }
-    });
-    layout->addWidget(box, 1, Qt::AlignHCenter);
+    layout->addWidget(this->color_select_widget(), 1);
 
     return widget;
 }
 
-QWidget *GeneralSettingsSubTab::controls_widget()
+QWidget *GeneralSettingsSubTab::color_select_widget()
 {
     QWidget *widget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(widget);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    QPushButton *save_button = new QPushButton("save", widget);
-    save_button->setFont(Theme::font_14);
-    save_button->setFlat(true);
-    save_button->setIconSize(Theme::icon_36);
-    this->theme->add_button_icon("save", save_button);
-    connect(save_button, &QPushButton::clicked, [config = this->config]() { config->save(); });
-    layout->addWidget(save_button, 0, Qt::AlignRight);
+    const QStringList colors = this->theme->get_colors().keys();
+
+    ColorLabel *label = new ColorLabel(Theme::icon_16, widget);
+    label->setFont(Theme::font_16);
+
+    QPushButton *left_button = new QPushButton(widget);
+    left_button->setFlat(true);
+    left_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_left", left_button);
+    connect(left_button, &QPushButton::clicked, [this, colors, label]() {
+        int total_colors = colors.size();
+        QString color = colors[((colors.indexOf(label->text()) - 1) % total_colors + total_colors) % total_colors];
+        label->update(color);
+        this->theme->set_color(color);
+        this->config->set_color(color);
+    });
+
+    QPushButton *right_button = new QPushButton(widget);
+    right_button->setFlat(true);
+    right_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_right", right_button);
+    connect(right_button, &QPushButton::clicked, [this, colors, label]() {
+        QString color = colors[(colors.indexOf(label->text()) + 1) % colors.size()];
+        label->update(color);
+        this->theme->set_color(color);
+        this->config->set_color(color);
+    });
+
+    layout->addStretch(1);
+    layout->addWidget(left_button);
+    layout->addWidget(label, 2);
+    layout->addWidget(right_button);
+    layout->addStretch(1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::quick_view_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Quick View", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    layout->addWidget(this->quick_view_select_widget(), 1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::quick_view_select_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    const QStringList views = this->config->get_quick_views().keys();
+
+    QLabel *label = new QLabel(this->config->get_quick_view(), widget);
+    label->setAlignment(Qt::AlignCenter);
+    label->setFont(Theme::font_16);
+
+    QPushButton *left_button = new QPushButton(widget);
+    left_button->setFlat(true);
+    left_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_left", left_button);
+    connect(left_button, &QPushButton::clicked, [this, label, views]() {
+        int total_views = views.size();
+        QString view = views[((views.indexOf(label->text()) - 1) % total_views + total_views) % total_views];
+        label->setText(view);
+        this->config->set_quick_view(view);
+    });
+
+    QPushButton *right_button = new QPushButton(widget);
+    right_button->setFlat(true);
+    right_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_right", right_button);
+    connect(right_button, &QPushButton::clicked, [this, label, views]() {
+        QString view = views[(views.indexOf(label->text()) + 1) % views.size()];
+        label->setText(view);
+        this->config->set_quick_view(view);
+    });
+
+    layout->addStretch(1);
+    layout->addWidget(left_button);
+    layout->addWidget(label, 2);
+    layout->addWidget(right_button);
+    layout->addStretch(1);
 
     return widget;
 }
@@ -199,10 +320,9 @@ BluetoothSettingsSubTab::BluetoothSettingsSubTab(QWidget *parent) : QWidget(pare
     this->config = Config::get_instance();
 
     QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
 
-    layout->addWidget(this->controls_widget());
-    layout->addWidget(this->devices_widget());
+    layout->addWidget(this->controls_widget(), 1);
+    layout->addWidget(this->devices_widget(), 1);
 }
 
 QWidget *BluetoothSettingsSubTab::controls_widget()
@@ -216,7 +336,7 @@ QWidget *BluetoothSettingsSubTab::controls_widget()
     layout->addWidget(label);
 
     QLabel *connected_device = new QLabel(this->bluetooth->get_media_player().first, widget);
-    connected_device->setStyleSheet("padding-left: 16px;");
+    connected_device->setIndent(16);
     connected_device->setFont(Theme::font_14);
     connect(this->bluetooth, &Bluetooth::media_player_changed,
             [connected_device](QString name, BluezQt::MediaPlayerPtr) { connected_device->setText(name); });
@@ -236,19 +356,25 @@ QWidget *BluetoothSettingsSubTab::scanner_widget()
     QPushButton *button = new QPushButton("scan", widget);
     button->setFont(Theme::font_14);
     button->setFlat(true);
+    button->setCheckable(true);
     button->setEnabled(this->bluetooth->has_adapter());
     button->setIconSize(Theme::icon_36);
     this->theme->add_button_icon("bluetooth_searching", button);
-    connect(button, &QPushButton::clicked, [bluetooth = this->bluetooth]() { bluetooth->scan(); });
+    connect(button, &QPushButton::clicked, [bluetooth = this->bluetooth](bool checked) {
+        if (checked)
+            bluetooth->start_scan();
+        else
+            bluetooth->stop_scan();
+    });
     layout->addWidget(button);
 
     ProgressIndicator *loader = new ProgressIndicator(widget);
     connect(this->bluetooth, &Bluetooth::scan_status, [button, loader](bool status) {
-        button->setEnabled(!status);
         if (status)
-            loader->startAnimation();
+            loader->start_animation();
         else
-            loader->stopAnimation();
+            loader->stop_animation();
+        button->setChecked(status);
     });
     layout->addWidget(loader);
 
@@ -261,7 +387,7 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
     QVBoxLayout *layout = new QVBoxLayout(widget);
 
     for (BluezQt::DevicePtr device : this->bluetooth->get_devices()) {
-        if (device->address() == this->config->get_bluetooth_device()) device->connectToDevice()->waitForFinished();
+        if (device->address() == this->config->get_bluetooth_device()) device->connectToDevice();
         QPushButton *button = new QPushButton(device->name(), widget);
         button->setFont(Theme::font_16);
         button->setCheckable(true);
@@ -269,11 +395,11 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
         connect(button, &QPushButton::clicked, [config = this->config, button, device](bool checked = false) {
             button->setChecked(!checked);
             if (checked) {
-                device->connectToDevice()->waitForFinished();
+                device->connectToDevice();
                 config->set_bluetooth_device(device->address());
             }
             else {
-                device->disconnectFromDevice()->waitForFinished();
+                device->disconnectFromDevice();
                 config->set_bluetooth_device(QString());
             }
         });
@@ -306,7 +432,12 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
         this->devices.remove(device);
     });
 
-    return widget;
+    QScrollArea *scroll_area = new QScrollArea(this);
+    Theme::to_touch_scroller(scroll_area);
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setWidget(widget);
+
+    return scroll_area;
 }
 
 OpenAutoSettingsSubTab::OpenAutoSettingsSubTab(QWidget *parent) : QWidget(parent)
@@ -316,7 +447,6 @@ OpenAutoSettingsSubTab::OpenAutoSettingsSubTab(QWidget *parent) : QWidget(parent
     this->config = Config::get_instance();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
 
     layout->addWidget(this->settings_widget());
 }
@@ -337,7 +467,12 @@ QWidget *OpenAutoSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->bluetooth_row_widget(), 1);
 
-    return widget;
+    QScrollArea *scroll_area = new QScrollArea(this);
+    Theme::to_touch_scroller(scroll_area);
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setWidget(widget);
+
+    return scroll_area;
 }
 
 QWidget *OpenAutoSettingsSubTab::rhd_row_widget()
@@ -350,10 +485,10 @@ QWidget *OpenAutoSettingsSubTab::rhd_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
-    toggle->setChecked(this->config->open_auto_config->getHandednessOfTrafficType() ==
+    toggle->setChecked(this->config->openauto_config->getHandednessOfTrafficType() ==
                        autoapp::configuration::HandednessOfTrafficType::RIGHT_HAND_DRIVE);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
-        config->open_auto_config->setHandednessOfTrafficType(
+        config->openauto_config->setHandednessOfTrafficType(
             state ? autoapp::configuration::HandednessOfTrafficType::RIGHT_HAND_DRIVE
                   : autoapp::configuration::HandednessOfTrafficType::LEFT_HAND_DRIVE);
     });
@@ -375,19 +510,17 @@ QWidget *OpenAutoSettingsSubTab::frame_rate_row_widget()
     QHBoxLayout *group_layout = new QHBoxLayout(group);
 
     QRadioButton *fps_30_button = new QRadioButton("30fps", group);
-    fps_30_button->setFixedHeight(fps_30_button->height());
     fps_30_button->setFont(Theme::font_14);
-    fps_30_button->setChecked(this->config->open_auto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_30);
+    fps_30_button->setChecked(this->config->openauto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_30);
     connect(fps_30_button, &QRadioButton::clicked,
-            [config = this->config]() { config->open_auto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_30); });
+            [config = this->config]() { config->openauto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_30); });
     group_layout->addWidget(fps_30_button);
 
     QRadioButton *fps_60_button = new QRadioButton("60fps", group);
-    fps_60_button->setFixedHeight(fps_60_button->height());
     fps_60_button->setFont(Theme::font_14);
-    fps_60_button->setChecked(this->config->open_auto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_60);
+    fps_60_button->setChecked(this->config->openauto_config->getVideoFPS() == aasdk::proto::enums::VideoFPS::_60);
     connect(fps_60_button, &QRadioButton::clicked,
-            [config = this->config]() { config->open_auto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_60); });
+            [config = this->config]() { config->openauto_config->setVideoFPS(aasdk::proto::enums::VideoFPS::_60); });
     group_layout->addWidget(fps_60_button);
 
     layout->addWidget(group, 1, Qt::AlignHCenter);
@@ -408,32 +541,29 @@ QWidget *OpenAutoSettingsSubTab::resolution_row_widget()
     QHBoxLayout *group_layout = new QHBoxLayout(group);
 
     QRadioButton *res_480_button = new QRadioButton("480p", group);
-    res_480_button->setFixedHeight(res_480_button->height());
     res_480_button->setFont(Theme::font_14);
-    res_480_button->setChecked(this->config->open_auto_config->getVideoResolution() ==
+    res_480_button->setChecked(this->config->openauto_config->getVideoResolution() ==
                                aasdk::proto::enums::VideoResolution::_480p);
     connect(res_480_button, &QRadioButton::clicked, [config = this->config]() {
-        config->open_auto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_480p);
+        config->openauto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_480p);
     });
     group_layout->addWidget(res_480_button);
 
     QRadioButton *res_720_button = new QRadioButton("720p", group);
-    res_720_button->setFixedHeight(res_720_button->height());
     res_720_button->setFont(Theme::font_14);
-    res_720_button->setChecked(this->config->open_auto_config->getVideoResolution() ==
+    res_720_button->setChecked(this->config->openauto_config->getVideoResolution() ==
                                aasdk::proto::enums::VideoResolution::_720p);
     connect(res_720_button, &QRadioButton::clicked, [config = this->config]() {
-        config->open_auto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_720p);
+        config->openauto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_720p);
     });
     group_layout->addWidget(res_720_button);
 
     QRadioButton *res_1080_button = new QRadioButton("1080p", group);
-    res_1080_button->setFixedHeight(res_1080_button->height());
     res_1080_button->setFont(Theme::font_14);
-    res_1080_button->setChecked(this->config->open_auto_config->getVideoResolution() ==
+    res_1080_button->setChecked(this->config->openauto_config->getVideoResolution() ==
                                 aasdk::proto::enums::VideoResolution::_1080p);
     connect(res_1080_button, &QRadioButton::clicked, [config = this->config]() {
-        config->open_auto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_1080p);
+        config->openauto_config->setVideoResolution(aasdk::proto::enums::VideoResolution::_1080p);
     });
     group_layout->addWidget(res_1080_button);
 
@@ -462,15 +592,13 @@ QWidget *OpenAutoSettingsSubTab::dpi_widget()
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
-    slider->setFixedHeight(slider->height());
     slider->setRange(0, 512);
-    slider->setSliderPosition(this->config->open_auto_config->getScreenDPI());
+    slider->setSliderPosition(this->config->openauto_config->getScreenDPI());
     QLabel *value = new QLabel(QString::number(slider->sliderPosition()), widget);
-    value->setFixedHeight(value->height());
     value->setFont(Theme::font_14);
     connect(slider, &QSlider::valueChanged, [config = this->config, value](int position) {
         value->setText(QString::number(position));
-        config->open_auto_config->setScreenDPI(position);
+        config->openauto_config->setScreenDPI(position);
     });
 
     layout->addStretch(2);
@@ -491,12 +619,12 @@ QWidget *OpenAutoSettingsSubTab::rt_audio_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
-    toggle->setChecked(this->config->open_auto_config->getAudioOutputBackendType() ==
+    toggle->setChecked(this->config->openauto_config->getAudioOutputBackendType() ==
                        autoapp::configuration::AudioOutputBackendType::RTAUDIO);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
-        config->open_auto_config->setAudioOutputBackendType(
-            state ? autoapp::configuration::AudioOutputBackendType::RTAUDIO
-                  : autoapp::configuration::AudioOutputBackendType::QT);
+        config->openauto_config->setAudioOutputBackendType(state
+                                                               ? autoapp::configuration::AudioOutputBackendType::RTAUDIO
+                                                               : autoapp::configuration::AudioOutputBackendType::QT);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
@@ -516,20 +644,18 @@ QWidget *OpenAutoSettingsSubTab::audio_channels_row_widget()
     QHBoxLayout *group_layout = new QHBoxLayout(group);
 
     QCheckBox *music_button = new QCheckBox("Music", group);
-    music_button->setFixedHeight(music_button->height());
     music_button->setFont(Theme::font_14);
-    music_button->setChecked(this->config->open_auto_config->musicAudioChannelEnabled());
+    music_button->setChecked(this->config->openauto_config->musicAudioChannelEnabled());
     connect(music_button, &QCheckBox::toggled,
-            [config = this->config](bool checked) { config->open_auto_config->setMusicAudioChannelEnabled(checked); });
+            [config = this->config](bool checked) { config->openauto_config->setMusicAudioChannelEnabled(checked); });
     group_layout->addWidget(music_button);
     group_layout->addStretch(2);
 
     QCheckBox *speech_button = new QCheckBox("Speech", group);
-    speech_button->setFixedHeight(speech_button->height());
     speech_button->setFont(Theme::font_14);
-    speech_button->setChecked(this->config->open_auto_config->speechAudioChannelEnabled());
+    speech_button->setChecked(this->config->openauto_config->speechAudioChannelEnabled());
     connect(speech_button, &QCheckBox::toggled,
-            [config = this->config](bool checked) { config->open_auto_config->setSpeechAudioChannelEnabled(checked); });
+            [config = this->config](bool checked) { config->openauto_config->setSpeechAudioChannelEnabled(checked); });
     group_layout->addWidget(speech_button);
 
     layout->addWidget(group, 1, Qt::AlignHCenter);
@@ -547,11 +673,11 @@ QWidget *OpenAutoSettingsSubTab::bluetooth_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
-    toggle->setChecked(this->config->open_auto_config->getBluetoothAdapterType() ==
+    toggle->setChecked(this->config->openauto_config->getBluetoothAdapterType() ==
                        autoapp::configuration::BluetoothAdapterType::LOCAL);
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
-        config->open_auto_config->setBluetoothAdapterType(state ? autoapp::configuration::BluetoothAdapterType::LOCAL
-                                                                : autoapp::configuration::BluetoothAdapterType::NONE);
+        config->openauto_config->setBluetoothAdapterType(state ? autoapp::configuration::BluetoothAdapterType::LOCAL
+                                                               : autoapp::configuration::BluetoothAdapterType::NONE);
     });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 

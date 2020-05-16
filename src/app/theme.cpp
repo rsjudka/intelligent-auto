@@ -29,7 +29,7 @@ const QSize Theme::icon_96 = QSize(96, 96);
 const QColor Theme::danger_color = QColor(211, 47, 47);
 const QColor Theme::success_color = QColor(56, 142, 60);
 
-Theme::Theme() : QObject(qApp), palette(), color("blue")
+Theme::Theme() : QObject(qApp), palette(), color("azure")
 {
     QFontDatabase::addApplicationFont(":/fonts/Titillium_Web/TitilliumWeb-Regular.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Montserrat/Montserrat-LightItalic.ttf");
@@ -110,7 +110,7 @@ void Theme::add_tab_icon(QString name, int index, Qt::Orientation orientation)
 
 void Theme::add_button_icon(QString name, QPushButton *button, QString normal_name)
 {
-    bool checkable = button->isCheckable();
+    bool set_down_state = button->isCheckable() && button->text().isNull();
 
     QPixmap dark_base = QIcon(QString(":/icons/dark/%1-24px.svg").arg(name)).pixmap(512, 512);
     QPixmap light_base = QIcon(QString(":/icons/light/%1-24px.svg").arg(name)).pixmap(512, 512);
@@ -124,8 +124,8 @@ void Theme::add_button_icon(QString name, QPushButton *button, QString normal_na
     QPixmap dark_normal;
     QPixmap light_normal;
     if (normal_name.isNull()) {
-        dark_normal = checkable ? this->create_pixmap_variant(dark_base, .54) : dark_active;
-        light_normal = checkable ? this->create_pixmap_variant(light_base, .7) : light_active;
+        dark_normal = set_down_state ? this->create_pixmap_variant(dark_base, .54) : dark_active;
+        light_normal = set_down_state ? this->create_pixmap_variant(light_base, .7) : light_active;
     }
     else {
         QPixmap dark_normal_base = QIcon(QString(":/icons/dark/%1-24px.svg").arg(normal_name)).pixmap(512, 512);
@@ -153,9 +153,10 @@ void Theme::update()
     this->set_palette();
     qApp->setStyleSheet(this->stylesheets[this->mode ? "dark" : "light"]);
 
+    emit mode_updated(this->mode);
     emit icons_updated(this->tab_icons[this->mode ? "dark" : "light"],
                        this->button_icons[this->mode ? "dark" : "light"]);
-    emit color_updated(this->colors[this->mode ? "dark" : "light"]);
+    emit color_updated();
 }
 
 Theme *Theme::get_instance()
