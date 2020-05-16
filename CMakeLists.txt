@@ -43,6 +43,11 @@ find_package(rtaudio REQUIRED)
 find_package(Qt5GStreamer)
 find_package(taglib REQUIRED)
 find_package(X11 REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4
+gstreamer-sdp-1.0>=1.4
+gstreamer-video-1.0>=1.4
+gstreamer-app-1.0>=1.4)
 
 if(RPI_BUILD)
     add_definitions(-DUSE_OMX -DOMX_SKIP64BIT)
@@ -52,11 +57,6 @@ if(RPI_BUILD)
     set(ILCLIENT_LIBRARIES "/opt/vc/src/hello_pi/libs/ilclient/libilclient.a;/opt/vc/lib/libvcos.so;/opt/vc/lib/libvcilcs.a;/opt/vc/lib/libvchiq_arm.so")
 endif(RPI_BUILD)
 if(GST_BUILD)
-    find_package(PkgConfig REQUIRED)
-pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4
-    gstreamer-sdp-1.0>=1.4
-    gstreamer-video-1.0>=1.4
-    gstreamer-app-1.0>=1.4)
     add_definitions(-DUSE_GST -DRPI)
 endif(GST_BUILD)
 message(INFO "${GST_LIBRARIES}")

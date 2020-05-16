@@ -4,7 +4,6 @@
 #include <app/widgets/ip_input.hpp>
 #include <app/widgets/progress.hpp>
 #include <app/window.hpp>
-
 OpenAutoWorker::OpenAutoWorker(std::function<void(bool)> callback, QWidget *parent, bool night_mode)
     : QObject(qApp),
       io_service(),

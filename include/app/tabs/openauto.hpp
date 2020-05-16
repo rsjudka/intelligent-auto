@@ -17,6 +17,7 @@
 
 #include <app/config.hpp>
 #include <app/theme.hpp>
+#include <thread>
 
 namespace aasdk = f1x::aasdk;
 namespace autoapp = f1x::openauto::autoapp;
