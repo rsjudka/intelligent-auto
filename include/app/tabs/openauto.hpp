@@ -14,6 +14,7 @@
 #include <f1x/openauto/autoapp/Configuration/RecentAddressesList.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntityFactory.hpp>
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
+#include <thread>
 
 #include <app/config.hpp>
 #include <app/theme.hpp>

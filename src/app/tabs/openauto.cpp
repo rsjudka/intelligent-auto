@@ -104,7 +104,10 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
 
     MainWindow *window = qobject_cast<MainWindow *>(parent);
     connect(window, &MainWindow::set_openauto_state, [this](unsigned int alpha) {
-        if (this->worker != nullptr) this->worker->set_opacity(alpha);
+        if (this->worker != nullptr) {
+            this->worker->set_opacity(alpha);
+            this->worker->resize();
+        }
         if (alpha > 0) this->setFocus();
     });
 
