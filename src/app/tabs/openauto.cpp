@@ -161,10 +161,8 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
         if (module->update_androidauto())
             this->worker->set_opacity(this->config->get_brightness());
-
         layout->addWidget(this->msg_widget());
         layout->addWidget(frame);
-
         this->worker->start();
     });
 }

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+        <file>aaVideo.qml</file>
         <file>icons/dark/play-24px.svg</file>
         <file>icons/dark/pause-24px.svg</file>
         <file>icons/dark/brightness_low-24px.svg</file>
