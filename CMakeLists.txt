@@ -40,24 +40,27 @@ find_package(KF5BluezQt REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(rtaudio REQUIRED)
-find_package(Qt5GStreamer)
 find_package(taglib REQUIRED)
 find_package(X11 REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4
-gstreamer-sdp-1.0>=1.4
-gstreamer-video-1.0>=1.4
-gstreamer-app-1.0>=1.4)
 
-if(RPI_BUILD)
+if(RPI_BUILD AND NOT GST_BUILD)
     add_definitions(-DUSE_OMX -DOMX_SKIP64BIT)
     set(BCM_HOST_LIBRARIES "/opt/vc/lib/libbcm_host.so")
     set(BCM_HOST_INCLUDE_DIRS "/opt/vc/include")
     set(ILCLIENT_INCLUDE_DIRS "/opt/vc/src/hello_pi/libs/ilclient")
     set(ILCLIENT_LIBRARIES "/opt/vc/src/hello_pi/libs/ilclient/libilclient.a;/opt/vc/lib/libvcos.so;/opt/vc/lib/libvcilcs.a;/opt/vc/lib/libvchiq_arm.so")
-endif(RPI_BUILD)
+endif(RPI_BUILD AND NOT GST_BUILD)
 if(GST_BUILD)
-    add_definitions(-DUSE_GST -DRPI)
+    find_package(Qt5GStreamer)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4
+    gstreamer-sdp-1.0>=1.4
+    gstreamer-video-1.0>=1.4
+    gstreamer-app-1.0>=1.4)
+    add_definitions(-DUSE_GST)
+    if(RPI_BUILD)
+     add_definitions(-DRPI)
+    endif(RPI_BUILD)
 endif(GST_BUILD)
 message(INFO "${GST_LIBRARIES}")
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
