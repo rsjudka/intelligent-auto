@@ -43,11 +43,6 @@ find_package(rtaudio REQUIRED)
 find_package(taglib REQUIRED)
 find_package(X11 REQUIRED)
 
-if(NOT RESOLUTION)
-    set(RESOLUTION 1)
-endif()
-add_definitions(-DRESOLUTION=${RESOLUTION})
-
 if(RPI_BUILD)
     add_definitions(-DUSE_OMX -DOMX_SKIP64BIT)
     set(BCM_HOST_LIBRARIES "/opt/vc/lib/libbcm_host.so")
@@ -99,5 +94,3 @@ target_link_libraries(ia
                       ${RTAUDIO_LIBRARIES}
                       ${TAGLIB_LIBRARIES}
                       ${X11_LIBRARIES})
-
-unset(RESOLUTION CACHE)
