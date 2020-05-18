@@ -1,8 +1,8 @@
 #ifndef THEME_HPP_
 #define THEME_HPP_
 
-#include <QApplication>
 #include <QAbstractScrollArea>
+#include <QApplication>
 #include <QFrame>
 #include <QMap>
 #include <QObject>

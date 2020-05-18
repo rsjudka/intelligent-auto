@@ -103,7 +103,8 @@ class Config : public QObject {
     }
 
     inline bool get_page(QWidget *page) { return this->pages.value(page->objectName(), true); }
-    inline void set_page(QWidget *page, bool enabled) {
+    inline void set_page(QWidget *page, bool enabled)
+    {
         this->pages[page->objectName()] = enabled;
         emit page_changed(page, enabled);
     }
