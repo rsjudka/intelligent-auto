@@ -4,6 +4,7 @@
 #include <app/widgets/ip_input.hpp>
 #include <app/widgets/progress.hpp>
 #include <app/window.hpp>
+
 OpenAutoWorker::OpenAutoWorker(std::function<void(bool)> callback, QWidget *parent, bool night_mode)
     : QObject(qApp),
       io_service(),
@@ -161,8 +162,10 @@ OpenAutoTab::OpenAutoTab(QWidget *parent) : QWidget(parent)
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
         if (module->update_androidauto())
             this->worker->set_opacity(this->config->get_brightness());
+
         layout->addWidget(this->msg_widget());
         layout->addWidget(frame);
+
         this->worker->start();
     });
 }
