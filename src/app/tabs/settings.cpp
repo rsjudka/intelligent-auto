@@ -338,8 +338,8 @@ QWidget *BluetoothSettingsSubTab::controls_widget()
     QLabel *connected_device = new QLabel(this->bluetooth->get_media_player().first, widget);
     connected_device->setIndent(16);
     connected_device->setFont(Theme::font_14);
-    // connect(this->bluetooth, &Bluetooth::media_player_changed,
-    //         [connected_device](QString name, BluezQt::MediaPlayerPtr) { connected_device->setText(name); });
+     connect(this->bluetooth, &Bluetooth::media_player_changed,
+             [connected_device](QString name, BluezQt::MediaPlayerPtr) { connected_device->setText(name); });
     layout->addWidget(connected_device);
     layout->addStretch();
 
