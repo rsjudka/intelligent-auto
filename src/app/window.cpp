@@ -72,31 +72,45 @@ QTabWidget *MainWindow::tabs_widget()
     openauto->setObjectName("OpenAuto");
     Shortcut *openauto_shortcut = new Shortcut(this->config->get_shortcut("openauto_page"), this);
     this->shortcuts->add_shortcut("openauto_page", "Open OpenAuto Page", openauto_shortcut);
-    connect(openauto_shortcut, &Shortcut::activated, [widget]() { widget->setCurrentIndex(0); });
+    connect(openauto_shortcut, &Shortcut::activated, [widget, openauto]() {
+        int idx = widget->indexOf(openauto);
+        if (widget->isTabEnabled(idx)) widget->setCurrentIndex(idx);
+    });
 
     MediaTab *media = new MediaTab(this);
     media->setObjectName("Media");
     Shortcut *media_shortcut = new Shortcut(this->config->get_shortcut("media_page"), this);
     this->shortcuts->add_shortcut("media_page", "Open Media Page", media_shortcut);
-    connect(media_shortcut, &Shortcut::activated, [widget]() { widget->setCurrentIndex(1); });
+    connect(media_shortcut, &Shortcut::activated, [widget, media]() {
+        int idx = widget->indexOf(media);
+        if (widget->isTabEnabled(idx)) widget->setCurrentIndex(idx);
+    });
 
     DataTab *data = new DataTab(this);
     data->setObjectName("Data");
     Shortcut *data_shortcut = new Shortcut(this->config->get_shortcut("data_page"), this);
     this->shortcuts->add_shortcut("data_page", "Open Data Page", data_shortcut);
-    connect(data_shortcut, &Shortcut::activated, [widget]() { widget->setCurrentIndex(2); });
+    connect(data_shortcut, &Shortcut::activated, [widget, data]() {
+        int idx = widget->indexOf(data);
+        if (widget->isTabEnabled(idx)) widget->setCurrentIndex(idx);
+    });
 
     LauncherTab *launcher = new LauncherTab(this);
     launcher->setObjectName("Launcher");
     Shortcut *launcher_shortcut = new Shortcut(this->config->get_shortcut("launcher_page"), this);
     this->shortcuts->add_shortcut("launcher_page", "Open Launcher Page", launcher_shortcut);
-    connect(launcher_shortcut, &Shortcut::activated, [widget]() { widget->setCurrentIndex(3); });
+    connect(launcher_shortcut, &Shortcut::activated, [widget, launcher]() {
+        int idx = widget->indexOf(launcher);
+        if (widget->isTabEnabled(idx)) widget->setCurrentIndex(idx);
+    });
 
     SettingsTab *settings = new SettingsTab(this);
     settings->setProperty("prevent_disable", true);
     Shortcut *settings_shortcut = new Shortcut(this->config->get_shortcut("settings_page"), this);
     this->shortcuts->add_shortcut("settings_page", "Open Settings Page", settings_shortcut);
-    connect(settings_shortcut, &Shortcut::activated, [widget]() { widget->setCurrentIndex(4); });
+    connect(settings_shortcut, &Shortcut::activated, [widget, settings]() {
+        widget->setCurrentIndex(widget->indexOf(settings));
+    });
 
     int idx;
     idx = widget->addTab(openauto, QString());
