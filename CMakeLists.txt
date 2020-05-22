@@ -69,7 +69,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${X11_INCLUDE_DIR}
                     ${include_directory})
 
-include_directories(${LIBUSB_1_INCLUDE_DIRS})
+include_directories(SYSTEM ${LIBUSB_1_INCLUDE_DIRS})
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
