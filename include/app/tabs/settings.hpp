@@ -15,6 +15,7 @@ class SettingsTab : public QTabWidget {
 
    public:
     SettingsTab(QWidget *parent = nullptr);
+    void fill_tabs();
 };
 
 class GeneralSettingsSubTab : public QWidget {
@@ -33,8 +34,25 @@ class GeneralSettingsSubTab : public QWidget {
     QWidget *si_units_row_widget();
     QWidget *color_row_widget();
     QWidget *color_select_widget();
+
+    Config *config;
+    Theme *theme;
+};
+
+class LayoutSettingsSubTab : public QWidget {
+    Q_OBJECT
+
+   public:
+    LayoutSettingsSubTab(QWidget *parent = nullptr);
+
+   private:
+    QWidget *settings_widget();
+    QWidget *pages_widget();
+    QWidget *controls_bar_widget();
     QWidget *quick_view_row_widget();
     QWidget *quick_view_select_widget();
+    QWidget *scale_row_widget();
+    QWidget *scale_widget();
 
     Config *config;
     Theme *theme;
