@@ -8,6 +8,8 @@
 #include <app/config.hpp>
 #include <app/theme.hpp>
 
+#include <ui_camera_settings.h>
+
 class SettingsTab : public QTabWidget {
     Q_OBJECT
 
@@ -75,6 +77,34 @@ class OpenAutoSettingsSubTab : public QWidget {
     Bluetooth *bluetooth;
     Config *config;
     Theme *theme;
+};
+
+class CameraSettingsSubTab : public QWidget {
+    Q_OBJECT
+
+   public:
+    CameraSettingsSubTab(QWidget *parent = nullptr);
+
+   signals:
+    void cam_toggle_requested();
+	void cam_name_changed(QString);
+
+   public slots:
+	void on_newConnectionStatus(QString);
+
+   private slots:
+    void on_camName_editingFinished();
+    void on_streamAddress_editingFinished();
+ 	void on_connectButton_clicked();
+
+   private:
+    Theme *theme;
+	QSettings *settings;
+	Ui::CameraSettings ui;
+
+
+// private slots:
+//     void on_test_button_clicked();
 };
 
 #endif

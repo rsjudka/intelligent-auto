@@ -8,6 +8,7 @@
 #include <app/tabs/launcher.hpp>
 #include <app/tabs/settings.hpp>
 #include <app/window.hpp>
+#include <app/tabs/camera.hpp>
 #include <app/modules/brightness.hpp>
 
 MainWindow::MainWindow()
@@ -69,8 +70,18 @@ QTabWidget *MainWindow::tabs_widget()
     widget->addTab(new LauncherTab(this), "");
     this->theme->add_tab_icon("widgets", 3, Qt::Orientation::Vertical);
 
-    widget->addTab(new SettingsTab(this), "");
-    this->theme->add_tab_icon("tune", 4, Qt::Orientation::Vertical);
+	CameraTab* camera = new CameraTab( this );
+    widget->addTab(camera, "");
+    this->theme->add_tab_icon("videocam", 4, Qt::Orientation::Vertical);
+
+	SettingsTab* settings = new SettingsTab(this);
+    widget->addTab(settings, "");
+    this->theme->add_tab_icon("tune", 5, Qt::Orientation::Vertical);
+
+	CameraSettingsSubTab* cameraSettings = settings->findChild<CameraSettingsSubTab*>();
+	connect(cameraSettings, &CameraSettingsSubTab::cam_name_changed, camera, &CameraTab::on_camName_changed);
+	connect(cameraSettings, &CameraSettingsSubTab::cam_toggle_requested, camera, &CameraTab::on_toggle_connect);
+	connect(camera, &CameraTab::media_status_changed, cameraSettings, &CameraSettingsSubTab::on_newConnectionStatus);
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());

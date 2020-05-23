@@ -90,6 +90,7 @@ class Config : public QObject {
 
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
+	inline QSettings* get_settings() { return &this->ia_config; };
     static Config *get_instance();
 
    private:
