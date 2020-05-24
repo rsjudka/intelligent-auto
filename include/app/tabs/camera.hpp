@@ -17,22 +17,22 @@ class CameraTab : public QWidget {
     void media_status_changed( QString );
 
    public slots:
-	void connect_stream();
-	void disconnect_stream();
-	void on_camName_changed(QString name);
-	void on_toggle_connect();
+    void connect_stream();
+    void disconnect_stream();
+    void on_camName_changed(QString name);
+    void on_toggle_connect();
 
    private slots:
     void ChangedStatus(QMediaPlayer::MediaStatus);
 
    private:
-	 QLabel status;
-	 QMediaPlayer player;
-	 QVideoWidget videoWidget;
-	 QLabel* cameraName;
+     QLabel status;
+     QMediaPlayer player;
+     QVideoWidget videoWidget;
+     QLabel* cameraName;
 
      QSettings* settings;
-	 Ui::CameraSettings ui;
+     Ui::CameraSettings ui;
 };
 
 #endif

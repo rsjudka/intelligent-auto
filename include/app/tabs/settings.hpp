@@ -105,24 +105,20 @@ class CameraSettingsSubTab : public QWidget {
 
    signals:
     void cam_toggle_requested();
-	void cam_name_changed(QString);
+    void cam_name_changed(QString);
 
    public slots:
-	void on_newConnectionStatus(QString);
+    void on_newConnectionStatus(QString);
 
    private slots:
     void on_camName_editingFinished();
     void on_streamAddress_editingFinished();
- 	void on_connectButton_clicked();
+     void on_connectButton_clicked();
 
    private:
     Theme *theme;
-	QSettings *settings;
-	Ui::CameraSettings ui;
-
-
-// private slots:
-//     void on_test_button_clicked();
+    QSettings *settings;
+    Ui::CameraSettings ui;
 };
 
 #endif

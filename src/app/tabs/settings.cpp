@@ -568,41 +568,41 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
 
 CameraSettingsSubTab::CameraSettingsSubTab(QWidget *parent) : QWidget(parent)
 {
-	ui.setupUi( this );
-	settings = Config::get_instance()->get_settings();
+    ui.setupUi( this );
+    settings = Config::get_instance()->get_settings();
 
-	ui.streamAddress->setText(settings->value("cameraStreamUrl").toString());
-	ui.camName->setText(settings->value("cameraName").toString());
+    ui.streamAddress->setText(settings->value("cameraStreamUrl").toString());
+    ui.camName->setText(settings->value("cameraName").toString());
 
-	ui.camName->setFont(Theme::font_16);
-	ui.streamAddress->setFont(Theme::font_16);
-	ui.camStatus->setFont(Theme::font_16);
-	ui.camName_label->setFont(Theme::font_16);
-	ui.streamAddress_label->setFont(Theme::font_16);
-	ui.camStatus_label->setFont(Theme::font_16);
+    ui.camName->setFont(Theme::font_16);
+    ui.streamAddress->setFont(Theme::font_16);
+    ui.camStatus->setFont(Theme::font_16);
+    ui.camName_label->setFont(Theme::font_16);
+    ui.streamAddress_label->setFont(Theme::font_16);
+    ui.camStatus_label->setFont(Theme::font_16);
 }
 
 void CameraSettingsSubTab::on_streamAddress_editingFinished()
 {
-	settings->setValue("cameraStreamUrl", ui.streamAddress->text());
+    settings->setValue("cameraStreamUrl", ui.streamAddress->text());
 }
 
 void CameraSettingsSubTab::on_camName_editingFinished()
 {
-	settings->setValue("cameraName", ui.camName->text());
-	emit cam_name_changed(ui.camName->text());
+    settings->setValue("cameraName", ui.camName->text());
+    emit cam_name_changed(ui.camName->text());
 }
 
 void CameraSettingsSubTab::on_newConnectionStatus(QString prettyStatus)
 {
-	ui.camStatus->setText(prettyStatus);
-	bool connected = prettyStatus == "Connected";
-	ui.connectButton->setText(connected? "Disconnect" : "Connected");
+    ui.camStatus->setText(prettyStatus);
+    bool connected = prettyStatus == "Connected";
+    ui.connectButton->setText(connected? "Disconnect" : "Connect");
 }
 
 void CameraSettingsSubTab::on_connectButton_clicked()
 {
-	 emit cam_toggle_requested();
+    emit cam_toggle_requested();
 }
 
 OpenAutoSettingsSubTab::OpenAutoSettingsSubTab(QWidget *parent) : QWidget(parent)
