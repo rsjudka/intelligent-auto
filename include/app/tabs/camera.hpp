@@ -29,9 +29,9 @@ class CameraTab : public QWidget {
      QLabel status;
      QMediaPlayer player;
      QVideoWidget videoWidget;
-     QLabel* cameraName;
+     QLabel *cameraName;
 
-     QSettings* settings;
+     QSettings *settings;
      Ui::CameraSettings ui;
 };
 

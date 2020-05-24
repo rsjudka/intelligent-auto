@@ -76,7 +76,7 @@ QTabWidget *MainWindow::tabs_widget()
     launcher->setObjectName("Launcher");
     SettingsTab *settings = new SettingsTab(this);
     settings->setProperty("prevent_disable", true);
-	CameraTab* camera = new CameraTab( this );
+    CameraTab *camera = new CameraTab( this );
 
     int idx;
     idx = widget->addTab(openauto, QString());
@@ -88,7 +88,7 @@ QTabWidget *MainWindow::tabs_widget()
     idx = widget->addTab(data, QString());
     this->theme->add_tab_icon("speed", data, Qt::Orientation::Vertical);
     widget->setTabEnabled(idx, this->config->get_page(data));
-	idx = widget->addTab(camera, QString());
+    idx = widget->addTab(camera, QString());
     this->theme->add_tab_icon("videocam", camera, Qt::Orientation::Vertical);
     widget->setTabEnabled(idx, this->config->get_page(camera));
     idx = widget->addTab(launcher, QString());
@@ -100,10 +100,10 @@ QTabWidget *MainWindow::tabs_widget()
     media->fill_tabs();
     settings->fill_tabs();
 
-	CameraSettingsSubTab* cameraSettings = settings->findChild<CameraSettingsSubTab*>();
-	connect(cameraSettings, &CameraSettingsSubTab::cam_name_changed, camera, &CameraTab::on_camName_changed);
-	connect(cameraSettings, &CameraSettingsSubTab::cam_toggle_requested, camera, &CameraTab::on_toggle_connect);
-	connect(camera, &CameraTab::media_status_changed, cameraSettings, &CameraSettingsSubTab::on_newConnectionStatus);
+    CameraSettingsSubTab *cameraSettings = settings->findChild<CameraSettingsSubTab*>();
+    connect(cameraSettings, &CameraSettingsSubTab::cam_name_changed, camera, &CameraTab::on_camName_changed);
+    connect(cameraSettings, &CameraSettingsSubTab::cam_toggle_requested, camera, &CameraTab::on_toggle_connect);
+    connect(camera, &CameraTab::media_status_changed, cameraSettings, &CameraSettingsSubTab::on_newConnectionStatus);
 
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
