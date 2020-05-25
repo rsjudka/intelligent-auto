@@ -63,7 +63,6 @@ QTabWidget *MainWindow::tabs_widget()
 {
     QTabWidget *widget = new QTabWidget(this);
     widget->setTabPosition(QTabWidget::TabPosition::West);
-
     widget->setIconSize(this->TAB_SIZE);
 
     OpenAutoTab *openauto = new OpenAutoTab(this);

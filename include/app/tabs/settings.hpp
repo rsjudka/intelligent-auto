@@ -113,7 +113,7 @@ class CameraSettingsSubTab : public QWidget {
    private slots:
     void on_camName_editingFinished();
     void on_streamAddress_editingFinished();
-     void on_connectButton_clicked();
+    void on_connectButton_clicked();
 
    private:
     Theme *theme;
