@@ -105,7 +105,7 @@ class CameraSettingsSubTab : public QWidget {
 
    signals:
     void cam_toggle_requested();
-    void cam_name_changed(QString);
+    void cam_name_changed(QString camName);
 
    public slots:
     void on_newConnectionStatus(QString);

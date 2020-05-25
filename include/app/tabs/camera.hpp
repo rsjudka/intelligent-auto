@@ -14,7 +14,7 @@ class CameraTab : public QWidget {
     CameraTab(QWidget *parent = nullptr);
 
    signals:
-    void media_status_changed( QString );
+    void media_status_changed(QString statusPrettyName);
 
    public slots:
     void connect_stream();
@@ -23,7 +23,7 @@ class CameraTab : public QWidget {
     void on_toggle_connect();
 
    private slots:
-    void ChangedStatus(QMediaPlayer::MediaStatus);
+    void changed_status(QMediaPlayer::MediaStatus);
 
    private:
      QLabel status;

@@ -76,7 +76,7 @@ QTabWidget *MainWindow::tabs_widget()
     launcher->setObjectName("Launcher");
     SettingsTab *settings = new SettingsTab(this);
     settings->setProperty("prevent_disable", true);
-    CameraTab *camera = new CameraTab( this );
+    CameraTab *camera = new CameraTab(this);
 
     int idx;
     idx = widget->addTab(openauto, QString());

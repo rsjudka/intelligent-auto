@@ -568,7 +568,7 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
 
 CameraSettingsSubTab::CameraSettingsSubTab(QWidget *parent) : QWidget(parent)
 {
-    ui.setupUi( this );
+    ui.setupUi(this);
     settings = Config::get_instance()->get_settings();
 
     ui.streamAddress->setText(settings->value("cameraStreamUrl").toString());

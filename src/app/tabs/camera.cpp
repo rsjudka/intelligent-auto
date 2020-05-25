@@ -14,21 +14,21 @@ CameraTab::CameraTab(QWidget *parent) : QWidget(parent)
     cameraName = new QLabel(camera, this);
 
     cameraName->setFont(Theme::font_16);
-       status.setFont(Theme::font_14);
+    status.setFont(Theme::font_14);
 
     layout->addWidget(cameraName);
     layout->addWidget(&videoWidget);
     layout->addWidget(&status);
 
-    connect(&player, &QMediaPlayer::mediaStatusChanged, this, &CameraTab::ChangedStatus);
+    connect(&player, &QMediaPlayer::mediaStatusChanged, this, &CameraTab::changed_status);
     connect_stream();
 }
 
-void CameraTab::ChangedStatus(QMediaPlayer::MediaStatus mediaStatus)
+void CameraTab::changed_status(QMediaPlayer::MediaStatus mediaStatus)
 {
     qInfo() << "Camera status changed to: " << mediaStatus;
 
-    switch( mediaStatus ) {
+    switch(mediaStatus) {
         case QMediaPlayer::InvalidMedia:
             status.setText("Camera disconnected");
             videoWidget.hide();
