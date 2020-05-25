@@ -8,11 +8,11 @@ CameraTab::CameraTab(QWidget *parent) : QWidget(parent)
     settings = Config::get_instance()->get_settings();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-	status = new QLabel;
+    status = new QLabel;
     status->setFont(Theme::font_14);
 
-	videoWidget = new QVideoWidget;
-	player = new QMediaPlayer;
+    videoWidget = new QVideoWidget;
+    player = new QMediaPlayer;
     player->setVideoOutput(videoWidget);
     QString camera = settings->value("cameraName").toString();
     cameraName = new QLabel(camera, this);
