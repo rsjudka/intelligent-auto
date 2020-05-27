@@ -569,10 +569,10 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
 CameraSettingsSubTab::CameraSettingsSubTab(QWidget *parent) : QWidget(parent)
 {
     ui.setupUi(this);
-    settings = Config::get_instance()->get_settings();
+    config = Config::get_instance();
 
-    ui.streamAddress->setText(settings->value("cameraStreamUrl").toString());
-    ui.camName->setText(settings->value("cameraName").toString());
+    ui.streamAddress->setText(config->get_cam_stream_url());
+    ui.camName->setText(config->get_cam_name());
 
     ui.camName->setFont(Theme::font_16);
     ui.streamAddress->setFont(Theme::font_16);
@@ -584,12 +584,12 @@ CameraSettingsSubTab::CameraSettingsSubTab(QWidget *parent) : QWidget(parent)
 
 void CameraSettingsSubTab::on_streamAddress_editingFinished()
 {
-    settings->setValue("cameraStreamUrl", ui.streamAddress->text());
+    config->set_cam_stream_url(ui.streamAddress->text());
 }
 
 void CameraSettingsSubTab::on_camName_editingFinished()
 {
-    settings->setValue("cameraName", ui.camName->text());
+    config->set_cam_name(ui.camName->text());
     emit cam_name_changed(ui.camName->text());
 }
 

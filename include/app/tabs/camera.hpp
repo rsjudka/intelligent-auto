@@ -31,7 +31,7 @@ class CameraTab : public QWidget {
      QVideoWidget* videoWidget;
      QLabel *cameraName;
 
-     QSettings *settings;
+     Config *config;
      Ui::CameraSettings ui;
 };
 

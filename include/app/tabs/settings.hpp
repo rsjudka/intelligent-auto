@@ -117,7 +117,7 @@ class CameraSettingsSubTab : public QWidget {
 
    private:
     Theme *theme;
-    QSettings *settings;
+    Config *config;
     Ui::CameraSettings ui;
 };
 

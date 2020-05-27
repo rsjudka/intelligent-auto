@@ -5,7 +5,7 @@
 
 CameraTab::CameraTab(QWidget *parent) : QWidget(parent)
 {
-    settings = Config::get_instance()->get_settings();
+    config = Config::get_instance();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     status = new QLabel;
@@ -14,7 +14,7 @@ CameraTab::CameraTab(QWidget *parent) : QWidget(parent)
     videoWidget = new QVideoWidget;
     player = new QMediaPlayer;
     player->setVideoOutput(videoWidget);
-    QString camera = settings->value("cameraName").toString();
+    QString camera = config->get_cam_name();
     cameraName = new QLabel(camera, this);
     cameraName->setFont(Theme::font_16);
 
@@ -77,7 +77,7 @@ void CameraTab::disconnect_stream()
 
 void CameraTab::connect_stream()
 {
-    QString streamUrl = settings->value("cameraStreamUrl").toString(); // e.g. "rtsp://10.0.0.185:8554/unicast"
+    QString streamUrl = config->get_cam_stream_url(); // e.g. "rtsp://10.0.0.185:8554/unicast"
     QString streamPipeline = QString("gst-pipeline: rtspsrc location=%1 ! decodebin ! video/x-raw ! videoconvert ! videoscale ! xvimagesink sync=false force-aspect-ratio=false name=\"qtvideosink\"").arg(streamUrl);
     qInfo() << "Playing stream pipeline: " << streamPipeline;
     player->setMedia(QUrl(streamPipeline));
