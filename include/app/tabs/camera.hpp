@@ -32,7 +32,6 @@ class CameraTab : public QWidget {
      QLabel *cameraName;
 
      Config *config;
-     Ui::CameraSettings ui;
 };
 
 #endif

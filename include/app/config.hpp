@@ -149,8 +149,8 @@ class Config : public QObject {
     QString brightness_module;
     bool controls_bar;
     double scale;
-    QString cam_stream_url;
     QString cam_name;
+    QString cam_stream_url;
     QMap<QString, bool> pages;
 
    signals:
