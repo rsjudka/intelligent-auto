@@ -99,11 +99,6 @@ QTabWidget *MainWindow::tabs_widget()
     media->fill_tabs();
     settings->fill_tabs();
 
-    CameraSettingsSubTab *cameraSettings = settings->findChild<CameraSettingsSubTab*>();
-    connect(cameraSettings, &CameraSettingsSubTab::cam_name_changed, camera, &CameraTab::on_camName_changed);
-    connect(cameraSettings, &CameraSettingsSubTab::cam_toggle_requested, camera, &CameraTab::on_toggle_connect);
-    connect(camera, &CameraTab::media_status_changed, cameraSettings, &CameraSettingsSubTab::on_newConnectionStatus);
-
     connect(this->config, &Config::brightness_changed, [this, widget](int position) {
         BrightnessModule *module = this->config->get_brightness_module(this->config->get_brightness_module());
         module->set_brightness(position);

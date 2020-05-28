@@ -97,28 +97,4 @@ class OpenAutoSettingsSubTab : public QWidget {
     Theme *theme;
 };
 
-class CameraSettingsSubTab : public QWidget {
-    Q_OBJECT
-
-   public:
-    CameraSettingsSubTab(QWidget *parent = nullptr);
-
-   signals:
-    void cam_toggle_requested();
-    void cam_name_changed(QString camName);
-
-   public slots:
-    void on_newConnectionStatus(QString);
-
-   private slots:
-    void on_camName_editingFinished();
-    void on_streamAddress_editingFinished();
-    void on_connectButton_clicked();
-
-   private:
-    Theme *theme;
-    Config *config;
-    Ui::CameraSettings ui;
-};
-
 #endif

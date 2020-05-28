@@ -7,6 +7,8 @@
 
 #include <ui_camera_settings.h>
 
+class QStackedLayout;
+
 class CameraTab : public QWidget {
     Q_OBJECT
 
@@ -14,24 +16,26 @@ class CameraTab : public QWidget {
     CameraTab(QWidget *parent = nullptr);
 
    signals:
-    void media_status_changed(QString statusPrettyName);
+    void stream_connecting();
+    void stream_connected();
+    void stream_disconnected();
 
    public slots:
-    void connect_stream();
+    void connect_stream(QString stream_url);
     void disconnect_stream();
-    void on_camName_changed(QString name);
-    void on_toggle_connect();
 
    private slots:
     void changed_status(QMediaPlayer::MediaStatus);
+    void new_metadata(const QString &key, const QVariant &value);
 
    private:
-     QLabel* status;
-     QMediaPlayer* player;
-     QVideoWidget* videoWidget;
-     QLabel *cameraName;
+     QWidget *connect_widget();
+     QWidget *cam_widget();
 
-     Config *config;
+     QLabel *status;
+     QLabel *status2;
+     QVideoWidget *video_widget;
+     QMediaPlayer *player;
 };
 
 #endif

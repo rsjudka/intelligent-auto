@@ -30,7 +30,6 @@ void SettingsTab::fill_tabs()
     this->addTab(new LayoutSettingsSubTab(this), "Layout");
     this->addTab(new BluetoothSettingsSubTab(this), "Bluetooth");
     this->addTab(new OpenAutoSettingsSubTab(this), "OpenAuto");
-    this->addTab(new CameraSettingsSubTab(this), "Camera");
 }
 
 GeneralSettingsSubTab::GeneralSettingsSubTab(QWidget *parent) : QWidget(parent)
@@ -564,45 +563,6 @@ QWidget *BluetoothSettingsSubTab::devices_widget()
     scroll_area->setWidget(widget);
 
     return scroll_area;
-}
-
-CameraSettingsSubTab::CameraSettingsSubTab(QWidget *parent) : QWidget(parent)
-{
-    ui.setupUi(this);
-    config = Config::get_instance();
-
-    ui.streamAddress->setText(config->get_cam_stream_url());
-    ui.camName->setText(config->get_cam_name());
-
-    ui.camName->setFont(Theme::font_16);
-    ui.streamAddress->setFont(Theme::font_16);
-    ui.camStatus->setFont(Theme::font_16);
-    ui.camName_label->setFont(Theme::font_16);
-    ui.streamAddress_label->setFont(Theme::font_16);
-    ui.camStatus_label->setFont(Theme::font_16);
-}
-
-void CameraSettingsSubTab::on_streamAddress_editingFinished()
-{
-    config->set_cam_stream_url(ui.streamAddress->text());
-}
-
-void CameraSettingsSubTab::on_camName_editingFinished()
-{
-    config->set_cam_name(ui.camName->text());
-    emit cam_name_changed(ui.camName->text());
-}
-
-void CameraSettingsSubTab::on_newConnectionStatus(QString prettyStatus)
-{
-    ui.camStatus->setText(prettyStatus);
-    bool connected = prettyStatus == "Connected";
-    ui.connectButton->setText(connected? "Disconnect" : "Connect");
-}
-
-void CameraSettingsSubTab::on_connectButton_clicked()
-{
-    emit cam_toggle_requested();
 }
 
 OpenAutoSettingsSubTab::OpenAutoSettingsSubTab(QWidget *parent) : QWidget(parent)
