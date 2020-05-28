@@ -28,6 +28,7 @@
         <file>icons/dark/wifi.svg</file>
         <file>icons/dark/widgets.svg</file>
         <file>icons/dark/videocam.svg</file>
+		<file>icons/dark/linked_camera.svg</file>
         <file>icons/light/play.svg</file>
         <file>icons/light/pause.svg</file>
         <file>icons/light/brightness_low.svg</file>
@@ -56,6 +57,7 @@
         <file>icons/light/wifi.svg</file>
         <file>icons/light/widgets.svg</file>
         <file>icons/light/videocam.svg</file>
+		<file>icons/light/linked_camera.svg</file>
         <file>stylesheets/light.qss</file>
         <file>stylesheets/dark.qss</file>
         <file>fonts/Titillium_Web/TitilliumWeb-Regular.ttf</file>
