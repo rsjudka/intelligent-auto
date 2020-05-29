@@ -290,7 +290,9 @@ QWidget *GeneralSettingsSubTab::mouse_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->get_mouse_active());
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged, [config = this->config](bool state) {
         qApp->setOverrideCursor(state ? Qt::ArrowCursor : Qt::BlankCursor);
         config->set_mouse_active(state);
@@ -952,7 +954,9 @@ QWidget *OpenAutoSettingsSubTab::touchscreen_row_widget()
     layout->addWidget(label, 1);
 
     Switch *toggle = new Switch(widget);
+    toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->openauto_config->getTouchscreenEnabled());
+    connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
     connect(toggle, &Switch::stateChanged,
             [config = this->config](bool state) { config->openauto_config->setTouchscreenEnabled(state); });
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
