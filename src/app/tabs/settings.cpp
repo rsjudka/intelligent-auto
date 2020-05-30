@@ -458,10 +458,13 @@ QWidget *LayoutSettingsSubTab::scale_widget()
     slider->setSliderPosition(this->config->get_scale() * 4);
     QLabel *value = new QLabel(QString("x%1").arg(slider->sliderPosition() / 4.0), widget);
     value->setFont(Theme::font_14);
-    connect(slider, &QSlider::valueChanged, [config = this->config, value](int position) {
+    connect(slider, &QSlider::valueChanged, [config = this->config, slider, value](int position) {
+        slider->setEnabled(false);
         double scale = position / 4.0;
         value->setText(QString("x%1").arg(scale));
         config->set_scale(scale);
+        slider->setEnabled(true);
+        slider->setFocus();
     });
 
     layout->addStretch(2);
