@@ -177,8 +177,6 @@ void Theme::update()
     emit icons_updated(this->tab_icons[this->mode ? "dark" : "light"],
                        this->button_icons[this->mode ? "dark" : "light"], this->scale);
     emit color_updated();
-
-    qApp->processEvents();
 }
 
 Theme *Theme::get_instance()
