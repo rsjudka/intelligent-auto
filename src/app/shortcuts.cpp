@@ -18,7 +18,7 @@ GpioWatcher::GpioWatcher(QObject *parent) : QObject(parent)
     }
 
     connect(this->watcher, &QFileSystemWatcher::fileChanged,
-            [this](QString path) { emit gpio_triggered(QFileInfo(path).fileName()); });
+            [this](QString path) { emit gpio_triggered(QFileInfo(path).dir().dirName()); });
 
     this->disable();
 }
