@@ -68,6 +68,16 @@ QTabWidget *MainWindow::tabs_widget()
     widget->setTabPosition(QTabWidget::TabPosition::West);
     widget->setIconSize(this->TAB_SIZE);
 
+    Shortcut *cycle_pages_shortcut = new Shortcut(this->config->get_shortcut("cycle_pages"), this);
+    this->shortcuts->add_shortcut("cycle_pages", "Cycle Pages", cycle_pages_shortcut);
+    connect(cycle_pages_shortcut, &Shortcut::activated, [widget]() {
+        int idx = widget->currentIndex();
+        do {
+            idx = (idx + 1) % widget->count();
+        } while (!widget->isTabEnabled(idx));
+        widget->setCurrentIndex(idx);
+    });
+
     OpenAutoTab *openauto = new OpenAutoTab(this);
     openauto->setObjectName("OpenAuto");
     Shortcut *openauto_shortcut = new Shortcut(this->config->get_shortcut("openauto_page"), this);
