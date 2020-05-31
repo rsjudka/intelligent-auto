@@ -1,11 +1,10 @@
 #ifndef CAMERA_HPP_
 #define CAMERA_HPP_
 
-#include <QMediaPlayer>
-#include <QVideoWidget>
 #include <QLabel>
-
-class QStackedLayout;
+#include <QMediaPlayer>
+#include <QStackedLayout>
+#include <QVideoWidget>
 
 class CameraTab : public QWidget {
     Q_OBJECT

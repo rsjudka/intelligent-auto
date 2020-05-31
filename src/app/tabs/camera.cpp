@@ -94,12 +94,11 @@ QWidget *CameraTab::connect_widget()
     return widget;
 }
 
-void CameraTab::changed_status(QMediaPlayer::MediaStatus mediaStatus)
+void CameraTab::changed_status(QMediaPlayer::MediaStatus media_status)
 {
-    qInfo() << "Camera status changed to: " << mediaStatus;
+    qInfo() << "Camera status changed to: " << media_status;
 
-    switch(mediaStatus)
-    {
+    switch(media_status) {
         case QMediaPlayer::InvalidMedia:
             this->status_connection_overlay->setText("unable to connect");
             emit stream_disconnected();

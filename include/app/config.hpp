@@ -109,13 +109,13 @@ class Config : public QObject {
         emit page_changed(page, enabled);
     }
 
-    inline QString get_cam_stream_url() {return cam_stream_url;}
+    inline QString get_cam_stream_url() { return cam_stream_url; }
     inline void set_cam_stream_url(QString stream_url)
     {
         this->cam_stream_url = stream_url;
         emit cam_stream_url_changed(this->cam_stream_url);
     }
-    inline QString get_cam_name() {return cam_name;}
+    inline QString get_cam_name() { return cam_name; }
     inline void set_cam_name(QString name)
     {
         this->cam_name = name;

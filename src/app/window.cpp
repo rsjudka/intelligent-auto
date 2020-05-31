@@ -76,6 +76,7 @@ QTabWidget *MainWindow::tabs_widget()
     SettingsTab *settings = new SettingsTab(this);
     settings->setProperty("prevent_disable", true);
     CameraTab *camera = new CameraTab(this);
+    camera->setObjectName("Camera");
 
     int idx;
     idx = widget->addTab(openauto, QString());
