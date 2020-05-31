@@ -1,4 +1,5 @@
 #include <QDir>
+#include <QDebug>
 #include <QElapsedTimer>
 
 #include <app/shortcuts.hpp>
@@ -27,6 +28,7 @@ ShortcutInput::ShortcutInput(QString shortcut, QWidget *parent) : QPushButton(sh
 {
     this->gpio_watcher = new GpioWatcher(this);
     connect(this->gpio_watcher, &GpioWatcher::gpio_triggered, [this](QString gpio) {
+        qDebug() << "[ShortcutInput][INFO] shortcut set to " << gpio;
         this->setText(gpio);
         emit shortcut_updated(gpio);
     });
@@ -60,9 +62,19 @@ Shortcut::Shortcut(QString shortcut, QWidget *parent) : QObject(parent), gpio_va
 
     this->set_shortcut(shortcut);
     connect(this->gpio, &QFileSystemWatcher::fileChanged, [this](QString) {
+        qDebug() << "[Shortcut][INFO] gpio changed";
         if (this->gpio_value_attribute.isOpen()) {
             this->gpio_value_attribute.seek(0);
-            if (this->gpio_active_low == this->gpio_value_attribute.read(1).at(0)) emit activated();
+            if (this->gpio_active_low == this->gpio_value_attribute.read(1).at(0)) {
+                qDebug() << "[Shortcut][INFO] gpio activated";
+                emit activated();
+            }
+            else {
+                qDebug() << "[Shortcut][INFO] gpio inactive";
+            }
+        }
+        else {
+            qDebug() << "[Shortcut][ERROR] gpio value attribute not open";
         }
     });
     connect(this->key, &QShortcut::activated, [this]() { emit activated(); });
@@ -83,14 +95,22 @@ void Shortcut::set_shortcut(QString shortcut)
 
     this->shortcut = shortcut;
     if (this->shortcut.startsWith("gpio")) {
+        qDebug() << "[Shortcut][INFO] setting shortcut to " << this->shortcut;
         this->gpio_value_attribute.setFileName(GPIOX_VALUE_PATH.arg(this->shortcut));
         if (this->gpio_value_attribute.open(QIODevice::ReadOnly)) {
             QFile active_low_attribute(GPIOX_ACTIVE_LOW_PATH.arg(this->shortcut));
             if (active_low_attribute.open(QIODevice::ReadOnly)) {
                 this->gpio_active_low = active_low_attribute.read(1)[0];
+                qDebug() << "[Shortcut][INFO] gpio active low is " << this->gpio_active_low;
                 active_low_attribute.close();
                 this->gpio->addPath(this->gpio_value_attribute.fileName());
             }
+            else {
+                qDebug() << "[Shortcut][ERROR] failed to open gpio active low";
+            }
+        }
+        else {
+            qDebug() << "[Shortcut][ERROR] failed to open gpio value attribute";
         }
     }
     else {
