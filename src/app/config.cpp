@@ -27,8 +27,8 @@ Config::Config()
     this->brightness_module = this->ia_config.value("brightness_module", "mocked").toString();
     this->controls_bar = this->ia_config.value("controls_bar", false).toBool();
     this->scale = this->ia_config.value("scale", 1.0).toDouble();
-	this->cam_name = this->ia_config.value("Camera/name").toString();
-	this->cam_stream_url = this->ia_config.value("Camera/stream_url").toString();
+    this->cam_name = this->ia_config.value("Camera/name").toString();
+    this->cam_stream_url = this->ia_config.value("Camera/stream_url").toString();
     this->ia_config.beginGroup("Pages");
     for (auto key : this->ia_config.childKeys())
         this->pages[key] = this->ia_config.value(key, true).toBool();

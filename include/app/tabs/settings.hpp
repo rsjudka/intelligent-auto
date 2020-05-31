@@ -8,8 +8,6 @@
 #include <app/config.hpp>
 #include <app/theme.hpp>
 
-#include <ui_camera_settings.h>
-
 class SettingsTab : public QTabWidget {
     Q_OBJECT
 

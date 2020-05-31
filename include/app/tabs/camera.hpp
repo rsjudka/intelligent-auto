@@ -5,8 +5,6 @@
 #include <QVideoWidget>
 #include <QLabel>
 
-#include <ui_camera_settings.h>
-
 class QStackedLayout;
 
 class CameraTab : public QWidget {
@@ -32,8 +30,8 @@ class CameraTab : public QWidget {
      QWidget *connect_widget();
      QWidget *cam_widget();
 
-     QLabel *status;
-     QLabel *status2;
+     QLabel *status_cam_view;
+     QLabel *status_connection_overlay;
      QVideoWidget *video_widget;
      QMediaPlayer *player;
 };

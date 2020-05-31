@@ -112,14 +112,14 @@ class Config : public QObject {
     inline QString get_cam_stream_url() {return cam_stream_url;}
     inline void set_cam_stream_url(QString stream_url)
     {
-        cam_stream_url = stream_url;
-        emit cam_stream_url_changed(stream_url);
+        this->cam_stream_url = stream_url;
+        emit cam_stream_url_changed(this->cam_stream_url);
     }
     inline QString get_cam_name() {return cam_name;}
     inline void set_cam_name(QString name)
     {
-        cam_name = name;
-        emit cam_name_changed(name);
+        this->cam_name = name;
+        emit cam_name_changed(this->cam_name);
     }
 
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
@@ -160,8 +160,8 @@ class Config : public QObject {
     void controls_bar_changed(bool controls_bar);
     void scale_changed(double scale);
     void page_changed(QWidget *page, bool enabled);
-	void cam_stream_url_changed(QString stream_url);
-	void cam_name_changed(QString cam_name);
+    void cam_stream_url_changed(QString stream_url);
+    void cam_name_changed(QString cam_name);
 };
 
 #endif
