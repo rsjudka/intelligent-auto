@@ -43,7 +43,6 @@ QWidget *CameraTab::cam_widget()
     return widget;
 }
 
-
 QWidget *CameraTab::connect_widget()
 {
     QWidget *widget = new QWidget(this);
