@@ -9,6 +9,22 @@
 #include <app/tabs/settings.hpp>
 #include <app/window.hpp>
 #include <app/modules/brightness.hpp>
+#include <app/widgets/popup.hpp>
+
+class WindowOverlay : public QGraphicsEffect {
+   public:
+    void draw(QPainter *painter)
+    {
+        QPoint offset;
+        QPixmap pixmap = sourcePixmap(Qt::DeviceCoordinates, &offset);
+
+        painter->setWorldTransform(QTransform());
+        painter->setBrush(QColor(0, 0, 0));
+        painter->drawRect(pixmap.rect());
+        painter->setOpacity(0.33);
+        painter->drawPixmap(offset, pixmap);
+    }
+};
 
 MainWindow::MainWindow()
 {
@@ -146,7 +162,14 @@ QWidget *MainWindow::controls_widget()
     save_button->setFlat(true);
     save_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("save", save_button);
-    connect(save_button, &QPushButton::clicked, [config = this->config]() { config->save(); });
+    connect(save_button, &QPushButton::clicked, [this]() {
+        config->save();
+        Dialog *dialog = new Dialog(this);
+        this->setGraphicsEffect(new WindowOverlay());
+        dialog->setGeometry(this->geometry());
+        dialog->exec();
+        this->setGraphicsEffect(nullptr);
+    });
 
     QPushButton *shutdown_button = new QPushButton(widget);
     shutdown_button->setFlat(true);
