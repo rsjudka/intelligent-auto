@@ -26,7 +26,7 @@ Main features include:
 
 ## Getting Started
 
-### Install.sh automated install
+### Install.sh automated install (Raspberry Pi only)
 First you need to run the executable with the following command:
 
 `./install.sh`
