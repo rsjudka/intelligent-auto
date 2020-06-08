@@ -27,19 +27,17 @@ Main features include:
 ## Getting Started
 
 ### Install.sh automated install
-First make install.sh executabled by running:
-
-`chmod +x install.sh`
-
-then run the executable with:
+First you need to run the executable with the following command:
 
 `./install.sh`
 
-Once installed it will start up, to run afterwards navigate to bin folder and run
+Once installed it will start up, to run afterwards, navigate to bin folder and run:
 
 `./ia`
 
-Video walk through: https://youtu.be/ElS7Vx9JuL0 
+Video walk through: 
+
+https://youtu.be/ElS7Vx9JuL0 
 
 ## Manual Install
 
