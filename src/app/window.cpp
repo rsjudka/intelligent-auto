@@ -3,28 +3,13 @@
 #include <cstdlib>
 #include <sstream>
 
-#include <app/tabs/data.hpp>
-#include <app/tabs/media.hpp>
-#include <app/tabs/launcher.hpp>
-#include <app/tabs/settings.hpp>
-#include <app/window.hpp>
 #include <app/modules/brightness.hpp>
-#include <app/widgets/popup.hpp>
-
-class WindowOverlay : public QGraphicsEffect {
-   public:
-    void draw(QPainter *painter)
-    {
-        QPoint offset;
-        QPixmap pixmap = sourcePixmap(Qt::DeviceCoordinates, &offset);
-
-        painter->setWorldTransform(QTransform());
-        painter->setBrush(QColor(0, 0, 0));
-        painter->drawRect(pixmap.rect());
-        painter->setOpacity(0.33);
-        painter->drawPixmap(offset, pixmap);
-    }
-};
+#include <app/tabs/data.hpp>
+#include <app/tabs/launcher.hpp>
+#include <app/tabs/media.hpp>
+#include <app/tabs/settings.hpp>
+#include <app/widgets/dialog.hpp>
+#include <app/window.hpp>
 
 MainWindow::MainWindow()
 {
@@ -162,35 +147,49 @@ QWidget *MainWindow::controls_widget()
     save_button->setFlat(true);
     save_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("save", save_button);
-    connect(save_button, &QPushButton::clicked, [this]() {
-        config->save();
-        Dialog *dialog = new Dialog(this);
-        this->setGraphicsEffect(new WindowOverlay());
-        dialog->setGeometry(this->geometry());
-        dialog->exec();
-        this->setGraphicsEffect(nullptr);
-    });
+    connect(save_button, &QPushButton::clicked, [config = this->config]() { config->save(); });
 
     QPushButton *shutdown_button = new QPushButton(widget);
     shutdown_button->setFlat(true);
     shutdown_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("power_settings_new", shutdown_button);
+    connect(shutdown_button, &QPushButton::clicked, [this]() {
+        Dialog *dialog = new Dialog(this);
+
+        QWidget *options = new QWidget;
+        QHBoxLayout *layout = new QHBoxLayout(options);
+
+        QPushButton *restart = new QPushButton(options);
+        restart->setFlat(true);
+        restart->setIconSize(Theme::icon_56);
+        this->theme->add_button_icon("refresh", restart);
+        connect(restart, &QPushButton::clicked, []() {
+            sync();
+            if (system("shutdown -r now") < 0) qApp->exit();
+        });
+        layout->addWidget(restart);
+
+        QPushButton *power_off = new QPushButton(options);
+        power_off->setFlat(true);
+        power_off->setIconSize(Theme::icon_56);
+        this->theme->add_button_icon("power_settings_new", power_off);
+        connect(power_off, &QPushButton::clicked, []() {
+            sync();
+            if (system("shutdown -h now") < 0) qApp->exit();
+        });
+        layout->addWidget(power_off);
+
+        dialog->set_title(new QLabel("power off"));
+        dialog->set_body(options);
+
+        dialog->exec();
+    });
 
     QPushButton *exit_button = new QPushButton(widget);
     exit_button->setFlat(true);
     exit_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("close", exit_button);
     connect(exit_button, &QPushButton::clicked, []() { qApp->exit(); });
-
-    QElapsedTimer *timer = new QElapsedTimer();
-    connect(shutdown_button, &QPushButton::pressed, [timer]() { timer->start(); });
-    connect(shutdown_button, &QPushButton::released, [timer]() {
-        sync();
-
-        std::stringstream cmd;
-        cmd << "shutdown -" << (timer->hasExpired(2000) ? 'r' : 'h') << " now";
-        if (system(cmd.str().c_str()) < 0) qApp->exit();
-    });
 
     QWidget *quick_view = this->quick_view_widget();
     quick_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -213,9 +212,8 @@ QWidget *MainWindow::quick_view_widget()
 
     for (auto quick_view : this->config->get_quick_views().values()) layout->addWidget(quick_view);
     layout->setCurrentWidget(this->config->get_quick_view(this->config->get_quick_view()));
-    connect(this->config, &Config::quick_view_changed, [this, layout](QString quick_view) {
-        layout->setCurrentWidget(this->config->get_quick_view(quick_view));
-    });
+    connect(this->config, &Config::quick_view_changed,
+            [this, layout](QString quick_view) { layout->setCurrentWidget(this->config->get_quick_view(quick_view)); });
 
     return widget;
 }
@@ -272,4 +270,5 @@ void MainWindow::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
     emit is_ready();
+    this->theme->update();
 }

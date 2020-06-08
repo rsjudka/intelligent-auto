@@ -221,3 +221,8 @@ Tuner::handle {
 Tuner::sub-page {
     background-color: rgb(0, 0, 0);
 }
+
+QDialog > QFrame {
+    background-color: rgb(252, 252, 252);
+    border-radius: 8px;
+}
