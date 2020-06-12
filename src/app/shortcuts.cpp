@@ -66,7 +66,7 @@ Shortcut::Shortcut(QString shortcut, QWidget *parent) : QObject(parent), gpio_va
             if (this->gpio_active_low == this->gpio_value_attribute.read(1).at(0)) {
                 this->gpio->blockSignals(true);
                 emit activated();
-                QTimer::singleShot(10, [gpio = this->gpio]() { gpio->blockSignals(false); });
+                QTimer::singleShot(300, [gpio = this->gpio]() { gpio->blockSignals(false); });
             }
         }
     });

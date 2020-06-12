@@ -87,6 +87,14 @@ QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
     Shortcut *shortcut = new Shortcut(this->config->get_shortcut("dark_mode_toggle"), this->window());
     this->shortcuts->add_shortcut("dark_mode_toggle", "Toggle Dark Mode", shortcut);
     connect(shortcut, &Shortcut::activated, [toggle]() { toggle->click(); });
+
+    Shortcut *temp_shortcut_on = new Shortcut(this->config->get_shortcut("dark_mode_on"), this->window());
+    this->shortcuts->add_shortcut("dark_mode_on", "[Enable Dark Mode]", temp_shortcut_on);
+    connect(temp_shortcut_on, &Shortcut::activated, [toggle]() { toggle->stateChanged(true); });
+    Shortcut *temp_shortcut_off = new Shortcut(this->config->get_shortcut("dark_mode_off"), this->window());
+    this->shortcuts->add_shortcut("dark_mode_off", "[Disable Dark Mode]", temp_shortcut_off);
+    connect(temp_shortcut_off, &Shortcut::activated, [toggle]() { toggle->stateChanged(false); });
+
     layout->addWidget(toggle, 1, Qt::AlignHCenter);
 
     return widget;
