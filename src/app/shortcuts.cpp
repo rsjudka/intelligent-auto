@@ -1,6 +1,7 @@
-#include <QDir>
 #include <QDebug>
+#include <QDir>
 #include <QElapsedTimer>
+#include <QTimer>
 
 #include <app/shortcuts.hpp>
 
@@ -62,19 +63,13 @@ Shortcut::Shortcut(QString shortcut, QWidget *parent) : QObject(parent), gpio_va
 
     this->set_shortcut(shortcut);
     connect(this->gpio, &QFileSystemWatcher::fileChanged, [this](QString) {
-        qDebug() << "[Shortcut][INFO] gpio changed";
         if (this->gpio_value_attribute.isOpen()) {
             this->gpio_value_attribute.seek(0);
             if (this->gpio_active_low == this->gpio_value_attribute.read(1).at(0)) {
-                qDebug() << "[Shortcut][INFO] gpio activated";
+                this->gpio->blockSignals(true);
                 emit activated();
+                QTimer::singleShot(10, [gpio = this->gpio]() { gpio->blockSignals(false); });
             }
-            else {
-                qDebug() << "[Shortcut][INFO] gpio inactive";
-            }
-        }
-        else {
-            qDebug() << "[Shortcut][ERROR] gpio value attribute not open";
         }
     });
     connect(this->key, &QShortcut::activated, [this]() { emit activated(); });
