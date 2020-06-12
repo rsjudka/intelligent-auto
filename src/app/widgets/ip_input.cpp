@@ -1,5 +1,4 @@
 #include <QColor>
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QList>
