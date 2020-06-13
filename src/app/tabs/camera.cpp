@@ -1,4 +1,5 @@
 #include <QLineEdit>
+
 #include <app/tabs/camera.hpp>
 #include <app/window.hpp>
 
