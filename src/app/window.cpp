@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <app/modules/brightness.hpp>
+#include <app/tabs/camera.hpp>
 #include <app/tabs/data.hpp>
 #include <app/tabs/launcher.hpp>
 #include <app/tabs/media.hpp>
@@ -75,6 +76,8 @@ QTabWidget *MainWindow::tabs_widget()
     launcher->setObjectName("Launcher");
     SettingsTab *settings = new SettingsTab(this);
     settings->setProperty("prevent_disable", true);
+    CameraTab *camera = new CameraTab(this);
+    camera->setObjectName("Camera");
 
     int idx;
     idx = widget->addTab(openauto, QString());
@@ -86,6 +89,9 @@ QTabWidget *MainWindow::tabs_widget()
     idx = widget->addTab(data, QString());
     this->theme->add_tab_icon("speed", data, Qt::Orientation::Vertical);
     widget->setTabEnabled(idx, this->config->get_page(data));
+    idx = widget->addTab(camera, QString());
+    this->theme->add_tab_icon("linked_camera", camera, Qt::Orientation::Vertical);
+    widget->setTabEnabled(idx, this->config->get_page(camera));
     idx = widget->addTab(launcher, QString());
     this->theme->add_tab_icon("widgets", launcher, Qt::Orientation::Vertical);
     widget->setTabEnabled(idx, this->config->get_page(launcher));

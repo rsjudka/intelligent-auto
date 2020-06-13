@@ -3,11 +3,11 @@
 
 #include <f1x/openauto/autoapp/Configuration/Configuration.hpp>
 
-#include <QObject>
-#include <QWidget>
 #include <QFrame>
+#include <QObject>
 #include <QSettings>
 #include <QString>
+#include <QWidget>
 
 #include <app/modules/brightness.hpp>
 
@@ -109,6 +109,9 @@ class Config : public QObject {
         emit page_changed(page, enabled);
     }
 
+    inline QString get_cam_stream_url() { return cam_stream_url; }
+    inline void set_cam_stream_url(QString stream_url) { this->cam_stream_url = stream_url; }
+
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
 
     static Config *get_instance();
@@ -136,6 +139,8 @@ class Config : public QObject {
     QString brightness_module;
     bool controls_bar;
     double scale;
+    QString cam_name;
+    QString cam_stream_url;
     QMap<QString, bool> pages;
 
    signals:
