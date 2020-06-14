@@ -17,6 +17,7 @@
 const QFont Theme::font_14 = QFont("Montserrat", 14);
 const QFont Theme::font_16 = QFont("Montserrat", 16);
 const QFont Theme::font_18 = QFont("Montserrat", 18);
+const QFont Theme::font_24 = QFont("Montserrat", 24);
 const QFont Theme::font_36 = QFont("Montserrat", 36);
 
 const QSize Theme::icon_16 = QSize(16, 16);

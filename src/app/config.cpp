@@ -41,8 +41,9 @@ Config::Config()
 
 void Config::save()
 {
-    if (this->volume != this->ia_config.value("volume", 50).toInt())
-        this->ia_config.setValue("volume", this->volume);
+    emit save_status(true);
+
+    if (this->volume != this->ia_config.value("volume", 50).toInt()) this->ia_config.setValue("volume", this->volume);
     if (this->dark_mode != this->ia_config.value("dark_mode", false).toBool())
         this->ia_config.setValue("dark_mode", this->dark_mode);
     if (this->brightness != this->ia_config.value("brightness", 255).toInt())
@@ -89,6 +90,9 @@ void Config::save()
     }
 
     this->openauto_config->save();
+
+    this->ia_config.sync();
+    emit save_status(false);
 }
 
 Config *Config::get_instance()

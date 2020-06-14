@@ -230,6 +230,7 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
     const QStringList colors = this->theme->get_colors().keys();
 
     ColorLabel *label = new ColorLabel(Theme::icon_16, widget);
+    label->scale(this->config->get_scale());
     label->setFont(Theme::font_16);
     connect(this->config, &Config::scale_changed, [label](double scale) { label->scale(scale); });
 
