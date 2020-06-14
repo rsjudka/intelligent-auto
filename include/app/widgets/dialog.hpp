@@ -64,7 +64,7 @@ class Dialog : public QDialog {
         QPushButton *cancel = new QPushButton("cancel");
         cancel->setFont(Theme::font_16);
         cancel->setFlat(true);
-        connect(cancel, &QPushButton::clicked, [this]() { this->reject(); });
+        connect(cancel, &QPushButton::clicked, [this]() { this->close(); });
         this->buttons->addWidget(cancel, 0, Qt::AlignRight);
         qApp->processEvents();
         Theme::get_instance()->update();
