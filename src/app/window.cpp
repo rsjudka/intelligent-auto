@@ -153,40 +153,11 @@ QWidget *MainWindow::controls_widget()
     save_button->setFlat(true);
     save_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("save", save_button);
-    connect(save_button, &QPushButton::clicked, [config = this->config, save_button]() {
-        save_button->blockSignals(true);
+    connect(save_button, &QPushButton::clicked, [this, save_button]() {
         Dialog *dialog = new Dialog(false, save_button);
+        dialog->set_body(this->save_control_widget());
 
-        QWidget *status = new QWidget();
-        QStackedLayout *layout = new QStackedLayout(status);
-
-        QLabel *check = new QLabel("✓", status);
-        check->setFont(Theme::font_24);
-        check->setAlignment(Qt::AlignCenter);
-
-        ProgressIndicator *loader = new ProgressIndicator();
-        loader->scale(config->get_scale());
-        connect(config, &Config::scale_changed, [loader](double scale) { loader->scale(scale); });
-        connect(config, &Config::save_status, [loader, save_button, layout, dialog](bool status) {
-            if (status) {
-                loader->start_animation();
-            }
-            else {
-                QTimer::singleShot(1000, [=]() {
-                    layout->setCurrentIndex(1);
-                    loader->stop_animation();
-                    save_button->blockSignals(false);
-                });
-            }
-        });
-
-        layout->addWidget(loader);
-        layout->addWidget(check);
-
-        dialog->set_body(status);
-        config->save();
-        qApp->processEvents();
-        Theme::get_instance()->update();
+        this->config->save();
         dialog->open(2000);
     });
 
@@ -196,32 +167,8 @@ QWidget *MainWindow::controls_widget()
     this->theme->add_button_icon("power_settings_new", shutdown_button);
     connect(shutdown_button, &QPushButton::clicked, [this]() {
         Dialog *dialog = new Dialog(true, this);
-
-        QWidget *options = new QWidget();
-        QHBoxLayout *layout = new QHBoxLayout(options);
-
-        QPushButton *restart = new QPushButton(options);
-        restart->setFlat(true);
-        restart->setIconSize(Theme::icon_56);
-        this->theme->add_button_icon("refresh", restart);
-        connect(restart, &QPushButton::clicked, []() {
-            sync();
-            if (system("shutdown -r now") < 0) qApp->exit();
-        });
-        layout->addWidget(restart);
-
-        QPushButton *power_off = new QPushButton(options);
-        power_off->setFlat(true);
-        power_off->setIconSize(Theme::icon_56);
-        this->theme->add_button_icon("power_settings_new", power_off);
-        connect(power_off, &QPushButton::clicked, []() {
-            sync();
-            if (system("shutdown -h now") < 0) qApp->exit();
-        });
-        layout->addWidget(power_off);
-
-        dialog->set_title(new QLabel("power off"));
-        dialog->set_body(options);
+        dialog->set_title("power off");
+        dialog->set_body(this->power_control_widget());
 
         dialog->open();
     });
@@ -295,6 +242,64 @@ QWidget *MainWindow::volume_widget()
     layout->addWidget(lower_button);
     layout->addWidget(slider, 4);
     layout->addWidget(raise_button);
+
+    return widget;
+}
+
+QWidget *MainWindow::power_control_widget()
+{
+    QWidget *widget = new QWidget();
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QPushButton *restart = new QPushButton(widget);
+    restart->setFlat(true);
+    restart->setIconSize(Theme::icon_56);
+    this->theme->add_button_icon("refresh", restart);
+    connect(restart, &QPushButton::clicked, []() {
+        sync();
+        if (system("shutdown -r now") < 0) qApp->exit();
+    });
+    layout->addWidget(restart);
+
+    QPushButton *power_off = new QPushButton(widget);
+    power_off->setFlat(true);
+    power_off->setIconSize(Theme::icon_56);
+    this->theme->add_button_icon("power_settings_new", power_off);
+    connect(power_off, &QPushButton::clicked, []() {
+        sync();
+        if (system("shutdown -h now") < 0) qApp->exit();
+    });
+    layout->addWidget(power_off);
+
+    return widget;
+}
+
+QWidget *MainWindow::save_control_widget()
+{
+    QWidget *widget = new QWidget();
+    QStackedLayout *layout = new QStackedLayout(widget);
+
+    QLabel *check = new QLabel("✓", widget);
+    check->setFont(Theme::font_24);
+    check->setAlignment(Qt::AlignCenter);
+
+    ProgressIndicator *loader = new ProgressIndicator(widget);
+    loader->scale(this->config->get_scale());
+    connect(this->config, &Config::scale_changed, [loader](double scale) { loader->scale(scale); });
+    connect(this->config, &Config::save_status, [loader, layout](bool status) {
+        if (status) {
+            loader->start_animation();
+        }
+        else {
+            QTimer::singleShot(1000, [=]() {
+                layout->setCurrentIndex(1);
+                loader->stop_animation();
+            });
+        }
+    });
+
+    layout->addWidget(loader);
+    layout->addWidget(check);
 
     return widget;
 }

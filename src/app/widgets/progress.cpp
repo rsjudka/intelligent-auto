@@ -51,7 +51,7 @@ ProgressIndicator::ProgressIndicator(QWidget* parent) : QFrame(parent)
 
 QSize ProgressIndicator::sizeHint()
 {
-    int size = (this->ellipse_point * 2) + this->pen_width + 4;
+    int size = (this->ellipse_point * 2) + this->pen_width + 1;
     return QSize(size, size);
 }
 

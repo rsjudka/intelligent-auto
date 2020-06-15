@@ -35,6 +35,8 @@ class MainWindow : public QMainWindow {
     QWidget *controls_widget();
     QWidget *quick_view_widget();
     QWidget *volume_widget();
+    QWidget *power_control_widget();
+    QWidget *save_control_widget();
 
     Config *config;
     Theme *theme;
