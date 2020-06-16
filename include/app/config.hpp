@@ -20,7 +20,11 @@ class Config : public QObject {
     void save();
 
     inline int get_volume() { return this->volume; }
-    inline void set_volume(int volume) { this->volume = volume; }
+    inline void set_volume(int volume)
+    {
+        this->volume = volume;
+        emit volume_changed(this->volume);
+    }
 
     inline bool get_dark_mode() { return this->dark_mode; }
     inline void set_dark_mode(bool dark_mode) { this->dark_mode = dark_mode; }
@@ -144,6 +148,7 @@ class Config : public QObject {
     QMap<QString, bool> pages;
 
    signals:
+    void volume_changed(int volume);
     void brightness_changed(unsigned int brightness);
     void si_units_changed(bool si_units);
     void quick_view_changed(QString quick_view);

@@ -25,6 +25,8 @@ MainWindow::MainWindow()
     connect(this->config, &Config::scale_changed, [theme = this->theme](double scale) { theme->set_scale(scale); });
 
     this->config->add_quick_view("volume", this->volume_widget());
+    this->config->add_quick_view("brightness", this->brightness_widget());
+    this->config->add_quick_view("controls", new QFrame(this));
     this->config->add_quick_view("none", new QFrame(this));
 
     this->config->add_brightness_module("mocked", new MockedBrightnessModule(this));
@@ -217,6 +219,8 @@ QWidget *MainWindow::volume_widget()
         config->set_volume(position);
         MainWindow::update_system_volume(position);
     });
+    connect(this->config, &Config::volume_changed,
+            [slider](int volume) { slider->setSliderPosition(volume); });
 
     QPushButton *lower_button = new QPushButton(widget);
     lower_button->setFlat(true);
@@ -243,10 +247,45 @@ QWidget *MainWindow::volume_widget()
     return widget;
 }
 
+QWidget *MainWindow::brightness_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setRange(76, 255);
+    slider->setSliderPosition(this->config->get_brightness());
+    connect(slider, &QSlider::valueChanged,
+            [config = this->config](int position) { config->set_brightness(position); });
+    connect(this->config, &Config::brightness_changed,
+            [slider](int brightness) { slider->setSliderPosition(brightness); });
+
+    QPushButton *dim_button = new QPushButton(widget);
+    dim_button->setFlat(true);
+    dim_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("brightness_low", dim_button);
+    connect(dim_button, &QPushButton::clicked,
+            [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 18)); });
+
+    QPushButton *brighten_button = new QPushButton(widget);
+    brighten_button->setFlat(true);
+    brighten_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("brightness_high", brighten_button);
+    connect(brighten_button, &QPushButton::clicked,
+            [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 18)); });
+
+    layout->addWidget(dim_button);
+    layout->addWidget(slider, 4);
+    layout->addWidget(brighten_button);
+
+    return widget;
+}
+
 void MainWindow::update_system_volume(int position)
 {
     QProcess *lProc = new QProcess();
-    std::string command = "amixer set Master " + std::to_string(position) + "% --quiet";
+    std::string command = "amixer -D pulse set Master " + std::to_string(position) + "% --quiet";
     lProc->start(QString(command.c_str()));
     lProc->waitForFinished();
 }

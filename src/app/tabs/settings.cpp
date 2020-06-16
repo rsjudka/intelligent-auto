@@ -52,6 +52,8 @@ QWidget *GeneralSettingsSubTab::settings_widget()
     layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->si_units_row_widget(), 1);
     layout->addWidget(Theme::br(widget), 1);
+    layout->addWidget(this->volume_row_widget(), 1);
+    layout->addWidget(Theme::br(widget), 1);
     layout->addWidget(this->brightness_module_row_widget(), 1);
     layout->addWidget(this->brightness_row_widget(), 1);
 
@@ -165,6 +167,8 @@ QWidget *GeneralSettingsSubTab::brightness_widget()
     slider->setSliderPosition(this->config->get_brightness());
     connect(slider, &QSlider::valueChanged,
             [config = this->config](int position) { config->set_brightness(position); });
+    connect(this->config, &Config::brightness_changed,
+            [slider](int brightness) { slider->setSliderPosition(brightness); });
 
     QPushButton *dim_button = new QPushButton(widget);
     dim_button->setFlat(true);
@@ -260,6 +264,64 @@ QWidget *GeneralSettingsSubTab::color_select_widget()
     layout->addWidget(left_button);
     layout->addWidget(label, 2);
     layout->addWidget(right_button);
+    layout->addStretch(1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::volume_row_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLabel *label = new QLabel("Volume", widget);
+    label->setFont(Theme::font_16);
+    layout->addWidget(label, 1);
+
+    layout->addWidget(this->volume_widget(), 1);
+
+    return widget;
+}
+
+QWidget *GeneralSettingsSubTab::volume_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setRange(0, 100);
+    slider->setSliderPosition(this->config->get_volume());
+    // update_system_volume(slider->sliderPosition());
+    connect(slider, &QSlider::valueChanged, [config = this->config](int position) {
+        config->set_volume(position);
+        // MainWindow::update_system_volume(position);
+    });
+    connect(this->config, &Config::volume_changed,
+            [slider](int volume) { slider->setSliderPosition(volume); });
+
+    QPushButton *lower_button = new QPushButton(widget);
+    lower_button->setFlat(true);
+    lower_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("volume_down", lower_button);
+    connect(lower_button, &QPushButton::clicked, [slider]() {
+        int position = slider->sliderPosition() - 10;
+        slider->setSliderPosition(position);
+    });
+
+    QPushButton *raise_button = new QPushButton(widget);
+    raise_button->setFlat(true);
+    raise_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("volume_up", raise_button);
+    connect(raise_button, &QPushButton::clicked, [slider]() {
+        int position = slider->sliderPosition() + 10;
+        slider->setSliderPosition(position);
+    });
+
+    layout->addStretch(1);
+    layout->addWidget(lower_button);
+    layout->addWidget(slider, 4);
+    layout->addWidget(raise_button);
     layout->addStretch(1);
 
     return widget;
