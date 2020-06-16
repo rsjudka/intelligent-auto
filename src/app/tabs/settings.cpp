@@ -677,7 +677,7 @@ QWidget *ShortcutsSettingsSubTab::shortcut_input_widget(QString id, Shortcut *sh
     else
         symbol->setChecked(shortcut->to_str().startsWith("gpio"));
     symbol->setIconSize(Theme::icon_32);
-    this->theme->add_button_icon("videogame_asset", symbol, "keyboard");
+    this->theme->add_button_icon("developer_board", symbol, "keyboard");
 
     ShortcutInput *input = new ShortcutInput(shortcut->to_str(), widget);
     input->setProperty("add_hint", true);
