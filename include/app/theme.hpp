@@ -26,6 +26,7 @@ class Theme : public QObject {
     static const QFont font_14;
     static const QFont font_16;
     static const QFont font_18;
+    static const QFont font_24;
     static const QFont font_36;
 
     static const QSize icon_16;

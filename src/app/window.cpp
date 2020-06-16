@@ -3,13 +3,14 @@
 #include <cstdlib>
 #include <sstream>
 
-#include <app/tabs/data.hpp>
-#include <app/tabs/media.hpp>
-#include <app/tabs/launcher.hpp>
-#include <app/tabs/settings.hpp>
-#include <app/window.hpp>
-#include <app/tabs/camera.hpp>
 #include <app/modules/brightness.hpp>
+#include <app/tabs/camera.hpp>
+#include <app/tabs/data.hpp>
+#include <app/tabs/launcher.hpp>
+#include <app/tabs/media.hpp>
+#include <app/tabs/settings.hpp>
+#include <app/widgets/dialog.hpp>
+#include <app/window.hpp>
 
 MainWindow::MainWindow()
 {
@@ -52,11 +53,11 @@ QWidget *MainWindow::window_widget()
     layout->setSpacing(0);
 
     layout->addWidget(this->tabs_widget());
-    QWidget *controls_widget = this->controls_widget();
-    if (!this->config->get_controls_bar()) controls_widget->hide();
+    QWidget *controls = this->controls_widget();
+    if (!this->config->get_controls_bar()) controls->hide();
     connect(this->config, &Config::controls_bar_changed,
-            [controls_widget](bool controls_bar) { controls_bar ? controls_widget->show() : controls_widget->hide(); });
-    layout->addWidget(controls_widget);
+            [controls](bool controls_bar) { controls_bar ? controls->show() : controls->hide(); });
+    layout->addWidget(controls);
 
     return widget;
 }
@@ -153,29 +154,32 @@ QWidget *MainWindow::controls_widget()
     QPushButton *save_button = new QPushButton(widget);
     save_button->setFlat(true);
     save_button->setIconSize(Theme::icon_32);
-    this->theme->add_button_icon("save", save_button);
-    connect(save_button, &QPushButton::clicked, [config = this->config]() { config->save(); });
+    this->theme->add_button_icon("save_alt", save_button);
+    connect(save_button, &QPushButton::clicked, [this, save_button]() {
+        Dialog *dialog = new Dialog(false, save_button);
+        dialog->set_body(this->save_control_widget());
+
+        this->config->save();
+        dialog->open(2000);
+    });
 
     QPushButton *shutdown_button = new QPushButton(widget);
     shutdown_button->setFlat(true);
     shutdown_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("power_settings_new", shutdown_button);
+    connect(shutdown_button, &QPushButton::clicked, [this]() {
+        Dialog *dialog = new Dialog(true, this);
+        dialog->set_title("power off");
+        dialog->set_body(this->power_control_widget());
+
+        dialog->open();
+    });
 
     QPushButton *exit_button = new QPushButton(widget);
     exit_button->setFlat(true);
     exit_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("close", exit_button);
     connect(exit_button, &QPushButton::clicked, []() { qApp->exit(); });
-
-    QElapsedTimer *timer = new QElapsedTimer();
-    connect(shutdown_button, &QPushButton::pressed, [timer]() { timer->start(); });
-    connect(shutdown_button, &QPushButton::released, [timer]() {
-        sync();
-
-        std::stringstream cmd;
-        cmd << "shutdown -" << (timer->hasExpired(2000) ? 'r' : 'h') << " now";
-        if (system(cmd.str().c_str()) < 0) qApp->exit();
-    });
 
     QWidget *quick_view = this->quick_view_widget();
     quick_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -198,9 +202,8 @@ QWidget *MainWindow::quick_view_widget()
 
     for (auto quick_view : this->config->get_quick_views().values()) layout->addWidget(quick_view);
     layout->setCurrentWidget(this->config->get_quick_view(this->config->get_quick_view()));
-    connect(this->config, &Config::quick_view_changed, [this, layout](QString quick_view) {
-        layout->setCurrentWidget(this->config->get_quick_view(quick_view));
-    });
+    connect(this->config, &Config::quick_view_changed,
+            [this, layout](QString quick_view) { layout->setCurrentWidget(this->config->get_quick_view(quick_view)); });
 
     return widget;
 }
@@ -278,6 +281,64 @@ QWidget *MainWindow::brightness_widget()
     layout->addWidget(dim_button);
     layout->addWidget(slider, 4);
     layout->addWidget(brighten_button);
+
+    return widget;
+}
+
+QWidget *MainWindow::power_control_widget()
+{
+    QWidget *widget = new QWidget();
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QPushButton *restart = new QPushButton(widget);
+    restart->setFlat(true);
+    restart->setIconSize(Theme::icon_56);
+    this->theme->add_button_icon("refresh", restart);
+    connect(restart, &QPushButton::clicked, []() {
+        sync();
+        if (system("shutdown -r now") < 0) qApp->exit();
+    });
+    layout->addWidget(restart);
+
+    QPushButton *power_off = new QPushButton(widget);
+    power_off->setFlat(true);
+    power_off->setIconSize(Theme::icon_56);
+    this->theme->add_button_icon("power_settings_new", power_off);
+    connect(power_off, &QPushButton::clicked, []() {
+        sync();
+        if (system("shutdown -h now") < 0) qApp->exit();
+    });
+    layout->addWidget(power_off);
+
+    return widget;
+}
+
+QWidget *MainWindow::save_control_widget()
+{
+    QWidget *widget = new QWidget();
+    QStackedLayout *layout = new QStackedLayout(widget);
+
+    QLabel *check = new QLabel("✓", widget);
+    check->setFont(Theme::font_24);
+    check->setAlignment(Qt::AlignCenter);
+
+    ProgressIndicator *loader = new ProgressIndicator(widget);
+    loader->scale(this->config->get_scale());
+    connect(this->config, &Config::scale_changed, [loader](double scale) { loader->scale(scale); });
+    connect(this->config, &Config::save_status, [loader, layout](bool status) {
+        if (status) {
+            loader->start_animation();
+        }
+        else {
+            QTimer::singleShot(1000, [=]() {
+                layout->setCurrentIndex(1);
+                loader->stop_animation();
+            });
+        }
+    });
+
+    layout->addWidget(loader);
+    layout->addWidget(check);
 
     return widget;
 }

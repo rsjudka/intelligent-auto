@@ -155,6 +155,7 @@ class Config : public QObject {
     void controls_bar_changed(bool controls_bar);
     void scale_changed(double scale);
     void page_changed(QWidget *page, bool enabled);
+    void save_status(bool status);
 };
 
 #endif
