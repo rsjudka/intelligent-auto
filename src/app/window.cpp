@@ -302,10 +302,17 @@ QWidget *MainWindow::controls_widget()
     volume->setFlat(true);
     volume->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("volume_up", volume);
-    connect(volume, &QPushButton::clicked, [this, volume]() {
-        Dialog *dialog = new Dialog(false, volume);
-        dialog->set_body(this->volume_widget(true));
-        dialog->open(2000);
+    QElapsedTimer *volume_timer = new QElapsedTimer();
+    connect(volume, &QPushButton::pressed, [volume_timer]() { volume_timer->start(); });
+    connect(volume, &QPushButton::released, [this, volume, volume_timer]() {
+        if (volume_timer->hasExpired(1000)) {
+            config->set_volume(0);
+        }
+        else {
+            Dialog *dialog = new Dialog(false, volume);
+            dialog->set_body(this->volume_widget(true));
+            dialog->open(2000);
+        }
     });
     QLabel *volume_value = new QLabel(QString::number(this->config->get_volume()), widget);
     volume_value->setFont(Theme::font_12);
