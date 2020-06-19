@@ -79,8 +79,6 @@ class Dialog : public QDialog {
         button->setFlat(true);
         connect(button, &QPushButton::clicked, [this]() { this->close(); });
         this->buttons->addWidget(button, 0, Qt::AlignRight);
-        qApp->processEvents();
-        Theme::get_instance()->update();
     }
 };
 

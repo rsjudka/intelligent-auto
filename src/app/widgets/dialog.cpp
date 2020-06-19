@@ -32,6 +32,9 @@ Dialog::Dialog(bool fullscreen, QWidget *parent) : QDialog(parent, Qt::Frameless
     connect(this->timer, &QTimer::timeout, [this]() { this->close(); });
 
     this->installEventFilter(this);
+
+    qApp->processEvents();
+    Theme::get_instance()->update();
 }
 
 void Dialog::open(int timeout)

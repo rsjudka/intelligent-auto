@@ -337,11 +337,13 @@ QWidget *MainWindow::controls_widget()
         this->config->set_dark_mode(mode);
     });
 
-    layout->addWidget(volume);
-    layout->addWidget(volume_value);
-    layout->addWidget(brightness);
-    layout->addWidget(brightness_value);
-    layout->addWidget(dark_mode);
+    layout->addWidget(volume, 1);
+    layout->addWidget(volume_value, 7);
+    layout->addStretch();
+    layout->addWidget(brightness, 1);
+    layout->addWidget(brightness_value, 7);
+    layout->addStretch();
+    layout->addWidget(dark_mode, 1);
 
     return widget;
 }
