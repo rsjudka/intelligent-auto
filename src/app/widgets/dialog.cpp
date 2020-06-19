@@ -1,9 +1,10 @@
+#include <math.h>
 #include <QFrame>
 #include <QGridLayout>
 #include <QKeyEvent>
 #include <QPropertyAnimation>
-#include <QTimer>
 
+#include <app/config.hpp>
 #include <app/widgets/dialog.hpp>
 
 Dialog::Dialog(bool fullscreen, QWidget *parent) : QDialog(parent, Qt::FramelessWindowHint)
@@ -11,8 +12,8 @@ Dialog::Dialog(bool fullscreen, QWidget *parent) : QDialog(parent, Qt::Frameless
     this->setAttribute(Qt::WA_TranslucentBackground, true);
 
     this->fullscreen = fullscreen;
-    if (false) {
-        if (this->fullscreen) {
+    if (this->fullscreen) {
+        if (false) {
             this->resize(parent->size());
             Overlay *overlay = new Overlay(this);
             overlay->resize(parent->size());
@@ -25,6 +26,12 @@ Dialog::Dialog(bool fullscreen, QWidget *parent) : QDialog(parent, Qt::Frameless
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(this->content_widget());
+
+    this->timer = new QTimer(this);
+    this->timer->setSingleShot(true);
+    connect(this->timer, &QTimer::timeout, [this]() { this->close(); });
+
+    this->installEventFilter(this);
 }
 
 void Dialog::open(int timeout)
@@ -34,14 +41,14 @@ void Dialog::open(int timeout)
     }
     else {
         this->show();
-        if (timeout > 0) QTimer::singleShot(timeout, [this]() { this->close(); });
+        if (timeout > 0) this->timer->start(timeout);
     }
 }
 
 QWidget *Dialog::content_widget()
 {
     QFrame *frame = new QFrame(this);
-    frame->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    if (this->fullscreen) frame->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     QVBoxLayout *layout = new QVBoxLayout(frame);
 
     this->title = new QVBoxLayout();
@@ -68,15 +75,21 @@ void Dialog::set_position()
             QWidget *window = parent->window();
             QPoint center = parent->mapToGlobal(parent->rect().center());
 
+            int offset = std::ceil(4 * Config::get_instance()->get_scale());
+
             QPoint pivot;
             if (center.y() > (window->height() / 2)) {
                 pivot = (center.x() > (window->width() / 2)) ? this->rect().bottomRight() : this->rect().bottomLeft();
-                pivot.ry() += parent->height() / 2;
+                pivot.ry() += (parent->height() / 2) + offset;
             }
             else {
                 pivot = (center.x() > (window->width() / 2)) ? this->rect().topRight() : this->rect().topLeft();
-                pivot.ry() -= parent->height() / 2;
+                pivot.ry() -= (parent->height() / 2) + offset;
             }
+            if (center.x() > (window->width() / 2))
+                pivot.rx() -= this->width() / 2;
+            else
+                pivot.rx() += this->width() / 2;
             point = this->mapFromGlobal(center) - pivot;
         }
         this->move(point);
@@ -92,4 +105,11 @@ void Dialog::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
     this->set_position();
+}
+
+bool Dialog::eventFilter(QObject *object, QEvent *event)
+{
+    if (this->timer->isActive()) this->timer->start(this->timer->interval());
+
+    return QWidget::eventFilter(object, event);
 }

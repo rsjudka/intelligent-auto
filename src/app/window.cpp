@@ -1,6 +1,7 @@
 #include <QElapsedTimer>
 #include <QtWidgets>
 #include <cstdlib>
+#include <math.h>
 #include <sstream>
 
 #include <app/modules/brightness.hpp>
@@ -27,7 +28,7 @@ MainWindow::MainWindow()
 
     this->config->add_quick_view("volume", this->volume_widget());
     this->config->add_quick_view("brightness", this->brightness_widget());
-    this->config->add_quick_view("controls", new QFrame(this));
+    this->config->add_quick_view("controls", this->controls_widget());
     this->config->add_quick_view("none", new QFrame(this));
 
     this->config->add_brightness_module("mocked", new MockedBrightnessModule(this));
@@ -53,7 +54,7 @@ QWidget *MainWindow::window_widget()
     layout->setSpacing(0);
 
     layout->addWidget(this->tabs_widget());
-    QWidget *controls = this->controls_widget();
+    QWidget *controls = this->controls_bar_widget();
     if (!this->config->get_controls_bar()) controls->hide();
     connect(this->config, &Config::controls_bar_changed,
             [controls](bool controls_bar) { controls_bar ? controls->show() : controls->hide(); });
@@ -140,7 +141,7 @@ QTabWidget *MainWindow::tabs_widget()
     return widget;
 }
 
-QWidget *MainWindow::controls_widget()
+QWidget *MainWindow::controls_bar_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -160,7 +161,7 @@ QWidget *MainWindow::controls_widget()
         dialog->set_body(this->save_control_widget());
 
         this->config->save();
-        dialog->open(2000);
+        dialog->open(1000);
     });
 
     QPushButton *shutdown_button = new QPushButton(widget);
@@ -208,7 +209,7 @@ QWidget *MainWindow::quick_view_widget()
     return widget;
 }
 
-QWidget *MainWindow::volume_widget()
+QWidget *MainWindow::volume_widget(bool skip_buttons)
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -225,32 +226,35 @@ QWidget *MainWindow::volume_widget()
     connect(this->config, &Config::volume_changed,
             [slider](int volume) { slider->setSliderPosition(volume); });
 
-    QPushButton *lower_button = new QPushButton(widget);
-    lower_button->setFlat(true);
-    lower_button->setIconSize(Theme::icon_32);
-    this->theme->add_button_icon("volume_down", lower_button);
-    connect(lower_button, &QPushButton::clicked, [slider]() {
-        int position = slider->sliderPosition() - 10;
-        slider->setSliderPosition(position);
-    });
+    if (!skip_buttons) {
+        QPushButton *lower_button = new QPushButton(widget);
+        lower_button->setFlat(true);
+        lower_button->setIconSize(Theme::icon_32);
+        this->theme->add_button_icon("volume_down", lower_button);
+        connect(lower_button, &QPushButton::clicked, [slider]() {
+            int position = slider->sliderPosition() - 10;
+            slider->setSliderPosition(position);
+        });
 
-    QPushButton *raise_button = new QPushButton(widget);
-    raise_button->setFlat(true);
-    raise_button->setIconSize(Theme::icon_32);
-    this->theme->add_button_icon("volume_up", raise_button);
-    connect(raise_button, &QPushButton::clicked, [slider]() {
-        int position = slider->sliderPosition() + 10;
-        slider->setSliderPosition(position);
-    });
+        QPushButton *raise_button = new QPushButton(widget);
+        raise_button->setFlat(true);
+        raise_button->setIconSize(Theme::icon_32);
+        this->theme->add_button_icon("volume_up", raise_button);
+        connect(raise_button, &QPushButton::clicked, [slider]() {
+            int position = slider->sliderPosition() + 10;
+            slider->setSliderPosition(position);
+        });
 
-    layout->addWidget(lower_button);
-    layout->addWidget(slider, 4);
-    layout->addWidget(raise_button);
+        layout->addWidget(lower_button);
+        layout->addWidget(raise_button);
+    }
+
+    layout->insertWidget(1, slider, 4);
 
     return widget;
 }
 
-QWidget *MainWindow::brightness_widget()
+QWidget *MainWindow::brightness_widget(bool skip_buttons)
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
@@ -264,23 +268,80 @@ QWidget *MainWindow::brightness_widget()
     connect(this->config, &Config::brightness_changed,
             [slider](int brightness) { slider->setSliderPosition(brightness); });
 
-    QPushButton *dim_button = new QPushButton(widget);
-    dim_button->setFlat(true);
-    dim_button->setIconSize(Theme::icon_32);
-    this->theme->add_button_icon("brightness_low", dim_button);
-    connect(dim_button, &QPushButton::clicked,
-            [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 18)); });
+    if (!skip_buttons) {
+        QPushButton *dim_button = new QPushButton(widget);
+        dim_button->setFlat(true);
+        dim_button->setIconSize(Theme::icon_32);
+        this->theme->add_button_icon("brightness_low", dim_button);
+        connect(dim_button, &QPushButton::clicked,
+                [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 18)); });
 
-    QPushButton *brighten_button = new QPushButton(widget);
-    brighten_button->setFlat(true);
-    brighten_button->setIconSize(Theme::icon_32);
-    this->theme->add_button_icon("brightness_high", brighten_button);
-    connect(brighten_button, &QPushButton::clicked,
-            [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 18)); });
+        QPushButton *brighten_button = new QPushButton(widget);
+        brighten_button->setFlat(true);
+        brighten_button->setIconSize(Theme::icon_32);
+        this->theme->add_button_icon("brightness_high", brighten_button);
+        connect(brighten_button, &QPushButton::clicked,
+                [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 18)); });
 
-    layout->addWidget(dim_button);
-    layout->addWidget(slider, 4);
-    layout->addWidget(brighten_button);
+        layout->addWidget(dim_button);
+        layout->addWidget(brighten_button);
+    }
+
+    layout->insertWidget(1, slider, 4);
+
+    return widget;
+}
+
+QWidget *MainWindow::controls_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    QPushButton *volume = new QPushButton(widget);
+    volume->setFlat(true);
+    volume->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("volume_up", volume);
+    connect(volume, &QPushButton::clicked, [this, volume]() {
+        Dialog *dialog = new Dialog(false, volume);
+        dialog->set_body(this->volume_widget(true));
+        dialog->open(2000);
+    });
+    QLabel *volume_value = new QLabel(QString::number(this->config->get_volume()), widget);
+    volume_value->setFont(Theme::font_12);
+    connect(this->config, &Config::volume_changed,
+            [volume_value](int volume) { volume_value->setText(QString::number(volume)); });
+
+    QPushButton *brightness = new QPushButton(widget);
+    brightness->setFlat(true);
+    brightness->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("brightness_high", brightness);
+    connect(brightness, &QPushButton::clicked, [this, brightness]() {
+        Dialog *dialog = new Dialog(false, brightness);
+        dialog->set_body(this->brightness_widget(true));
+        dialog->open(2000);
+    });
+    QLabel *brightness_value = new QLabel(QString::number(std::ceil(this->config->get_brightness() / 2.55)), widget);
+    brightness_value->setFont(Theme::font_12);
+    connect(this->config, &Config::brightness_changed, [brightness_value](int brightness) {
+        brightness_value->setText(QString::number(std::ceil(brightness / 2.55)));
+    });
+
+    QPushButton *dark_mode = new QPushButton(widget);
+    dark_mode->setFlat(true);
+    dark_mode->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("dark_mode", dark_mode);
+    connect(dark_mode, &QPushButton::clicked, [this]() {
+        bool mode = !theme->get_mode();
+        this->theme->set_mode(mode);
+        this->config->set_dark_mode(mode);
+    });
+
+    layout->addWidget(volume);
+    layout->addWidget(volume_value);
+    layout->addWidget(brightness);
+    layout->addWidget(brightness_value);
+    layout->addWidget(dark_mode);
 
     return widget;
 }
@@ -316,6 +377,7 @@ QWidget *MainWindow::power_control_widget()
 QWidget *MainWindow::save_control_widget()
 {
     QWidget *widget = new QWidget();
+    widget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     QStackedLayout *layout = new QStackedLayout(widget);
 
     QLabel *check = new QLabel("✓", widget);

@@ -23,6 +23,7 @@ class Theme : public QObject {
    public:
     enum Orientation { BOTTOM, RIGHT };
 
+    static const QFont font_12;
     static const QFont font_14;
     static const QFont font_16;
     static const QFont font_18;

@@ -78,6 +78,8 @@ QWidget *GeneralSettingsSubTab::dark_mode_row_widget()
     toggle->scale(this->config->get_scale());
     toggle->setChecked(this->config->get_dark_mode());
     connect(this->config, &Config::scale_changed, [toggle](double scale) { toggle->scale(scale); });
+    connect(this->theme, &Theme::mode_updated,
+            [toggle, config = this->config](bool mode) { toggle->setChecked(mode); });
     connect(toggle, &Switch::stateChanged, [theme = this->theme, config = this->config](bool state) {
         theme->set_mode(state);
         config->set_dark_mode(state);
@@ -288,15 +290,12 @@ QWidget *GeneralSettingsSubTab::volume_widget()
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
-    layout->setContentsMargins(0, 0, 0, 0);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
     slider->setRange(0, 100);
     slider->setSliderPosition(this->config->get_volume());
-    // update_system_volume(slider->sliderPosition());
     connect(slider, &QSlider::valueChanged, [config = this->config](int position) {
         config->set_volume(position);
-        // MainWindow::update_system_volume(position);
     });
     connect(this->config, &Config::volume_changed,
             [slider](int volume) { slider->setSliderPosition(volume); });

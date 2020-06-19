@@ -14,6 +14,7 @@
 
 #include <app/theme.hpp>
 
+const QFont Theme::font_12 = QFont("Montserrat", 12);
 const QFont Theme::font_14 = QFont("Montserrat", 14);
 const QFont Theme::font_16 = QFont("Montserrat", 16);
 const QFont Theme::font_18 = QFont("Montserrat", 18);
@@ -65,7 +66,7 @@ QString Theme::scale_stylesheet(QString stylesheet)
     while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
         if (match.hasMatch()) {
-            int scaled_px = ceil(match.captured(1).toInt() * this->scale);
+            int scaled_px = std::ceil(match.captured(1).toInt() * this->scale);
             stylesheet.replace(match.captured(), QString("%1px").arg(scaled_px));
         }
     }

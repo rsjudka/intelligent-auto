@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QPainter>
 #include <QPushButton>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include <app/theme.hpp>
@@ -58,11 +59,13 @@ class Dialog : public QDialog {
    protected:
     void showEvent(QShowEvent *event);
     void keyPressEvent(QKeyEvent *event);
+    bool eventFilter(QObject *object, QEvent *event);
 
    private:
     QVBoxLayout *title;
     QVBoxLayout *body;
     QHBoxLayout *buttons;
+    QTimer *timer;
     bool fullscreen;
     bool overlay_enabled = false;
 
