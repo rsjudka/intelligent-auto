@@ -65,5 +65,6 @@
         <file>fonts/Titillium_Web/TitilliumWeb-Regular.ttf</file>
         <file>fonts/Montserrat/Montserrat-LightItalic.ttf</file>
         <file>fonts/Montserrat/Montserrat-Regular.ttf</file>
+        <file>aa_video.qml</file>
     </qresource>
 </RCC>
