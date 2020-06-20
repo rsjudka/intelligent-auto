@@ -78,11 +78,11 @@ QTabWidget *MainWindow::tabs_widget()
         widget->setCurrentIndex(idx);
     });
 
-    OpenAutoTab *openauto = new OpenAutoTab(this);
-    openauto->setObjectName("OpenAuto");
+    this->openauto = new OpenAutoTab(this);
+    this->openauto->setObjectName("OpenAuto");
     Shortcut *openauto_shortcut = new Shortcut(this->config->get_shortcut("openauto_page"), this);
     this->shortcuts->add_shortcut("openauto_page", "Open OpenAuto Page", openauto_shortcut);
-    connect(openauto_shortcut, &Shortcut::activated, [widget, openauto]() {
+    connect(openauto_shortcut, &Shortcut::activated, [widget, openauto = this->openauto]() {
         int idx = widget->indexOf(openauto);
         if (widget->isTabEnabled(idx)) widget->setCurrentIndex(idx);
     });
@@ -301,4 +301,16 @@ void MainWindow::showEvent(QShowEvent *event)
     QWidget::showEvent(event);
     emit is_ready();
     this->theme->update();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    QMainWindow::keyPressEvent(event);
+    if (this->openauto != nullptr) this->openauto->send_key_event(event);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    QMainWindow::keyReleaseEvent(event);
+    if (this->openauto != nullptr) this->openauto->send_key_event(event);
 }
