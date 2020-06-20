@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(ia CXX)
 add_subdirectory(aasdk)
+
 set(AASDK_INCLUDE_DIRS ${aasdk_SOURCE_DIR}/include)
 set(AASDK_LIBRARIES ${aasdk_SOURCE_DIR}/lib/libaasdk.so)
 set(AASDK_PROTO_INCLUDE_DIRS ${aasdk_BINARY_DIR})
@@ -68,6 +69,7 @@ if(GST_BUILD)
     endif(RPI_BUILD)
 endif(GST_BUILD)
 message(INFO "${GST_LIBRARIES}")
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${Qt5Multimedia_INCLUDE_DIRS}
                     ${Qt5MultimediaWidgets_INCLUDE_DIRS}
