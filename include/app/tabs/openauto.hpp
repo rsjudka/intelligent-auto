@@ -15,6 +15,7 @@
 #include <f1x/openauto/autoapp/Configuration/RecentAddressesList.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntityFactory.hpp>
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
+#include <thread>
 
 #include <app/config.hpp>
 #include <app/theme.hpp>
@@ -28,7 +29,6 @@ class OpenAutoWorker : public QObject {
    public:
     OpenAutoWorker(std::function<void(bool)> callback = nullptr, QWidget *parent = nullptr, bool night_mode = false);
     ~OpenAutoWorker();
-    const QStringList get_recent_addresses();
     void connect_wireless(QString address);
 
     inline void start() { this->app->waitForUSBDevice(); }
@@ -46,7 +46,6 @@ class OpenAutoWorker : public QObject {
     boost::asio::io_service io_service;
     boost::asio::io_service::work work;
     std::shared_ptr<autoapp::configuration::Configuration> configuration;
-    autoapp::configuration::RecentAddressesList recent_addresses_list;
     aasdk::tcp::TCPWrapper tcp_wrapper;
     aasdk::usb::USBWrapper usb_wrapper;
     aasdk::usb::AccessoryModeQueryFactory query_factory;

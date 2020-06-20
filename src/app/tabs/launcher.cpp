@@ -77,30 +77,15 @@ EmbeddedApp::EmbeddedApp(QWidget *parent) : QWidget(parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    this->container = new QVBoxLayout();
-
-    layout->addWidget(this->controls_widget(), 0, Qt::AlignTop | Qt::AlignRight);
-    layout->addLayout(this->container, 1);
-}
-
-QWidget *EmbeddedApp::controls_widget()
-{
-    QWidget *widget = new QWidget(this);
-
-    QHBoxLayout *layout = new QHBoxLayout(widget);
-    layout->setContentsMargins(0, 0, 0, 0);
-
     QPushButton *button = new QPushButton(this);
     button->setFlat(true);
     button->setIconSize(Theme::icon_16);
     connect(button, &QPushButton::clicked, [this]() { this->end(); });
     Theme::get_instance()->add_button_icon("close", button);
-    layout->addWidget(button);
+    layout->addWidget(button, 0, Qt::AlignRight);
 
-    layout->addStretch();
-    layout->addWidget(button);
-
-    return widget;
+    this->container = new QVBoxLayout();
+    layout->addLayout(this->container, 1);
 }
 
 void EmbeddedApp::start(QString app)
@@ -181,11 +166,13 @@ QWidget *LauncherTab::app_select_widget()
     layout->addWidget(home_button, 0, Qt::AlignTop);
 
     this->folders = new QListWidget(widget);
+    this->folders->setFont(Theme::font_16);
     Theme::to_touch_scroller(this->folders);
     this->populate_dirs(root_path);
     layout->addWidget(this->folders, 4);
 
     this->apps = new QListWidget(widget);
+    this->apps->setFont(Theme::font_16);
     Theme::to_touch_scroller(this->apps);
     this->populate_apps(root_path);
     connect(this->apps, &QListWidget::itemClicked, [this](QListWidgetItem *item) {
@@ -216,21 +203,21 @@ QWidget *LauncherTab::config_widget()
 
     QCheckBox *checkbox = new QCheckBox("launch at startup", widget);
     checkbox->setFont(Theme::font_14);
-    checkbox->setStyleSheet(QString("QCheckBox::indicator {"
-                                    "    width: %1px;"
-                                    "    height: %1px;"
-                                    "}")
-                                .arg(Theme::font_14.pointSize()));
     checkbox->setChecked(this->config->get_launcher_auto_launch());
-    connect(checkbox, &QCheckBox::toggled, [this](bool checked) {
+    connect(checkbox, &QCheckBox::toggled, [this, checkbox](bool checked) {
         this->config->set_launcher_auto_launch(checked);
         QString launcher_app;
         if (checked) {
             launcher_app.append(this->path_label->text() + '/');
-            if (this->apps->currentItem() == nullptr)
-                launcher_app.append(this->apps->item(0)->text());
-            else
+            if (this->apps->currentItem() == nullptr) {
+                if (this->apps->count() > 0)
+                    launcher_app.append(this->apps->item(0)->text());
+                else
+                    checkbox->setChecked(false);
+            }
+            else {
                 launcher_app.append(this->apps->currentItem()->text());
+            }
         }
         this->config->set_launcher_app(launcher_app);
     });
@@ -256,15 +243,11 @@ void LauncherTab::populate_dirs(QString path)
         else {
             item->setText(dir.fileName());
         }
-        item->setFont(Theme::font_16);
         item->setData(Qt::UserRole, QVariant(dir.absoluteFilePath()));
     }
 }
 
 void LauncherTab::populate_apps(QString path)
 {
-    for (QString app : QDir(path).entryList(QDir::Files | QDir::Executable)) {
-        QListWidgetItem *item = new QListWidgetItem(app, this->apps);
-        item->setFont(Theme::font_16);
-    }
+    for (QString app : QDir(path).entryList(QDir::Files | QDir::Executable)) new QListWidgetItem(app, this->apps);
 }

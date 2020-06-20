@@ -36,8 +36,11 @@ QTabBar::tab:selected:top {
     border-bottom: 2px solid palette(base);
 }
 
-QTabBar::tab:disabled:top {
-    color: rgba(0, 0, 0, 97);
+QTabBar::tab:disabled {
+    height: 0px;
+    width: 0px;
+    padding: 0px;
+    margin: 0px;
 }
 
 QSlider {
@@ -146,14 +149,14 @@ QCheckBox::indicator {
 }
 
 QRadioButton::indicator {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     border: 2px solid rgb(97, 97, 97);
     border-radius: 11px;
 }
 
 QCheckBox::indicator::checked {
-    image: url(:/icons/light/check-24px.svg);
+    image: url(:/icons/light/check.svg);
     background-color: palette(base);
     border: 2px solid palette(base);
 }
@@ -191,6 +194,23 @@ QScrollBar::add-line {
 
 QScrollBar::sub-line {
     border: none;
+}
+
+QLineEdit {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 1px;
+    border-bottom-right-radius: 1px;
+    border: none;
+    padding: 12px;
+    color: rgba(0, 0, 0, 222);
+    background-color: rgba(0, 0, 0, 10);
+    border-bottom: 1px solid rgb(0, 0, 0, 108);
+}
+
+QLineEdit:focus {
+    background-color: rgba(0, 0, 0, 20);
+    border-bottom: 2px solid palette(base);
 }
 
 Switch {

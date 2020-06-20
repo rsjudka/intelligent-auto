@@ -25,6 +25,14 @@ Config::Config()
     this->launcher_app = this->ia_config.value("Launcher/app", QString()).toString();
     this->quick_view = this->ia_config.value("quick_view", "volume").toString();
     this->brightness_module = this->ia_config.value("brightness_module", "mocked").toString();
+    this->controls_bar = this->ia_config.value("controls_bar", false).toBool();
+    this->scale = this->ia_config.value("scale", 1.0).toDouble();
+    this->cam_name = this->ia_config.value("Camera/name").toString();
+    this->cam_stream_url = this->ia_config.value("Camera/stream_url").toString();
+    this->ia_config.beginGroup("Pages");
+    for (auto key : this->ia_config.childKeys())
+        this->pages[key] = this->ia_config.value(key, true).toBool();
+    this->ia_config.endGroup();
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() { this->save(); });
@@ -65,6 +73,20 @@ void Config::save()
         this->ia_config.setValue("quick_view", this->quick_view);
     if (this->brightness_module != this->ia_config.value("brightness_module", "mocked").toString())
         this->ia_config.setValue("brightness_module", this->brightness_module);
+    if (this->controls_bar != this->ia_config.value("controls_bar", false).toBool())
+        this->ia_config.setValue("controls_bar", this->controls_bar);
+    if (this->scale != this->ia_config.value("scale", 1.0).toDouble())
+        this->ia_config.setValue("scale", this->scale);
+    if (this->cam_name != this->ia_config.value("Camera/name").toString())
+        this->ia_config.setValue("Camera/name", this->cam_name);
+    if (this->cam_stream_url != this->ia_config.value("Camera/stream_url").toString())
+        this->ia_config.setValue("Camera/stream_url", this->cam_stream_url);
+    for (auto id : this->pages.keys()) {
+        QString config_key = QString("Pages/%1").arg(id);
+        bool page_enabled = this->pages[id];
+        if (page_enabled != this->ia_config.value(config_key, true).toBool())
+            this->ia_config.setValue(config_key, page_enabled);
+    }
 
     this->openauto_config->save();
 }
