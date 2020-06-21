@@ -2,6 +2,7 @@
 #define OPENAUTO_HPP_
 
 #include <QtWidgets>
+#include <thread>
 #include <f1x/aasdk/TCP/TCPWrapper.hpp>
 #include <f1x/aasdk/USB/AccessoryModeQueryChain.hpp>
 #include <f1x/aasdk/USB/AccessoryModeQueryChainFactory.hpp>
@@ -14,7 +15,6 @@
 #include <f1x/openauto/autoapp/Configuration/RecentAddressesList.hpp>
 #include <f1x/openauto/autoapp/Service/AndroidAutoEntityFactory.hpp>
 #include <f1x/openauto/autoapp/Service/ServiceFactory.hpp>
-#include <thread>
 
 #include <app/config.hpp>
 #include <app/theme.hpp>
