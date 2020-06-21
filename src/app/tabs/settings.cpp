@@ -165,26 +165,27 @@ QWidget *GeneralSettingsSubTab::brightness_widget()
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setTracking(false);
     slider->setRange(76, 255);
-    slider->setSliderPosition(this->config->get_brightness());
+    slider->setValue(this->config->get_brightness());
     connect(slider, &QSlider::valueChanged,
             [config = this->config](int position) { config->set_brightness(position); });
     connect(this->config, &Config::brightness_changed,
-            [slider](int brightness) { slider->setSliderPosition(brightness); });
+            [slider](int brightness) { slider->setValue(brightness); });
 
     QPushButton *dim_button = new QPushButton(widget);
     dim_button->setFlat(true);
     dim_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("brightness_low", dim_button);
     connect(dim_button, &QPushButton::clicked,
-            [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 18)); });
+            [slider]() { slider->setValue(std::max(76, slider->value() - 18)); });
 
     QPushButton *brighten_button = new QPushButton(widget);
     brighten_button->setFlat(true);
     brighten_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("brightness_high", brighten_button);
     connect(brighten_button, &QPushButton::clicked,
-            [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 18)); });
+            [slider]() { slider->setValue(std::min(255, slider->value() + 18)); });
 
     layout->addStretch(1);
     layout->addWidget(dim_button);
@@ -292,21 +293,22 @@ QWidget *GeneralSettingsSubTab::volume_widget()
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setTracking(false);
     slider->setRange(0, 100);
-    slider->setSliderPosition(this->config->get_volume());
+    slider->setValue(this->config->get_volume());
     connect(slider, &QSlider::valueChanged, [config = this->config](int position) {
         config->set_volume(position);
     });
     connect(this->config, &Config::volume_changed,
-            [slider](int volume) { slider->setSliderPosition(volume); });
+            [slider](int volume) { slider->setValue(volume); });
 
     QPushButton *lower_button = new QPushButton(widget);
     lower_button->setFlat(true);
     lower_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("volume_down", lower_button);
     connect(lower_button, &QPushButton::clicked, [slider]() {
-        int position = slider->sliderPosition() - 10;
-        slider->setSliderPosition(position);
+        int position = slider->value() - 10;
+        slider->setValue(position);
     });
 
     QPushButton *raise_button = new QPushButton(widget);
@@ -314,8 +316,8 @@ QWidget *GeneralSettingsSubTab::volume_widget()
     raise_button->setIconSize(Theme::icon_32);
     this->theme->add_button_icon("volume_up", raise_button);
     connect(raise_button, &QPushButton::clicked, [slider]() {
-        int position = slider->sliderPosition() + 10;
-        slider->setSliderPosition(position);
+        int position = slider->value() + 10;
+        slider->setValue(position);
     });
 
     layout->addStretch(1);
@@ -479,14 +481,19 @@ QWidget *LayoutSettingsSubTab::scale_widget()
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setTracking(false);
     slider->setRange(1, 4);
-    slider->setSliderPosition(this->config->get_scale() * 4);
-    QLabel *value = new QLabel(QString("x%1").arg(slider->sliderPosition() / 4.0), widget);
+    slider->setValue(this->config->get_scale() * 4);
+    QLabel *value = new QLabel(QString("x%1").arg(slider->value() / 4.0), widget);
     value->setFont(Theme::font_14);
     connect(slider, &QSlider::valueChanged, [config = this->config, value](int position) {
         double scale = position / 4.0;
         value->setText(QString("x%1").arg(scale));
         config->set_scale(scale);
+    });
+    connect(slider, &QSlider::sliderMoved, [value](int position) {
+        double scale = position / 4.0;
+        value->setText(QString("x%1").arg(scale));
     });
 
     layout->addStretch(2);
@@ -781,13 +788,17 @@ QWidget *OpenAutoSettingsSubTab::dpi_widget()
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setTracking(false);
     slider->setRange(0, 512);
-    slider->setSliderPosition(this->config->openauto_config->getScreenDPI());
-    QLabel *value = new QLabel(QString::number(slider->sliderPosition()), widget);
+    slider->setValue(this->config->openauto_config->getScreenDPI());
+    QLabel *value = new QLabel(QString::number(slider->value()), widget);
     value->setFont(Theme::font_14);
     connect(slider, &QSlider::valueChanged, [config = this->config, value](int position) {
-        value->setText(QString::number(position));
         config->openauto_config->setScreenDPI(position);
+        value->setText(QString::number(position));
+    });
+    connect(slider, &QSlider::sliderMoved, [value](int position) {
+        value->setText(QString::number(position));
     });
 
     layout->addStretch(2);
