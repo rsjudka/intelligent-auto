@@ -216,34 +216,29 @@ QWidget *MainWindow::volume_widget(bool skip_buttons)
     layout->setContentsMargins(0, 0, 0, 0);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setTracking(false);
     slider->setRange(0, 100);
-    slider->setSliderPosition(this->config->get_volume());
-    update_system_volume(slider->sliderPosition());
+    slider->setValue(this->config->get_volume());
+    update_system_volume(slider->value());
     connect(slider, &QSlider::valueChanged, [config = this->config](int position) {
         config->set_volume(position);
         MainWindow::update_system_volume(position);
     });
     connect(this->config, &Config::volume_changed,
-            [slider](int volume) { slider->setSliderPosition(volume); });
+            [slider](int volume) { slider->setValue(volume); });
 
     if (!skip_buttons) {
         QPushButton *lower_button = new QPushButton(widget);
         lower_button->setFlat(true);
         lower_button->setIconSize(Theme::icon_32);
         this->theme->add_button_icon("volume_down", lower_button);
-        connect(lower_button, &QPushButton::clicked, [slider]() {
-            int position = slider->sliderPosition() - 10;
-            slider->setSliderPosition(position);
-        });
+        connect(lower_button, &QPushButton::clicked, [slider]() { slider->setValue(slider->value() - 10); });
 
         QPushButton *raise_button = new QPushButton(widget);
         raise_button->setFlat(true);
         raise_button->setIconSize(Theme::icon_32);
         this->theme->add_button_icon("volume_up", raise_button);
-        connect(raise_button, &QPushButton::clicked, [slider]() {
-            int position = slider->sliderPosition() + 10;
-            slider->setSliderPosition(position);
-        });
+        connect(raise_button, &QPushButton::clicked, [slider]() { slider->setValue(slider->value() + 10); });
 
         layout->addWidget(lower_button);
         layout->addWidget(raise_button);
@@ -261,27 +256,26 @@ QWidget *MainWindow::brightness_widget(bool skip_buttons)
     layout->setContentsMargins(0, 0, 0, 0);
 
     QSlider *slider = new QSlider(Qt::Orientation::Horizontal, widget);
+    slider->setTracking(false);
     slider->setRange(76, 255);
-    slider->setSliderPosition(this->config->get_brightness());
+    slider->setValue(this->config->get_brightness());
     connect(slider, &QSlider::valueChanged,
             [config = this->config](int position) { config->set_brightness(position); });
     connect(this->config, &Config::brightness_changed,
-            [slider](int brightness) { slider->setSliderPosition(brightness); });
+            [slider](int brightness) { slider->setValue(brightness); });
 
     if (!skip_buttons) {
         QPushButton *dim_button = new QPushButton(widget);
         dim_button->setFlat(true);
         dim_button->setIconSize(Theme::icon_32);
         this->theme->add_button_icon("brightness_low", dim_button);
-        connect(dim_button, &QPushButton::clicked,
-                [slider]() { slider->setSliderPosition(std::max(76, slider->sliderPosition() - 18)); });
+        connect(dim_button, &QPushButton::clicked, [slider]() { slider->setValue(slider->value() - 18); });
 
         QPushButton *brighten_button = new QPushButton(widget);
         brighten_button->setFlat(true);
         brighten_button->setIconSize(Theme::icon_32);
         this->theme->add_button_icon("brightness_high", brighten_button);
-        connect(brighten_button, &QPushButton::clicked,
-                [slider]() { slider->setSliderPosition(std::min(255, slider->sliderPosition() + 18)); });
+        connect(brighten_button, &QPushButton::clicked, [slider]() { slider->setValue(slider->value() + 18); });
 
         layout->addWidget(dim_button);
         layout->addWidget(brighten_button);
@@ -417,7 +411,7 @@ QWidget *MainWindow::save_control_widget()
 void MainWindow::update_system_volume(int position)
 {
     QProcess *lProc = new QProcess();
-    std::string command = "amixer -D pulse set Master " + std::to_string(position) + "% --quiet";
+    std::string command = "amixer set Master " + std::to_string(position) + "% --quiet";
     lProc->start(QString(command.c_str()));
     lProc->waitForFinished();
 }
