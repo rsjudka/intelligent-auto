@@ -105,7 +105,7 @@ QFrame[frameShape="5"][frameShadow="16"] {
 
 QListWidget {
     background-color: rgba(255, 255, 255, 10);
-    color: rgba(255, 255, 255);
+    color: rgb(255, 255, 255);
     border: none;
 }
 
@@ -244,4 +244,8 @@ QDialog,
 QDialog > QFrame {
     background-color: rgb(36, 36, 36);
     border-radius: 8px;
+}
+
+*[add_hint="true"] {
+    background-color: rgba(255, 255, 255, 8);
 }

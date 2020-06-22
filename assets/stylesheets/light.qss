@@ -245,3 +245,7 @@ QDialog > QFrame {
     background-color: rgb(252, 252, 252);
     border-radius: 8px;
 }
+
+*[add_hint="true"] {
+    background-color: rgba(0, 0, 0, 8);
+}
