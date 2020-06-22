@@ -9,6 +9,7 @@
 #include <app/tabs/openauto.hpp>
 #include <app/tabs/settings.hpp>
 #include <app/window.hpp>
+#include <app/tabs/camera.hpp>
 #include <app/modules/brightness.hpp>
 
 MainWindow::MainWindow()
@@ -105,6 +106,15 @@ QTabWidget *MainWindow::tabs_widget()
         if (widget->isTabEnabled(idx)) widget->setCurrentIndex(idx);
     });
 
+    CameraTab *camera = new CameraTab(this);
+    camera->setObjectName("Camera");
+    Shortcut *camera_shortcut = new Shortcut(this->config->get_shortcut("camera_page"), this);
+    this->shortcuts->add_shortcut("camera_page", "Open Camera Page", camera_shortcut);
+    connect(camera_shortcut, &Shortcut::activated, [widget, camera]() {
+        int idx = widget->indexOf(camera);
+        if (widget->isTabEnabled(idx)) widget->setCurrentIndex(idx);
+    });
+
     LauncherTab *launcher = new LauncherTab(this);
     launcher->setObjectName("Launcher");
     Shortcut *launcher_shortcut = new Shortcut(this->config->get_shortcut("launcher_page"), this);
@@ -132,6 +142,9 @@ QTabWidget *MainWindow::tabs_widget()
     idx = widget->addTab(data, QString());
     this->theme->add_tab_icon("speed", data, Qt::Orientation::Vertical);
     widget->setTabEnabled(idx, this->config->get_page(data));
+    idx = widget->addTab(camera, QString());
+    this->theme->add_tab_icon("linked_camera", camera, Qt::Orientation::Vertical);
+    widget->setTabEnabled(idx, this->config->get_page(camera));
     idx = widget->addTab(launcher, QString());
     this->theme->add_tab_icon("widgets", launcher, Qt::Orientation::Vertical);
     widget->setTabEnabled(idx, this->config->get_page(launcher));

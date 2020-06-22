@@ -196,6 +196,23 @@ QScrollBar::sub-line {
     border: none;
 }
 
+QLineEdit {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 1px;
+    border-bottom-right-radius: 1px;
+    border: none;
+    padding: 12px;
+    color: rgb(255, 255, 255);
+    background-color: rgba(255, 255, 255, 10);
+    border-bottom: 1px solid rgba(255, 255, 255, 136);
+}
+
+QLineEdit:focus {
+    background-color: rgba(255, 255, 255,20);
+    border-bottom: 2px solid palette(base);
+}
+
 Switch {
     qproperty-track_color: rgba(255, 255, 255, 31);
     qproperty-thumb_color: rgb(158, 158, 158);
