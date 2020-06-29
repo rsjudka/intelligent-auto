@@ -31,6 +31,8 @@ Config::Config()
     this->scale = this->ia_config.value("scale", 1.0).toDouble();
     this->cam_name = this->ia_config.value("Camera/name").toString();
     this->cam_stream_url = this->ia_config.value("Camera/stream_url").toString();
+    this->cam_local_device = this->ia_config.value("Camera/local_device").toString();
+    this->cam_is_local = this->ia_config.value("Camera/is_local").toBool();
     this->ia_config.beginGroup("Pages");
     for (auto key : this->ia_config.childKeys())
         this->pages[key] = this->ia_config.value(key, true).toBool();
@@ -91,6 +93,10 @@ void Config::save()
         this->ia_config.setValue("Camera/name", this->cam_name);
     if (this->cam_stream_url != this->ia_config.value("Camera/stream_url").toString())
         this->ia_config.setValue("Camera/stream_url", this->cam_stream_url);
+    if (this->cam_local_device != this->ia_config.value("Camera/local_device").toString())
+        this->ia_config.setValue("Camera/local_device", this->cam_local_device);
+    if (this->cam_is_local != this->ia_config.value("Camera/is_local").toBool())
+        this->ia_config.setValue("Camera/is_local", this->cam_is_local);
     for (auto id : this->pages.keys()) {
         QString config_key = QString("Pages/%1").arg(id);
         bool page_enabled = this->pages[id];
