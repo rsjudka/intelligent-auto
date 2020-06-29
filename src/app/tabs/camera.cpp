@@ -123,7 +123,6 @@ QGridLayout* CameraTab::camera_type_selector()
 {
     QGridLayout *layout = new QGridLayout();
     layout->setColumnStretch(0,1);
-    //    layout->setColumnStretch(0,1);
     layout->setColumnStretch(2,2);
     layout->setColumnStretch(4,1);
 
