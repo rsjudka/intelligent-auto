@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QRadioButton>
 #include <QCamera>
+#include <QCheckBox>
 
 #include <app/config.hpp>
 #include <app/theme.hpp>
@@ -23,12 +24,14 @@ class CameraTab : public QWidget {
     QWidget *connect_widget();
     QWidget *network_camera_widget();
     QWidget *local_camera_widget();
-    QGridLayout *camera_type_selector();
-    QWidget *input_widget(QRadioButton *network_radio);
+    QWidget *camera_selector();
+    QPushButton *connect_button();
+    QWidget *input_widget();
+    QWidget *selector_widget(QWidget *selection);
     bool populate_local_cams();
     void connect_network_stream();
     void connect_local_stream();
-    bool local_cam_available(QString& device);
+    bool local_cam_available(const QString& device);
     void update_network_status(QMediaPlayer::MediaStatus media_status);
     void update_local_status(QCamera::Status status);
 
@@ -36,17 +39,18 @@ class CameraTab : public QWidget {
     Config *config;
     QLabel *status;
     QMediaPlayer *player;
-    QString url;
+    QList<QPair<QString,QString>> local_cams;
     QComboBox* cams_dropdown;
     QVideoWidget *local_video_widget;
     QCamera *local_cam;
-    QString local_device;
-    bool local;
+    int local_index;
 
    signals:
     void connected_network();
     void connected_local();
     void disconnected();
+    void next_cam();
+    void prev_cam();
 };
 
 #endif

@@ -120,14 +120,14 @@ class Config : public QObject {
         emit page_changed(page, enabled);
     }
 
-    inline QString get_cam_stream_url() { return this->cam_stream_url; }
-    inline void set_cam_stream_url(QString stream_url) { this->cam_stream_url = stream_url; }
+    inline QString get_cam_network_url() { return this->cam_network_url; }
+    inline void set_cam_network_url(QString network_url) { this->cam_network_url = network_url; }
 
-    inline QString get_cam_local_device() { return this->cam_local_device; }
+    inline const QString& get_cam_local_device() { return this->cam_local_device; }
     inline void set_cam_local_device(QString local_device) { this->cam_local_device = local_device; }
 
-    inline bool get_cam_is_local() { return this->cam_is_local; }
-    inline void set_cam_is_local(bool is_local) { this->cam_is_local = is_local; }
+    inline bool get_cam_is_network() { return this->cam_is_network; }
+    inline void set_cam_is_network(bool is_network) { this->cam_is_network = is_network; }
 
     std::shared_ptr<f1x::openauto::autoapp::configuration::Configuration> openauto_config;
     f1x::openauto::autoapp::configuration::Configuration::ButtonCodes openauto_button_codes;
@@ -159,10 +159,10 @@ class Config : public QObject {
     QString brightness_module;
     bool controls_bar;
     double scale;
-    QString cam_name;
-    QString cam_stream_url;
+    QString cam_network_url;
     QString cam_local_device;
-    bool cam_is_local;
+    QString cam_name;
+    bool cam_is_network;
     QMap<QString, bool> pages;
 
    signals:

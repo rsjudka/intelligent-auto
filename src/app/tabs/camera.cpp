@@ -10,11 +10,9 @@ CameraTab::CameraTab(QWidget *parent) : QWidget(parent)
     this->theme = Theme::get_instance();
     this->player = new QMediaPlayer(this);
     this->local_cam = nullptr;
+    this->local_index = 0;
 
     this->config = Config::get_instance();
-    this->url = this->config->get_cam_stream_url();
-    this->local_device = this->config->get_cam_local_device();
-    this->local = this->config->get_cam_is_local();
 
     QStackedLayout *layout = new QStackedLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -23,32 +21,44 @@ CameraTab::CameraTab(QWidget *parent) : QWidget(parent)
     layout->addWidget(this->local_camera_widget());
     layout->addWidget(this->network_camera_widget());
 
-    connect(this, &CameraTab::connected_network, [layout]() { layout->setCurrentIndex(2); });
-    connect(this, &CameraTab::connected_local, [layout]() { layout->setCurrentIndex(1); });
     connect(this, &CameraTab::disconnected, [layout]() { layout->setCurrentIndex(0); });
+    connect(this, &CameraTab::connected_local, [layout]() { layout->setCurrentIndex(1); });
+    connect(this, &CameraTab::connected_network, [layout]() { layout->setCurrentIndex(2); });
 }
 
-QWidget *CameraTab::network_camera_widget()
+QWidget *CameraTab::connect_widget()
 {
     QWidget *widget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(widget);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
 
-    QPushButton *disconnect = new QPushButton(widget);
-    disconnect->setFlat(true);
-    disconnect->setIconSize(Theme::icon_16);
-    connect(disconnect, &QPushButton::clicked, [this]() {
-        this->player->setMedia(QUrl());
-        this->status->setText(QString());
-        this->player->stop();
+    QLabel *label = new QLabel("connect camera", widget);
+    label->setFont(Theme::font_16);
+
+    this->status = new QLabel(widget);
+    this->status->setFont(Theme::font_16);
+
+    QWidget *local_cams = this->camera_selector();
+    QWidget *network_cam = this->input_widget();
+    network_cam->setVisible( false );
+    QCheckBox *network_toggle = new QCheckBox("Network", this);
+    network_toggle->setFont(Theme::font_14);
+    connect(network_toggle, &QCheckBox::toggled, [this, network_cam, local_cams](bool checked) {
+        network_cam->setVisible( checked );
+        local_cams->setVisible( !checked );
+        this->status->setText("");
+    this->config->set_cam_is_network( checked );
     });
-    this->theme->add_button_icon("close", disconnect);
-    layout->addWidget(disconnect, 0, Qt::AlignRight);
+    network_toggle->setChecked(this->config->get_cam_is_network());
 
-    QVideoWidget *video = new QVideoWidget(widget);
-    this->player->setVideoOutput(video);
-    layout->addWidget(video);
+    layout->addStretch();
+    layout->addWidget(label, 0, Qt::AlignCenter);
+    layout->addStretch();
+    layout->addWidget(local_cams);
+    layout->addWidget(network_cam);
+    layout->addWidget(this->status, 0, Qt::AlignCenter);
+    layout->addWidget(this->connect_button(), 0, Qt::AlignCenter);
+    layout->addStretch();
+    layout->addWidget(network_toggle, 1, Qt::AlignLeft);
 
     return widget;
 }
@@ -79,145 +89,159 @@ QWidget *CameraTab::local_camera_widget()
     return widget;
 }
 
-QWidget *CameraTab::connect_widget()
+QWidget *CameraTab::network_camera_widget()
 {
     QWidget *widget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
 
-    QLabel *label = new QLabel("connect camera", widget);
-    label->setFont(Theme::font_16);
+    QPushButton *disconnect = new QPushButton(widget);
+    disconnect->setFlat(true);
+    disconnect->setIconSize(Theme::icon_16);
+    connect(disconnect, &QPushButton::clicked, [this]() {
+        this->player->setMedia(QUrl());
+        this->status->setText(QString());
+        this->player->stop();
+    });
+    this->theme->add_button_icon("close", disconnect);
+    layout->addWidget(disconnect, 0, Qt::AlignRight);
 
-    this->status = new QLabel(widget);
-    this->status->setFont(Theme::font_16);
+    QVideoWidget *video = new QVideoWidget(widget);
+    this->player->setVideoOutput(video);
+    layout->addWidget(video);
 
-    QPushButton *connect_button = new QPushButton("connect", widget);
+    return widget;
+}
+
+
+QPushButton *CameraTab::connect_button()
+{
+    QPushButton *connect_button = new QPushButton("connect", this);
     connect_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     connect_button->setFont(Theme::font_14);
     connect_button->setFlat(true);
     connect_button->setIconSize(Theme::icon_36);
     connect(connect_button, &QPushButton::clicked, [this]() {
         this->status->setText("");
-        this->config->set_cam_is_local(this->local);
-        if (this->local) {
-            this->connect_local_stream();
-            this->config->set_cam_local_device(this->local_device);
-        }
-        else {
+        if (this->config->get_cam_is_network())
             this->connect_network_stream();
-            this->config->set_cam_stream_url(this->url);
-        }
+        else
+        this->connect_local_stream();
     });
 
-    layout->addStretch();
-    layout->addWidget(label, 0, Qt::AlignCenter);
-    layout->addStretch();
-    layout->addLayout(this->camera_type_selector());
-    layout->addWidget(this->status, 0, Qt::AlignCenter);
-    layout->addWidget(connect_button, 0, Qt::AlignCenter);
-    layout->addStretch();
+    return connect_button;
+}
+
+QWidget *CameraTab::camera_selector()
+{
+    QWidget *widget = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout(widget);
+
+    QLabel *label = new QLabel(widget);
+    label->setFont(Theme::font_16);
+    label->setAlignment(Qt::AlignCenter);
+    QWidget *selector = this->selector_widget(label);
+    this->populate_local_cams();
+    connect(this, &CameraTab::prev_cam, [this, label]() {
+        local_index=(local_index-1+local_cams.size())%this->local_cams.size();
+        auto cam = this->local_cams.at(local_index);
+        label->setText(cam.first);
+        this->config->set_cam_local_device(cam.second);
+    });
+    connect(this, &CameraTab::next_cam, [this, label]() {
+        local_index=(local_index+1)%this->local_cams.size();
+        auto cam = this->local_cams.at(local_index);
+        label->setText(cam.first);
+        this->config->set_cam_local_device(cam.second);
+    });
+    label->setText(this->local_cams.at(local_index).first);
+    layout->addWidget(selector);
+
+    QHBoxLayout *refresh_row = new QHBoxLayout();
+    QPushButton *refresh_button = new QPushButton(widget);
+    refresh_button->setFont(Theme::font_14);
+    refresh_button->setFlat(true);
+    this->theme->add_button_icon("refresh", refresh_button);
+
+    refresh_row->addStretch(1);
+    refresh_row->addWidget(refresh_button);
+    refresh_row->addStretch(1);
+    layout->addLayout(refresh_row);
+    connect(refresh_button, &QPushButton::clicked, this, [this,label]{
+        this->populate_local_cams();
+        label->setText(this->local_cams.at(local_index).first);
+    });
 
     return widget;
 }
 
-QGridLayout* CameraTab::camera_type_selector()
-{
-    QGridLayout *layout = new QGridLayout();
-    layout->setColumnStretch(0,1);
-    layout->setColumnStretch(2,2);
-    layout->setColumnStretch(4,1);
-
-    QRadioButton* local_cam_radio = new QRadioButton("Local", this);
-    local_cam_radio->setFont(Theme::font_18);
-    layout->addWidget(local_cam_radio,0,1);
-
-    this->cams_dropdown = new QComboBox(this);
-    this->cams_dropdown->setFont(Theme::font_18);
-    bool has_local = this->populate_local_cams();
-    connect(local_cam_radio, &QRadioButton::toggled, [=](bool checked){
-        this->local=checked;
-        this->status->setText("");
-    });
-    connect(this->cams_dropdown, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index){
-        this->local_device=this->cams_dropdown->itemData(index).toString();
-        this->status->setText("");
-    });
-    layout->addWidget(this->cams_dropdown,0,2);
-
-    QRadioButton* network_cam_radio = new QRadioButton("Network", this);
-    network_cam_radio->setFont(Theme::font_18);
-    layout->addWidget(network_cam_radio,1,1);
-    layout->addWidget(this->input_widget(network_cam_radio),1,2);
-
-    QPushButton *refresh = new QPushButton();
-    refresh->setFont(Theme::font_14);
-    refresh->setFlat(true);
-    this->theme->add_button_icon("refresh", refresh);
-    layout->addWidget(refresh,0,3);
-
-    if (has_local && this->config->get_cam_is_local())
-        local_cam_radio->setChecked(true);
-    else
-        network_cam_radio->setChecked(true);
-
-    connect(refresh, &QPushButton::clicked, [=](){ local_cam_radio->setChecked(true); });
-    connect(refresh, &QPushButton::clicked, this, &CameraTab::populate_local_cams);
-    connect(refresh, &QPushButton::clicked, this, [=](){ local_cam_radio->setChecked(true); });
-
-    return layout;
-}
-
-bool CameraTab::populate_local_cams()
-{
-    this->cams_dropdown->clear();
-
-    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    for (const QCameraInfo &cameraInfo : cameras) {
-        QString pretty_name = cameraInfo.description() + " at " + cameraInfo.deviceName();
-        this->cams_dropdown->addItem(pretty_name, cameraInfo.deviceName());
-    }
-
-    if (this->cams_dropdown->count() == 0) {
-        this->cams_dropdown->addItem("<No local cameras found>");
-        this->cams_dropdown->setDisabled(true);
-        return false;
-    }
-
-    if (!this->local_device.isEmpty()) {
-        int pref_cam_index = this->cams_dropdown->findData(this->local_device);
-        if (pref_cam_index >= 0)
-            this->cams_dropdown->setCurrentIndex(pref_cam_index);
-    }
-    else {
-        QCameraInfo default_cam = QCameraInfo::defaultCamera();
-        if (!default_cam.isNull()) {
-            int default_cam_index = this->cams_dropdown->findData(default_cam.deviceName());
-            if (default_cam_index >= 0)
-                this->cams_dropdown->setCurrentIndex(default_cam_index);
-        }
-    }
-
-    this->cams_dropdown->setDisabled(false);
-    return true;
-}
-
-QWidget *CameraTab::input_widget(QRadioButton* network_radio)
+QWidget *CameraTab::selector_widget(QWidget *selection)
 {
     QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
-    QLineEdit *input = new QLineEdit(this->url, widget);
+    QPushButton *left_button = new QPushButton(widget);
+    left_button->setFlat(true);
+    left_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_left", left_button);
+    connect(left_button, &QPushButton::clicked, this, &CameraTab::prev_cam);
+
+    QPushButton *right_button = new QPushButton(this);
+    right_button->setFlat(true);
+    right_button->setIconSize(Theme::icon_32);
+    this->theme->add_button_icon("arrow_right", right_button);
+    connect(right_button, &QPushButton::clicked, this, &CameraTab::next_cam);
+
+    layout->addStretch(1);
+    layout->addWidget(left_button);
+    layout->addWidget(selection, 2);
+    layout->addWidget(right_button);
+    layout->addStretch(1);
+
+    return widget;
+}
+
+bool CameraTab::populate_local_cams()
+{
+    this->local_cams.clear();
+    this->local_index=0;
+    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+    QString default_device = this->config->get_cam_local_device();
+    if (default_device.isEmpty() && !QCameraInfo::defaultCamera().isNull())
+        default_device = QCameraInfo::defaultCamera().deviceName();
+
+    int i = 0;
+    for (auto const& cam : cameras) {
+      QString pretty_name = cam.description() + " at " + cam.deviceName();
+      local_cams.append(QPair<QString,QString>(pretty_name, cam.deviceName()));
+      if (cam.deviceName() == default_device)
+      this->local_index = i;
+      i++;
+    }
+
+    if (this->local_cams.isEmpty()) {
+        this->local_cams.append(QPair<QString,QString>(QString("<No local cameras found>"),QString()));
+        return false;
+    }
+    return true;
+}
+
+QWidget *CameraTab::input_widget()
+{
+    QWidget *widget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(widget);
+
+    QLineEdit *input = new QLineEdit(this->config->get_cam_network_url(), widget);
     input->setContextMenuPolicy(Qt::NoContextMenu);
     input->setFont(Theme::font_18);
-    input->setAlignment(Qt::AlignLeft);
-    connect(input, &QLineEdit::textEdited, [this](QString text) { this->url = text; });
-    connect(input, &QLineEdit::returnPressed, [this]() {
-        this->connect_network_stream();
-        this->config->set_cam_stream_url(this->url);
-    });
+    input->setAlignment(Qt::AlignCenter);
+    connect(input, &QLineEdit::textEdited, [this](QString text) { this->config->set_cam_network_url(text); });
+    connect(input, &QLineEdit::returnPressed, this, &CameraTab::connect_network_stream );
 
+    layout->addStretch(1);
     layout->addWidget(input, 4);
-
-    connect(input, &QLineEdit::textEdited, [=](){ network_radio->setChecked(true); });
+    layout->addStretch(1);
 
     return widget;
 }
@@ -246,9 +270,9 @@ void CameraTab::connect_network_stream()
     connect(this->player, QOverload<>::of(&QMediaPlayer::metaDataChanged), [this]() { emit connected_network(); });
 
     QString pipeline = QString(
-                           "gst-pipeline: rtspsrc location=%1 ! decodebin ! video/x-raw ! videoconvert ! videoscale ! "
-                           "xvimagesink sync=false force-aspect-ratio=false name=\"qtvideosink\"")
-                           .arg(this->url);
+        "gst-pipeline: rtspsrc location=%1 ! decodebin ! video/x-raw ! videoconvert ! videoscale ! "
+        "xvimagesink sync=false force-aspect-ratio=false name=\"qtvideosink\"")
+        .arg(this->config->get_cam_network_url());
 
     qInfo() << "playing stream pipeline: " << pipeline;
     this->player->setMedia(QUrl(pipeline));
@@ -257,22 +281,25 @@ void CameraTab::connect_network_stream()
 
 void CameraTab::connect_local_stream()
 {
-    if (this->local_cam != nullptr)
+    if (this->local_cam != nullptr) {
         delete this->local_cam;
+        this->local_cam = nullptr;
+    }
 
-    if (!this->local_cam_available(this->local_device)) {
+    const QString& local = this->config->get_cam_local_device();
+    if (!this->local_cam_available(local)) {
         this->status->setText("Camera unavailable");
         return;
     }
 
-    qDebug() << "Connecting to local cam " << this->local_device;
-    this->local_cam = new QCamera(this->local_device.toUtf8(), this);
+    qDebug() << "Connecting to local cam " << local;
+    this->local_cam = new QCamera(local.toUtf8(), this);
     this->local_cam->setViewfinder(this->local_video_widget);
-
     connect(this->local_cam, &QCamera::statusChanged, this, &CameraTab::update_local_status);
-    this->local_cam->start();                                                                                                              }
+    this->local_cam->start();
+}
 
-bool CameraTab::local_cam_available(QString& device)
+bool CameraTab::local_cam_available(const QString& device)
 {
     if (device.isEmpty())
         return false;
@@ -287,7 +314,7 @@ bool CameraTab::local_cam_available(QString& device)
 
 void CameraTab::update_local_status(QCamera::Status status)
 {
-    qDebug() << "Local camera" << this->local_device << "changed status to" << status;
+    qDebug() << "Local camera" << this->config->get_cam_local_device() << "changed status to" << status;
 
     switch (status) {
       case QCamera::ActiveStatus:
@@ -307,6 +334,6 @@ void CameraTab::update_local_status(QCamera::Status status)
 
     if (this->local_cam != nullptr && !this->local_cam->error() == QCamera::NoError) {
         qCritical() << "Local camera" << this->local_cam << "got error" << this->local_cam->error();
-        this->status->setText("Error connecting to local camera at '" + this->local_device + "'");
+        this->status->setText("Error connecting to local camera at '" + this->config->get_cam_local_device() + "'");
     }
 }
