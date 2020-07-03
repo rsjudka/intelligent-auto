@@ -39,14 +39,14 @@ QWidget *CameraTab::connect_widget()
 
     QWidget *local_cams = this->camera_selector();
     QWidget *network_cam = this->input_widget();
-    network_cam->setVisible( false );
+    network_cam->setVisible(false);
     QCheckBox *network_toggle = new QCheckBox("Network", this);
     network_toggle->setFont(Theme::font_14);
     connect(network_toggle, &QCheckBox::toggled, [this, network_cam, local_cams](bool checked) {
-        network_cam->setVisible( checked );
-        local_cams->setVisible( !checked );
+        network_cam->setVisible(checked);
+        local_cams->setVisible(!checked);
         this->status->setText("");
-    this->config->set_cam_is_network( checked );
+    this->config->set_cam_is_network(checked);
     });
     network_toggle->setChecked(this->config->get_cam_is_network());
 
@@ -237,7 +237,7 @@ QWidget *CameraTab::input_widget()
     input->setFont(Theme::font_18);
     input->setAlignment(Qt::AlignCenter);
     connect(input, &QLineEdit::textEdited, [this](QString text) { this->config->set_cam_network_url(text); });
-    connect(input, &QLineEdit::returnPressed, this, &CameraTab::connect_network_stream );
+    connect(input, &QLineEdit::returnPressed, this, &CameraTab::connect_network_stream);
 
     layout->addStretch(1);
     layout->addWidget(input, 4);

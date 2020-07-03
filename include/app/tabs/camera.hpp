@@ -40,7 +40,7 @@ class CameraTab : public QWidget {
     QLabel *status;
     QMediaPlayer *player;
     QList<QPair<QString,QString>> local_cams;
-    QComboBox* cams_dropdown;
+    QComboBox *cams_dropdown;
     QVideoWidget *local_video_widget;
     QCamera *local_cam;
     int local_index;
