@@ -268,14 +268,8 @@ void CameraTab::connect_network_stream()
     connect(this->player, &QMediaPlayer::mediaStatusChanged,
             [this](QMediaPlayer::MediaStatus media_status) { this->update_network_status(media_status); });
     connect(this->player, QOverload<>::of(&QMediaPlayer::metaDataChanged), [this]() { emit connected_network(); });
-
-    QString pipeline = QString(
-        "gst-pipeline: rtspsrc location=%1 ! decodebin ! video/x-raw ! videoconvert ! videoscale ! "
-        "xvimagesink sync=false force-aspect-ratio=false name=\"qtvideosink\"")
-        .arg(this->config->get_cam_network_url());
-
-    qInfo() << "playing stream pipeline: " << pipeline;
-    this->player->setMedia(QUrl(pipeline));
+    qInfo() << "playing stream: " << this->config->get_cam_network_url();
+    this->player->setMedia(QUrl(this->config->get_cam_network_url()));
     this->player->play();
 }
 
