@@ -1,6 +1,7 @@
 #include <QLineEdit>
 #include <QCamera>
 #include <QCameraInfo>
+#include <QCameraImageCapture>
 
 #include <app/tabs/camera.hpp>
 #include <app/window.hpp>
@@ -83,7 +84,7 @@ QWidget *CameraTab::local_camera_widget()
     this->theme->add_button_icon("close", disconnect);
     layout->addWidget(disconnect, 0, Qt::AlignRight);
 
-    this->local_video_widget = new QVideoWidget(widget);
+    this->local_video_widget = new QCameraViewfinder(widget);
     layout->addWidget(this->local_video_widget);
 
     return widget;
@@ -127,7 +128,7 @@ QPushButton *CameraTab::connect_button()
         if (this->config->get_cam_is_network())
             this->connect_network_stream();
         else
-        this->connect_local_stream();
+            this->connect_local_stream();
     });
 
     return connect_button;
@@ -293,6 +294,30 @@ void CameraTab::connect_local_stream()
     this->local_cam->start();
 }
 
+void CameraTab::choose_video_resolution()
+{
+    QSize window_size = this->size();
+    QCameraImageCapture imageCapture(this->local_cam);
+    int min_gap = 10000, xgap, ygap;
+    QSize max_fit;
+    for (auto const& resolution : imageCapture.supportedResolutions()) {
+        xgap = window_size.width() - resolution.width();
+        ygap = window_size.height() - resolution.height();
+        if (xgap >= 0 && ygap >= 0 && xgap+ygap < min_gap) {
+            min_gap = xgap + ygap;
+            max_fit = resolution;
+        }
+    }
+    if (max_fit.isValid()) {
+        qDebug() << "Local cam auto resolution" << max_fit << "to fit in" << window_size;
+        this->local_cam_settings.setResolution(max_fit);
+    }
+    else
+        qDebug() << "No suitable resolutions found to fit in" << window_size;
+    //    this->local_cam_settings.setPixelFormat(QVideoFrame::Format_YV12);
+    this->local_cam->setViewfinderSettings(this->local_cam_settings);
+}
+
 bool CameraTab::local_cam_available(const QString& device)
 {
     if (device.isEmpty())
@@ -312,12 +337,15 @@ void CameraTab::update_local_status(QCamera::Status status)
 
     switch (status) {
       case QCamera::ActiveStatus:
+        qDebug() << "Local camera format:" << this->local_cam->viewfinderSettings().pixelFormat();
         emit connected_local();
         break;
-      case QCamera::LoadingStatus:
       case QCamera::LoadedStatus:
+        this->choose_video_resolution();
+        // fall-through
+      case QCamera::LoadingStatus:
       case QCamera::StartingStatus:
-        this->status->setText("connecting...");
+        this->status->setText("connecting..."); 
         break;
       case QCamera::UnloadedStatus:
         emit disconnected();

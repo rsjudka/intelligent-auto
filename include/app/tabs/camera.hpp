@@ -10,6 +10,8 @@
 #include <QRadioButton>
 #include <QCamera>
 #include <QCheckBox>
+#include <QCameraViewfinder>
+#include <QCameraViewfinderSettings>
 
 #include <app/config.hpp>
 #include <app/theme.hpp>
@@ -34,6 +36,7 @@ class CameraTab : public QWidget {
     bool local_cam_available(const QString& device);
     void update_network_status(QMediaPlayer::MediaStatus media_status);
     void update_local_status(QCamera::Status status);
+    void choose_video_resolution();
 
     Theme *theme;
     Config *config;
@@ -41,7 +44,8 @@ class CameraTab : public QWidget {
     QMediaPlayer *player;
     QList<QPair<QString,QString>> local_cams;
     QComboBox *cams_dropdown;
-    QVideoWidget *local_video_widget;
+    QCameraViewfinder *local_video_widget;
+    QCameraViewfinderSettings local_cam_settings;
     QCamera *local_cam;
     int local_index;
 
