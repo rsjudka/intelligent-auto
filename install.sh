@@ -22,22 +22,36 @@ deps=(
 "librtaudio6"
 "libkf5bluezqt-dev"
 "libtag1-dev"
+"qml-module-qtquick2"
+"doxygen"
+"qml-module-qtquick*"
+"libglib2.0-dev"
+"libgstreamer1.0-dev"
+"gstreamer1.0-plugins-base-apps"
+"gstreamer1.0-plugins-bad"
+"gstreamer1.0-libav"
+"gstreamer1.0-alsa"
+"libgstreamer-plugins-base1.0-dev"
+"qtdeclarative5-dev"
+"qt5-default"
+"libgstreamer-plugins-bad1.0-dev"
+"libunwind-dev"
+"qml-module-qtmultimedia"
 )
-
-#loop through dependencies and install
+echo "installing Gstreamer dependencies"
 for app in ${deps[@]}; do
 	echo "installing: " $app
-	sudo apt -qq -o=Dpkg::Use-Pty=0 install $app -y > /dev/null 2> /dev/null
+        sudo apt install $app -y 
 
-	if [[ $? > 0 ]]
-	then
-	    echo $app " Failed to install, quitting"
-	    exit
-	else
-	    echo $app " Installed ok"
-	    echo
-	    
-	fi
+        if [[ $? > 0 ]]
+        then
+            echo $app " Failed to install, quitting"
+            exit
+        else
+            echo $app " Installed ok"
+            echo
+
+        fi
 done
 
 echo "All dependencies installed"
@@ -54,6 +68,73 @@ else
   echo "made ok"
   echo
 fi
+
+echo "Cloning Gstreamer"
+git clone git://anongit.freedesktop.org/gstreamer/qt-gstreamer
+if [[ $? > 0 ]]
+  then
+    echo "unable to clone Gstreamer"
+  exit
+else
+  echo "cloned OK"
+  echo
+fi
+
+cd qt-gstreamer
+
+echo "creating Gstreamer build directory"
+mkdir build
+if [[ $? > 0 ]]
+  then
+    echo "unable to create Gstreamer build directory"
+  exit
+else
+  echo "build directory made"
+  echo
+fi
+
+cd build
+
+echo "beginning cmake"
+
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DCMAKE_INSTALL_INCLUDEDIR=include -DQT_VERSION=5 -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-std=c++11
+
+if [[ $? > 0 ]]
+  then
+    echo "cmake failed"
+  exit
+else
+  echo "make ok"
+  echo
+fi
+
+echo "making J4"
+make -j4
+
+if [[ $? > 0 ]]
+  then
+    echo "unable to make j4"
+  exit
+else
+  echo "make ok"
+  echo
+fi
+
+echo "beginning make install"
+sudo make install
+
+if [[ $? > 0 ]]
+  then
+    echo "unable to make Gstreamer"
+  exit
+else
+  echo "make ok"
+  echo
+fi
+
+sudo ldconfig
+
+cd ../..
 
 #move to build directory
 echo "Moving to build directory"
@@ -86,7 +167,7 @@ fi
 
 #begin cmake
 echo "beginning cmake for raspberry pi"
-cmake -DRPI_BUILD=TRUE -DCMAKE_BUILD_TYPE=Release ../
+cmake -DRPI_BUILD=TRUE -DCMAKE_BUILD_TYPE=Release ../ -DGST_BUILD=True
 if [[ $? > 0 ]]
   then
     echo "Cmake error"
