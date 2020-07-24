@@ -38,7 +38,7 @@ deps=(
 "libunwind-dev"
 "qml-module-qtmultimedia"
 )
-echo "installing Gstreamer dependencies"
+echo "installing dependencies"
 for app in ${deps[@]}; do
 	echo "installing: " $app
         sudo apt install $app -y 
@@ -69,6 +69,7 @@ else
   echo
 fi
 
+#clone gstreamer
 echo "Cloning Gstreamer"
 git clone git://anongit.freedesktop.org/gstreamer/qt-gstreamer
 if [[ $? > 0 ]]
@@ -80,10 +81,14 @@ else
   echo
 fi
 
+#change into newly cloned directory
 cd qt-gstreamer
 
+#create build directory
 echo "creating Gstreamer build directory"
+
 mkdir build
+
 if [[ $? > 0 ]]
   then
     echo "unable to create Gstreamer build directory"
@@ -95,6 +100,7 @@ fi
 
 cd build
 
+#run cmake
 echo "beginning cmake"
 
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DCMAKE_INSTALL_INCLUDEDIR=include -DQT_VERSION=5 -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-std=c++11
@@ -108,6 +114,7 @@ else
   echo
 fi
 
+#make j4
 echo "making J4"
 make -j4
 
@@ -120,6 +127,7 @@ else
   echo
 fi
 
+#run make install
 echo "beginning make install"
 sudo make install
 
@@ -132,8 +140,10 @@ else
   echo
 fi
 
+#run ldconfig
 sudo ldconfig
 
+#navigate back to ia directory
 cd ../..
 
 #move to build directory
