@@ -1,3 +1,9 @@
+# *THIS PROJECT HAS MOVED!*
+
+Please head over to [dash](https://github.com/openDsh/dash), part of the [openDsh](https://github.com/openDsh) org, for the latest and greatest of this project!
+
+![](https://avatars2.githubusercontent.com/u/64765545?s=200&v=4)
+
 # IntelligentAuto
 
 IntelligentAuto is a Qt-based infotainment center for your current Linux OpenAuto installation!
