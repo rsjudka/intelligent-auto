@@ -1,10 +1,8 @@
 #include <QtWidgets>
-
 #include <app/tabs/data.hpp>
 #include <app/tabs/media.hpp>
 #include <app/tabs/settings.hpp>
 #include <app/window.hpp>
-
 MainWindow::MainWindow()
 {
     this->config = Config::get_instance();
@@ -16,6 +14,16 @@ MainWindow::MainWindow()
 
     this->open_auto_tab = new OpenAutoTab(this);
 
+    setCentralWidget(widget);
+   
+    
+
+
+}
+
+
+QWidget *MainWindow::window_widget()
+{
     QWidget *widget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(widget);
 

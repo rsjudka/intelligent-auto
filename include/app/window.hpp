@@ -13,6 +13,7 @@
 #include <app/config.hpp>
 #include <app/tabs/open_auto.hpp>
 #include <app/theme.hpp>
+#include <QBluetoothSocket>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
