@@ -77,7 +77,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${Qt5Widgets_INCLUDE_DIRS}
                     ${Qt5Bluetooth_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
-                    ${LIBUSB_1_INCLUDE_DIRS}
                     ${PROTOBUF_INCLUDE_DIR}
                     ${OPENSSL_INCLUDE_DIR}
                     ${RTAUDIO_INCLUDE_DIRS}
@@ -91,6 +90,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${TAGLIB_INCLUDE_DIRS}
                     ${X11_INCLUDE_DIR}
                     ${include_directory})
+
+include_directories(SYSTEM ${LIBUSB_1_INCLUDE_DIRS})
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
